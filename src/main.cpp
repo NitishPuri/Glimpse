@@ -1,26 +1,16 @@
 
-#include <filesystem>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <thread>
-#include <vector>
 #include <future>
 
-#include "core/color.h"
 #include "core/logger.h"
-#include "core/utils.h"
 
-#include "bvh_node.h"
 #include "camera.h"
 #include "image.h"
 #include "scenes.h"
+#include "cli.h"
 
 #ifndef ROOT
 #define ROOT "."
 #endif // !ROOT
-
-#include <fstream>
 
 const std::string log_file_path = ROOT "/log.txt";
 color ray_color(const ray &r, const color &background, const hittable &world,
@@ -81,10 +71,19 @@ color ray_color(const ray &r, const color &background, const hittable &world,
   // return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
 }
 
-int main()
+int main(int argc, char **argv)
 {
   Logger logger(log_file_path);
   logger.log("Starting...");
+  auto options = ParseCommandLine(argc, argv);
+
+  logger.log("Width: ", options.width);
+  logger.log("Height: ", options.height);
+  logger.log("Samples: ", options.samples);
+  logger.log("Max Depth: ", options.max_depth);
+  logger.log("Scene: ", options.scene);
+
+  return 0;
 
   // Image
   // TODO: Parameterize image width and height from cli
@@ -104,7 +103,7 @@ int main()
   color background(0, 0, 0);
 
   // TODO: Parameterize Scene from cli
-  switch (1)
+  switch (2)
   {
   case 1:
     world = random_scene();
