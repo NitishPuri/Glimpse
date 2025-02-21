@@ -1,6 +1,9 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
+// supress warning due to localtime being unsafe
+#pragma warning(disable : 4996)
+
 #include <fstream>
 #include <iostream>
 #include <sstream>

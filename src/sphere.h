@@ -1,18 +1,21 @@
-#pragma once 
+#pragma once
 
 #include "hittable.h"
-#include "vec3.h"
+#include "core/vec3.h"
 
-class sphere : public hittable {
+class sphere : public hittable
+{
 public:
     sphere() {}
     sphere(point3 c, double r, shared_ptr<material> m)
-        : center{ c }, radius{ r }, mat_ptr(m) {}
+        : center{c}, radius{r}, mat_ptr(m) {}
 
-    bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const override;
-    bool bounding_box(double time0, double time1, aabb& output_box) const override;
+    bool hit(const ray &r, double t_min, double t_max, hit_record &rec) const override;
+    bool bounding_box(double time0, double time1, aabb &output_box) const override;
+
 private:
-    static void get_sphere_uv(const point3& p, double& u, double& v) {
+    static void get_sphere_uv(const point3 &p, double &u, double &v)
+    {
         // p: a given point on the sphere of radius one, centered at the origin.
         // u: returned value [0,1] of angle around the Y axis from X=-1.
         // v: returned value [0,1] of angle from Y=-1 to Y=+1.
@@ -33,21 +36,24 @@ private:
     shared_ptr<material> mat_ptr = nullptr;
 };
 
-bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
+bool sphere::hit(const ray &r, double t_min, double t_max, hit_record &rec) const
+{
     vec3 oc = r.origin() - center;
     auto a = r.direction().length_squared();
     auto half_b = dot(oc, r.direction());
     auto c = oc.length_squared() - radius * radius;
 
     auto discriminant = half_b * half_b - a * c;
-    if (discriminant < 0) {
+    if (discriminant < 0)
+    {
         return false;
     }
     auto sqrtd = sqrt(discriminant);
 
     // Find the nearest root that lies in the acceptable range.
     auto root = (-half_b - sqrtd) / a;
-    if (root < t_min || root > t_max) {
+    if (root < t_min || root > t_max)
+    {
         root = (-half_b + sqrtd) / a;
         if (root < t_min || t_max < root)
             return false;
@@ -63,10 +69,10 @@ bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) cons
     return true;
 }
 
-bool sphere::bounding_box(double time0, double time1, aabb& output_box) const {
+bool sphere::bounding_box(double time0, double time1, aabb &output_box) const
+{
     output_box = aabb(
         center - vec3(radius, radius, radius),
-        center + vec3(radius, radius, radius)
-    );
+        center + vec3(radius, radius, radius));
     return true;
 }

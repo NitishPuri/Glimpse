@@ -1,23 +1,25 @@
 #pragma once
 
-#include "utils.h"
+#include "core/utils.h"
 
 #include "hittable.h"
 
-class moving_sphere : public hittable {
+class moving_sphere : public hittable
+{
 public:
     moving_sphere() {}
     moving_sphere(
         point3 cen0, point3 cen1, double _time0, double _time1,
-        double r, shared_ptr<material> m) 
-    :
-        center0{cen0}, center1{cen1}, time0{_time0}, time1{_time1}, radius{r}, mat_ptr{m}
-    {}
+        double r, shared_ptr<material> m)
+        : center0{cen0}, center1{cen1}, time0{_time0}, time1{_time1}, radius{r}, mat_ptr{m}
+    {
+    }
 
-    bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const override;
-    bool bounding_box(double time0, double time1, aabb& output_box) const override;
+    bool hit(const ray &r, double t_min, double t_max, hit_record &rec) const override;
+    bool bounding_box(double time0, double time1, aabb &output_box) const override;
 
-    point3 center(double time) const {
+    point3 center(double time) const
+    {
         return center0 + (center1 - center0) * ((time - time0) / (time1 - time0));
     }
 
@@ -28,21 +30,24 @@ public:
     shared_ptr<material> mat_ptr;
 };
 
-bool moving_sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
+bool moving_sphere::hit(const ray &r, double t_min, double t_max, hit_record &rec) const
+{
     vec3 oc = r.origin() - center(r.time());
     auto a = r.direction().length_squared();
     auto half_b = dot(oc, r.direction());
     auto c = oc.length_squared() - radius * radius;
 
     auto discriminant = half_b * half_b - a * c;
-    if (discriminant < 0) {
+    if (discriminant < 0)
+    {
         return false;
     }
     auto sqrtd = sqrt(discriminant);
 
     // Find the nearest root that lies in the acceptable range.
     auto root = (-half_b - sqrtd) / a;
-    if (root < t_min || root > t_max) {
+    if (root < t_min || root > t_max)
+    {
         root = (-half_b + sqrtd) / a;
         if (root < t_min || t_max < root)
             return false;
@@ -57,7 +62,8 @@ bool moving_sphere::hit(const ray& r, double t_min, double t_max, hit_record& re
     return true;
 }
 
-bool moving_sphere::bounding_box(double _time0, double _time1, aabb& output_box) const {
+bool moving_sphere::bounding_box(double _time0, double _time1, aabb &output_box) const
+{
     aabb box0(
         center(_time0) - vec3(radius, radius, radius),
         center(_time0) + vec3(radius, radius, radius));
