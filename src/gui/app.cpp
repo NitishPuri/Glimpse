@@ -1,10 +1,15 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include <iostream>
+#include <vector>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
+
+// Window dimensions
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 600;
 
 // Vertex Shader
 const char *vertexShaderSrc = R"(   
@@ -28,6 +33,29 @@ const char *fragmentShaderSrc = R"(
     }
 )";
 
+struct GlResources
+{
+    // Quad
+    GLuint VBO, VAO, EBO;
+    GLuint shaderProgram;
+
+    // Texture
+    GLuint framebufferTexture;
+    int renderWidth = WINDOW_WIDTH / 2;
+    int renderHeight = WINDOW_HEIGHT / 2;
+
+    // spice
+    int duration = 0;
+
+} Resources;
+
+struct ImguiParams
+{
+    float backgroundColor[3] = {0.1f, 0.1f, 0.1f};
+} Params;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Create a simple shader program
 GLuint createShaderProgram()
 {
@@ -50,30 +78,29 @@ GLuint createShaderProgram()
     return shaderProgram;
 }
 
-int main()
+std::vector<uint8_t> raytracer(int width, int height)
 {
-    if (!glfwInit())
+    std::vector<uint8_t> image(width * height * 3); // RGB image
+    // Your ray tracing logic here
+    Resources.duration++;
+    auto s = sin(Resources.duration * 0.1);
+    auto c = cos(Resources.duration * 0.1);
+    for (int y = 0; y < height; y++)
     {
-        std::cerr << "Failed to initialize GLFW\n";
-        return -1;
+        for (int x = 0; x < width; x++)
+        {
+            // Compute pixel color
+            int index = (y * width + x) * 3;
+            image[index] = int(c * 255);     // R
+            image[index + 1] = int(s * 255); // G
+            image[index + 2] = 0;            // B
+        }
     }
+    return image;
+}
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "OpenGL Window", nullptr, nullptr);
-    if (!window)
-    {
-        std::cerr << "Failed to create GLFW window\n";
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-
-    // Setup ImGui
-    ImGui::CreateContext();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 330");
-
+void setupQuad()
+{
     // Quad Data
     float vertices[] = {
         -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Bottom-left (red)
@@ -86,17 +113,16 @@ int main()
         0, 1, 2,
         2, 3, 0};
 
-    GLuint VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &Resources.VAO);
+    glGenBuffers(1, &Resources.VBO);
+    glGenBuffers(1, &Resources.EBO);
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(Resources.VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, Resources.VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Resources.EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
@@ -105,7 +131,71 @@ int main()
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    GLuint shaderProgram = createShaderProgram();
+    Resources.shaderProgram = createShaderProgram();
+
+    // Generate a texture for the framebuffer
+    glGenTextures(1, &Resources.framebufferTexture);
+    glBindTexture(GL_TEXTURE_2D, Resources.framebufferTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Resources.renderWidth, Resources.renderHeight,
+                 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+// Function to update the framebuffer texture with the rendered image
+void updateFramebuffer(const std::vector<uint8_t> &imageData)
+{
+    glBindTexture(GL_TEXTURE_2D, Resources.framebufferTexture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Resources.renderWidth, Resources.renderHeight,
+                    GL_RGB, GL_UNSIGNED_BYTE, imageData.data());
+}
+
+void renderUI()
+{
+    ImGui::Begin("Control Panel");
+    ImGui::ColorEdit3("Quad Color", Params.backgroundColor);
+
+    // if (ImGui::Button("Render"))
+    {
+        // Render the scene
+        std::vector<uint8_t> imageData = raytracer(Resources.renderWidth, Resources.renderHeight);
+        updateFramebuffer(imageData);
+    }
+
+    ImGui::End();
+}
+
+int main()
+{
+    if (!glfwInit())
+    {
+        std::cerr << "Failed to initialize GLFW\n";
+        return -1;
+    }
+
+    GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Glimpse", nullptr, nullptr);
+    if (!window)
+    {
+        std::cerr << "Failed to create GLFW window\n";
+        glfwTerminate();
+        return -1;
+    }
+
+    glfwMakeContextCurrent(window);
+    // glfwSwapInterval(1); // Enable vsync
+    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+    // Setup ImGui
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    // ImGuiIO &io = ImGui::GetIO();
+    // (void)io;
+    // ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
+    setupQuad();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -117,20 +207,21 @@ int main()
         ImGui::NewFrame();
 
         // ImGui UI
-        ImGui::Begin("Control Panel");
-        static float color[3] = {1.0f, 1.0f, 1.0f};
-        ImGui::ColorEdit3("Quad Color", color);
-        ImGui::Text("Press ESC to exit.");
-        ImGui::End();
+        renderUI();
 
         // Clear screen
-        glClearColor(color[0], color[1], color[2], 1.0f);
+        glClearColor(Params.backgroundColor[0], Params.backgroundColor[1], Params.backgroundColor[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        ImGui::Begin("Render Output");
+        ImGui::Image(Resources.framebufferTexture,
+                     ImVec2(float(Resources.renderWidth), float(Resources.renderHeight)));
+        ImGui::End();
+
         // Render Quad
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        // glUseProgram(Resources.shaderProgram);
+        // glBindVertexArray(Resources.VAO);
+        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Render ImGui
         ImGui::Render();
