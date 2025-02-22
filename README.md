@@ -1,109 +1,192 @@
-Ray tracer in a weekend.
+~~Ray tracer in a weekend.~~
+Glimpse.
 
-Resources :
-* https://raytracing.github.io
-* https://github.com/nothings/stb
+A physically-based ray tracer that simulates light to reveal scenes with realism and depth.
+"Reality is nothing but glimpses of light, shaped by perception and time."
 
+Builds on top https://github.com/NitishPuri/ray-tracer-in-a-weekend
+
+
+Dependencies
+
+- https://raytracing.github.io
+- https://github.com/nothings/stb
+
+Should also use
+
+- https://github.com/skypjack/entt
+- https://github.com/g-truc/glm
+
+Reference implementations
+
+- pbrt
+- https://github.com/lighttransport/nanort?tab=readme-ov-file
+
+## Roadmap
+
+- Add windowing
+  - glfw/imgui
+  - something else ?
+  - https://github.com/floooh/sokol
+  
+- Add camera positioning and re-rendering the scene
+  - More camera controls, like aperture, exposure etc
+- ...
+- custom scenes, import/export to json
+- setup test scenes
+- ...
+- improved acceleration structures
+  - bvh
+- Add effects
+  - shadows
+  - refraction
+  - ...
+- ... ??
+- global illumination
+- ...
+- parallelization improvements
+  - thread pools ?
+  - tiling ?
+  - SIMD
+  - openMP
+-
+- ...
+- ...??
+- ...
+- compute shaders for ray tracing
+- ...
+- vulkan/rtx
+
+### Some results
 
 # [Ray Tracing In One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 
 ## Initial gradient based background
+
 ![Inital Background](results/background1.jpg)
 
 ## Sphere with flat color
+
 ![Sphere with flat color](./results/sphere1.jpg)
 
 ## Sphere with normals visualized
+
 ![Sphere with normals visualized](./results/sphereNormals.jpg)
 
 ## Sphere with normals visualized with ground
+
 ![Sphere with normals visualized with ground](./results/sphereNormals2.jpg)
 
 ![Sphere with normals visualized with ground](./results/sphereNormals3.jpg)
 
 ## Sphere with normals with antialiazing
+
 ![Sphere with normals with antialiazing](./results/sphereNormalsAntiAliasing.jpg)
 
 ## Apply Diffuse Material
+
 ![Apply Diffuse Material](./results/sphereNormalsAntiDiffuse.jpg)
 
 ## Gamma Correction
+
 ![Gamma Correction](./results/sphereNormalsGamma.jpg)
 
 ## True Lambertian Refleaction
+
 ![True Lambertian Refleaction](./results/sphereTrueLambertian.jpg)
 
 ## A Scene with Metal Spheres
+
 ![A Scene with Metal Spheres](./results/sphereMaterial.jpg)
 
 ## Add Fuzzy Reflection
+
 ![Add Fuzzy Reflection](./results/sphereMaterialFuzz.jpg)
 
 ## Refraction and Snell's Law
+
 ![Refraction and Snell's Law](./results/sphereMaterialGlass1.jpg)
 
 ## Total internal reflection
+
 ![Total internal reflection](./results/sphereMaterialGlass2.jpg)
 
 ## Hollow Glass sphere
+
 ![Hollow Glass sphere](./results/sphereMaterialGlassHollow.jpg)
 
 ## Add Camera with Positioning
+
 ![sphereCameraAspect](./results/sphereCameraAspect.jpg)
 ![sphereCamera2](./results/sphereCamera2.jpg)
 ![sphereCamera3](./results/sphereCamera3.jpg)
 
 ## Add Defocus Blur/ Depth of Field effect
+
 ![sphereDefocsBlur](./results/sphereDefocsBlur.jpg)
 
 ## A Final Render
-![final1](./results/final1.jpg)
 
+![final1](./results/final1.jpg)
 
 # [Ray Tracing The Next Week](https://raytracing.github.io/books/RayTracingTheNextWeek.html)
 
 ## Moving Spheres / Motion Blur
+
 ![movingSpheres](./results/movingSpheres.jpg)
 
 ## Texture / Checker texture
+
 ![movingSpheresChecker](./results/movingSpheresChecker.jpg)
 
 ## Texture / Perlin Noise
+
 ![spheresPerlin](./results/spheresPerlin.jpg)
 
 ## Texture / Perlin Noise / With Trilinear interpolation
+
 ![spheresPerlinInterp](./results/spheresPerlinInterp.jpg)
 
 ## Texture / Perlin Noise / Scaled
+
 ![spheresPerlinInterp](./results/spheresPerlinScaled.jpg)
 
 ## Texture / Perlin Noise / Shifted
+
 ![spheresPerlinShifted](./results/spheresPerlinShifted.jpg)
 
 ## Texture / Perlin Noise / Turbulence
+
 ![spheresPerlinTurb](./results/spheresPerlinTurb.jpg)
 
 ## Texture / Perlin Noise / Marbles
+
 ![spheresMarbles](./results/spheresMarbles.jpg)
 
 ## Texture / Image Texture / Earth
+
 ![earth](./results/earth1.jpg)
 
 ## Light
+
 ![light1](./results/light1.jpg)
 
 ## Cornell Box with Light
+
 ![cornellBox1](./results/cornellBox1.jpg)
 
 ## Cornell Box with Boxes
+
 ![cornellBox2](./results/cornellBox2.jpg)
 
 ## Cornell Box with Rotated Boxes
+
 ![cornellBox3](./results/cornellBox3.jpg)
 
 ## Cornell Box with Volumetric Smoke
+
 ![cornellBox4](./results/cornellBox4.jpg)
 
 ## Final
-![final2](./results/final2.jpg)
 
+![final2](./results/final2.jpg)

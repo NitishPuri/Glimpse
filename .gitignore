@@ -2,5 +2,5 @@
 .vs/
 out/
 log.txt
-.vscode/settings.json
+.vscode/*
 results/
