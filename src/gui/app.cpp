@@ -1,6 +1,7 @@
 // clang-format off
 #include <iostream>
 #include <vector>
+#include <optional>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -17,10 +18,11 @@
 // clang-format on
 
 // Window dimensions
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
+const int WINDOW_WIDTH = 1800;
+const int WINDOW_HEIGHT = 1600;
 
 const std::string log_file_path = "./log_gui.txt";
+static Logger logger(log_file_path);
 
 // Vertex Shader
 const char *vertexShaderSrc = R"(   
@@ -66,8 +68,10 @@ struct ImguiParams {
 struct RayTracer {
   Scene scene;
   Image image;
-  enum Status { IDLE, RENDERING, DONE } status = IDLE;
-  std::future<void> trace_future;
+  enum Status { IDLE, RENDERING, DONE };
+  std::optional<std::future<void>> trace_future;
+  std::atomic<Status> status = IDLE;
+  std::atomic<int> progress = 0;
 } Tracer;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,25 +177,67 @@ void renderUI() {
   if (ImGui::Button("Render")) {
     Tracer.trace_future = std::async(std::launch::async, [&]() {
       Resources.duration++;
+      // clear render
+      Tracer.image.clear();
+      logger.log("Rendering... ", Resources.renderWidth, "x",
+                 Resources.renderHeight, " with ",
+                 Tracer.scene.samples_per_pixel, " samples per pixel");
+      auto startTime = std::chrono::high_resolution_clock::now();
+
       Tracer.status = RayTracer::RENDERING;
-      render_scene(Tracer.scene, Tracer.image);
+      render_scene(Tracer.scene, Tracer.image, &Tracer.progress);
       Tracer.status = RayTracer::DONE;
+
+      auto endTime = std::chrono::high_resolution_clock::now();
+      auto duration =
+          std::chrono::duration<float, std::chrono::seconds::period>(endTime -
+                                                                     startTime)
+              .count();
+
+      logger.log("Image generated in ", duration, " seconds");
     });
   }
   if (Tracer.status == RayTracer::RENDERING) {
-    ImGui::Text("Rendering...");
+    int totalPixels = Resources.renderWidth * Resources.renderHeight *
+                      Tracer.scene.samples_per_pixel;
+    ImGui::Text("Rendering...%d/%d", Tracer.progress.load(), totalPixels);
+    ImGui::ProgressBar(static_cast<float>(Tracer.progress.load()) /
+                       totalPixels);
+    updateFramebuffer(Tracer.image.data);
+
   } else if (Tracer.status == RayTracer::DONE) {
     updateFramebuffer(Tracer.image.data);
     ImGui::Text("Done");
     Tracer.status = RayTracer::IDLE;
+    Tracer.progress = 0;
+  } else {
+    ImGui::Text("Idle");
   }
 
   ImGui::End();
 }
 
-int main() {
-  Logger logger(log_file_path);
+void renderOutput() {
+  ImGui::Begin("Render Output");
 
+  ImVec2 available_size = ImGui::GetContentRegionAvail();
+  float aspect_ratio =
+      static_cast<float>(Resources.renderWidth) / Resources.renderHeight;
+  ImVec2 image_size;
+
+  if (available_size.x / aspect_ratio <= available_size.y) {
+    image_size.x = available_size.x;
+    image_size.y = available_size.x / aspect_ratio;
+  } else {
+    image_size.x = available_size.y * aspect_ratio;
+    image_size.y = available_size.y;
+  }
+
+  ImGui::Image(ImTextureID(Resources.framebufferTexture), image_size);
+  ImGui::End();
+}
+
+int main() {
   if (!glfwInit()) {
     logger.log("Failed to initialize GLFW");
     return -1;
@@ -244,11 +290,7 @@ int main() {
     // Render Raytracer
     // raytracer(Tracer.image, Tracer.scene);
 
-    ImGui::Begin("Render Output");
-    ImGui::Image(
-        Resources.framebufferTexture,
-        ImVec2(float(Resources.renderWidth), float(Resources.renderHeight)));
-    ImGui::End();
+    renderOutput();
 
     // Render Quad
     // glUseProgram(Resources.shaderProgram);

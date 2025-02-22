@@ -26,7 +26,9 @@ Reference implementations
 - [x] Add windowing
   - [x] glfw/imgui  
 - [x] refactor into cli and gui apps
-- [ ] hook ray tracer into gui
+- [x] hook ray tracer into gui
+- [x] async ray tracing and progress update when using gui 
+- [ ] add namespace
 - ...  
 - Add camera positioning and re-rendering the scene
   - More camera controls, like aperture, exposure etc

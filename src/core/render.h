@@ -36,9 +36,8 @@ color ray_color(const ray &r, const color &background, const hittable &world,
 void render_section(Image &image, int start_row, int end_row, int image_width,
                     int image_height, int samples_per_pixel, const camera &cam,
                     const color &background, const bvh_node &world_bvh,
-                    int max_depth) {
+                    int max_depth, std::atomic<int> *progress = nullptr) {
   for (int j = end_row - 1; j >= start_row; --j) {
-    std::cout << "\rScanlines remaining: " << j << ' ' << std::flush;
     for (int i = 0; i < image_width; ++i) {
       color pixel_color(0, 0, 0);
       for (int s = 0; s < samples_per_pixel; ++s) {
@@ -49,11 +48,15 @@ void render_section(Image &image, int start_row, int end_row, int image_width,
       }
       pixel_color = sqrt(pixel_color / samples_per_pixel);
       image.set(i, j, pixel_color);
+      if (progress) {
+        (*progress)++;
+      }
     }
   }
 }
 
-void render_scene(const Scene &scene, Image &image) {
+void render_scene(const Scene &scene, Image &image,
+                  std::atomic<int> *progress = nullptr) {
   auto aspect_ratio = scene.aspect_ratio;
   auto image_width = scene.image_width;
   auto image_height = static_cast<int>(image_width / aspect_ratio);
@@ -88,7 +91,7 @@ void render_scene(const Scene &scene, Image &image) {
     futures.push_back(std::async(
         std::launch::async, render_section, std::ref(image), start_row, end_row,
         image_width, image_height, samples_per_pixel, std::ref(cam),
-        std::ref(background), std::ref(world_bvh), max_depth));
+        std::ref(background), std::ref(world_bvh), max_depth, progress));
   }
 
   for (auto &f : futures) {

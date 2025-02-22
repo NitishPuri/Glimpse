@@ -16,12 +16,15 @@ class Image {
     height = h;
     data = std::vector<uint8_t>(width * height * 3);
   }
+
   Image() {
     width = 0;
     height = 0;
   }
 
   Image(int w, int h) : width(w), height(h) { initialize(w, h); }
+
+  void clear() { memset(data.data(), 0, data.size()); }
 
   void Image::set(int x, int y, ImageColor color) {
     if (x < 0 || y < 0 || x >= width || y >= height) {
