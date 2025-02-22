@@ -3,10 +3,10 @@
 
 #include "core/logger.h"
 
-#include "camera.h"
-#include "image.h"
-#include "scenes.h"
-#include "cli.h"
+#include "core/camera.h"
+#include "core/image.h"
+#include "core/scenes.h"
+#include "core/cli.h"
 
 #ifndef ROOT
 #define ROOT "."
@@ -83,7 +83,7 @@ int main(int argc, char **argv)
   logger.log("Max Depth: ", options.max_depth);
   logger.log("Scene: ", options.scene);
 
-  return 0;
+  // return 0;
 
   // Image
   // TODO: Parameterize image width and height from cli

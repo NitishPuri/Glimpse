@@ -40,7 +40,7 @@ public:
 
         std::string timestamped_message = oss.str();
         // Log to console
-        std::cout << timestamped_message << std::endl;
+        std::clog << timestamped_message << std::endl;
 
         // Log to file
         if (log_file.is_open())
