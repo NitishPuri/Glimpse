@@ -9,7 +9,6 @@ Builds on top https://github.com/NitishPuri/ray-tracer-in-a-weekend
 
 Dependencies
 
-- https://raytracing.github.io
 - https://github.com/nothings/stb
 
 Should also use
@@ -24,11 +23,11 @@ Reference implementations
 
 ## Roadmap
 
-- Add windowing
-  - glfw/imgui
-  - something else ?
-  - https://github.com/floooh/sokol
-  
+- [x] Add windowing
+  - [x] glfw/imgui  
+- [x] refactor into cli and gui apps
+- [ ] render full screen quad on gui main loop
+- ...  
 - Add camera positioning and re-rendering the scene
   - More camera controls, like aperture, exposure etc
 - ...

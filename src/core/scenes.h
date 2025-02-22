@@ -1,3 +1,5 @@
+#pragma once
+
 #include "aarect.h"
 #include "hittable_list.h"
 #include "material.h"
@@ -97,7 +99,8 @@ hittable_list two_perlin_spheres()
 
 hittable_list earth()
 {
-    auto earth_texture = make_shared<image_texture>(ROOT "/res/earthmap.jpg");
+    // auto earth_texture = make_shared<image_texture>(ROOT "/res/earthmap.jpg");
+    auto earth_texture = make_shared<image_texture>("/res/earthmap.jpg");
     auto earth_surface = make_shared<lambertian>(earth_texture);
     auto globe = make_shared<sphere>(point3(0, 0, 0), 2, earth_surface);
 
@@ -232,8 +235,8 @@ hittable_list final_scene()
         make_shared<sphere>(point3(0, 0, 0), 5000, make_shared<dielectric>(1.5));
     objects.add(make_shared<constant_medium>(boundary, .0001, color(1, 1, 1)));
 
-    auto emat = make_shared<lambertian>(
-        make_shared<image_texture>(ROOT "/res/earthmap.jpg"));
+    // auto emat = make_shared<lambertian>(make_shared<image_texture>(ROOT "/res/earthmap.jpg"));
+    auto emat = make_shared<lambertian>(make_shared<image_texture>("/res/earthmap.jpg"));
     objects.add(make_shared<sphere>(point3(400, 200, 400), 100, emat));
     auto pertext = make_shared<noise_texture>(0.1);
     objects.add(make_shared<sphere>(point3(220, 280, 300), 80,
