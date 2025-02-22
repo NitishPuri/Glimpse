@@ -1,5 +1,4 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#pragma once
 
 // supress warning due to localtime being unsafe
 #pragma warning(disable : 4996)
@@ -64,5 +63,3 @@ private:
         return ss.str();
     }
 };
-
-#endif // LOGGER_H

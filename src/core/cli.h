@@ -1,6 +1,4 @@
-#ifndef COMMAND_LINE_PARSER_H
-#define COMMAND_LINE_PARSER_H
-
+#pragma once
 #include <string>
 #include <vector>
 #include <iostream>
@@ -45,5 +43,3 @@ CmdOptions ParseCommandLine(int argc, char *argv[])
 
     return options;
 }
-
-#endif // COMMAND_LINE_PARSER_H

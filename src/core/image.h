@@ -3,54 +3,58 @@
 #include "core/color.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb/stb_image_write.h"
-
 #include <string>
 
-class Image
-{
-public:
-    Image(int w, int h) : width(w), height(h)
-    {
-        data = (unsigned char *)malloc(width * height * 3);
-    }
-    ~Image()
-    {
-        if (data)
-        {
-            free(data);
-            data = nullptr;
-        }
-    }
+#include "stb/stb_image_write.h"
 
-    void Image::set(int x, int y, ImageColor color)
-    {
-        if (!data || x < 0 || y < 0 || x >= width || y >= height)
-        {
-            return;
-        }
+class Image {
+ public:
+  void initialize(int w, int h) {
+    data.clear();
 
-        memcpy(data + (x + y * width) * num_components, color.rgb, num_components);
+    width = w;
+    height = h;
+    data = std::vector<uint8_t>(width * height * 3);
+  }
+  Image() {
+    width = 0;
+    height = 0;
+  }
+
+  Image(int w, int h) : width(w), height(h) { initialize(w, h); }
+
+  void Image::set(int x, int y, ImageColor color) {
+    if (x < 0 || y < 0 || x >= width || y >= height) {
+      return;
     }
 
-    // Color get(int x, int y) const {
-    //     Color c {};
-    //     c.rgb[0] = data[x + y * width + 0];
-    //     c.rgb[1] = data[x + y * width + 1];
-    //     c.rgb[2] = data[x + y * width + 2];
-    //     return c;
-    // }
+    // data[(x + y * width) * num_components + 0] = color.rgb[0];
+    // data[(x + y * width) * num_components + 1] = color.rgb[1];
+    // data[(x + y * width) * num_components + 2] = color.rgb[2];
 
-    int write(const std::string &filename, bool flip = true)
-    {
-        stbi_flip_vertically_on_write(1);
-        return stbi_write_jpg(filename.c_str(), width, height, num_components, data, 95);
-        // return stbi_write_bmp(filename.c_str(), width, height, num_components, data);
-    }
+    memcpy(data.data() + (x + y * width) * num_components, color.rgb,
+           num_components);
+  }
 
-private:
-    unsigned char *data = nullptr;
-    int width = 0;
-    int height = 0;
-    const int num_components = 3;
+  // Color get(int x, int y) const {
+  //     Color c {};
+  //     c.rgb[0] = data[x + y * width + 0];
+  //     c.rgb[1] = data[x + y * width + 1];
+  //     c.rgb[2] = data[x + y * width + 2];
+  //     return c;
+  // }
+
+  int write(const std::string &filename, bool flip = true) {
+    stbi_flip_vertically_on_write(1);
+    return stbi_write_jpg(filename.c_str(), width, height, num_components,
+                          data.data(), 95);
+    // return stbi_write_bmp(filename.c_str(), width, height, num_components,
+    // data);
+  }
+
+  //  private:
+  std::vector<uint8_t> data;
+  int width = 0;
+  int height = 0;
+  const int num_components = 3;
 };
