@@ -66,6 +66,8 @@ struct ImguiParams {
 struct RayTracer {
   Scene scene;
   Image image;
+  enum Status { IDLE, RENDERING, DONE } status = IDLE;
+  std::future<void> trace_future;
 } Tracer;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,17 +109,6 @@ std::vector<uint8_t> raytracer_dummy(int width, int height) {
     }
   }
   return image;
-}
-
-void raytracer(Image &image, Scene &scene) {
-  //   std::vector<uint8_t> image(width * height * 3);  // RGB image
-  // Your ray tracing logic here
-  Resources.duration++;
-
-  //   auto scene = setupScene(2);
-  render_scene(scene, image);
-
-  //   return image;
 }
 
 void setupQuad() {
@@ -180,13 +171,19 @@ void renderUI() {
   ImGui::ColorEdit3("Quad Color", Params.backgroundColor);
 
   if (ImGui::Button("Render")) {
-    // Render the scene
-    // std::vector<uint8_t> imageData =
-    //     raytracer(Resources.renderWidth, Resources.renderHeight);
-    // updateFramebuffer(imageData);
-
-    render_scene(Tracer.scene, Tracer.image);
+    Tracer.trace_future = std::async(std::launch::async, [&]() {
+      Resources.duration++;
+      Tracer.status = RayTracer::RENDERING;
+      render_scene(Tracer.scene, Tracer.image);
+      Tracer.status = RayTracer::DONE;
+    });
+  }
+  if (Tracer.status == RayTracer::RENDERING) {
+    ImGui::Text("Rendering...");
+  } else if (Tracer.status == RayTracer::DONE) {
     updateFramebuffer(Tracer.image.data);
+    ImGui::Text("Done");
+    Tracer.status = RayTracer::IDLE;
   }
 
   ImGui::End();
