@@ -58,7 +58,6 @@ class AppWindow {
     ImGui_ImplOpenGL3_Init("#version 330");
 
     if (glfwGetCurrentContext() == window) {
-      setupFramebuffer();
       setupRaytracer();
     } else {
       logger.log("Failed to initialize OpenGL context");
@@ -110,25 +109,26 @@ class AppWindow {
     std::atomic<int> progress = 0;
   } RayTracer;
 
-  struct GlResources {
+  struct {
     // Texture
     GLuint framebufferTexture;
     int renderWidth = WINDOW_WIDTH / 2;
     int renderHeight = WINDOW_HEIGHT / 2;
-  } Resources;
+  } GLResources;
 
   GLFWwindow* window;
   Logger logger;
 
   void setupFramebuffer() {
-    glGenTextures(1, &Resources.framebufferTexture);
+    glGenTextures(1, &GLResources.framebufferTexture);
     if (checkGLError("glGenTextures")) return;
 
-    glBindTexture(GL_TEXTURE_2D, Resources.framebufferTexture);
+    glBindTexture(GL_TEXTURE_2D, GLResources.framebufferTexture);
     if (checkGLError("glBindTexture")) return;
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Resources.renderWidth,
-                 Resources.renderHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, GLResources.renderWidth,
+                 GLResources.renderHeight, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                 nullptr);
     if (checkGLError("glTexImage2D")) return;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -159,13 +159,20 @@ class AppWindow {
     logger.log("Setting up scene ... ", ImGuiParams.current_scene,
                SceneNames[ImGuiParams.current_scene]);
     RayTracer.scene = SceneMap[SceneNames[ImGuiParams.current_scene]]();
-    RayTracer.image.initialize(Resources.renderWidth, Resources.renderHeight);
+
+    GLResources.renderWidth = RayTracer.scene.image_width;
+    GLResources.renderHeight = static_cast<int>(RayTracer.scene.image_width /
+                                                RayTracer.scene.aspect_ratio);
+    RayTracer.image.initialize(GLResources.renderWidth,
+                               GLResources.renderHeight);
+
+    setupFramebuffer();
   }
 
   void updateFramebuffer(const std::vector<uint8_t>& imageData) {
-    glBindTexture(GL_TEXTURE_2D, Resources.framebufferTexture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Resources.renderWidth,
-                    Resources.renderHeight, GL_RGB, GL_UNSIGNED_BYTE,
+    glBindTexture(GL_TEXTURE_2D, GLResources.framebufferTexture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GLResources.renderWidth,
+                    GLResources.renderHeight, GL_RGB, GL_UNSIGNED_BYTE,
                     imageData.data());
     if (checkGLError("glTexSubImage2D")) return;
   }
@@ -191,8 +198,8 @@ class AppWindow {
     if (ImGui::Button("Render")) {
       RayTracer.trace_future = std::async(std::launch::async, [&]() {
         RayTracer.image.clear();
-        logger.log("Rendering... ", Resources.renderWidth, "x",
-                   Resources.renderHeight, " with ",
+        logger.log("Rendering... ", GLResources.renderWidth, "x",
+                   GLResources.renderHeight, " with ",
                    RayTracer.scene.samples_per_pixel, " samples per pixel");
         auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -210,7 +217,7 @@ class AppWindow {
       });
     }
     if (RayTracer.status == RayTracerSt::RENDERING) {
-      int totalPixels = Resources.renderWidth * Resources.renderHeight *
+      int totalPixels = GLResources.renderWidth * GLResources.renderHeight *
                         RayTracer.scene.samples_per_pixel;
       ImGui::Text("Rendering...%d/%d", RayTracer.progress.load(), totalPixels);
       float progress = float(RayTracer.progress.load()) / float(totalPixels);
@@ -229,12 +236,10 @@ class AppWindow {
     ImGui::End();
   }
 
-  void renderOutput() {
-    ImGui::Begin("Render Output");
-
+  auto calculatePanelSize() {
     ImVec2 available_size = ImGui::GetContentRegionAvail();
     float aspect_ratio =
-        static_cast<float>(Resources.renderWidth) / Resources.renderHeight;
+        static_cast<float>(GLResources.renderWidth) / GLResources.renderHeight;
     ImVec2 image_size;
 
     if (available_size.x / aspect_ratio <= available_size.y) {
@@ -245,7 +250,13 @@ class AppWindow {
       image_size.y = available_size.y;
     }
 
-    ImGui::Image(ImTextureID(Resources.framebufferTexture), image_size);
+    return image_size;
+  }
+
+  void renderOutput() {
+    ImGui::Begin("Render Output");
+    ImGui::Image(ImTextureID(GLResources.framebufferTexture),
+                 calculatePanelSize());
     ImGui::End();
   }
 };
