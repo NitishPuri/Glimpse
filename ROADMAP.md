@@ -12,7 +12,7 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - [x] **GLFW + ImGui GUI** *(Windowing & Controls)*
 - [x] **Refactor into CLI and GUI Apps**
 - [x] **Async Ray Tracing in GUI**
-- [ ] **Expose All Config Options in GUI**
+- [ ] **Expose All Config Options in GUI** 
   - Scene selection
   - Samples per pixel (SPP)
   - Max depth

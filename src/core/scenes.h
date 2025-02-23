@@ -15,8 +15,8 @@ struct Scene {
   // camera
   point3 lookfrom;
   point3 lookat;
-  double vfov;
-  double aperture;
+  float vfov;
+  float aperture;
 
   double aspect_ratio = 16.0 / 9.0;
   int image_width = 800;
@@ -77,8 +77,8 @@ Scene random_scene() {
   scene.background = color(0.7, 0.8, 1.0);
   scene.lookfrom = point3(13, 2, 3);
   scene.lookat = point3(0, 0, 0);
-  scene.vfov = 20.0;
-  scene.aperture = 0.1;
+  scene.vfov = 20.0f;
+  scene.aperture = 0.1f;
 
   return scene;
 }

@@ -187,13 +187,27 @@ class AppWindow {
         if (ImGui::Selectable(SceneNames[n].c_str(), is_selected)) {
           ImGuiParams.current_scene = n;
           setupRaytracer();
-          //   RayTracer.scene =
-          //   SceneMap[SceneNames[ImGuiParams.current_scene]]();
         }
         if (is_selected) ImGui::SetItemDefaultFocus();
       }
       ImGui::EndCombo();
     }
+
+    // Render parameters
+    ImGui::SliderInt("Samples per Pixel", &RayTracer.scene.samples_per_pixel, 1,
+                     1000);
+    ImGui::SliderInt("Max Depth", &RayTracer.scene.max_depth, 1, 100);
+
+    // Camera parameters
+    // ImGui::SliderFloat3("Camera Position",
+    // &RayTracer.scene.camera.position[0],
+    //                     -1000.0f, 1000.0f);
+    // ImGui::SliderFloat3("Camera Target", &RayTracer.scene.camera.target[0],
+    //                     -1000.0f, 1000.0f);
+    ImGui::SliderFloat("Field of View", &RayTracer.scene.vfov, 1.0f, 180.0f);
+    ImGui::SliderFloat("Aperture", &RayTracer.scene.aperture, 0.0f, 10.0f);
+    // ImGui::SliderFloat("Focus Distance", &RayTracer.scene.camera.focus_dist,
+    //                    0.1f, 1000.0f);
 
     if (ImGui::Button("Render")) {
       RayTracer.trace_future = std::async(std::launch::async, [&]() {
