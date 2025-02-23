@@ -1,8 +1,32 @@
 #pragma once
 
+#include <functional>
+#include <unordered_map>
+
 #include "glimpse.h"
 
-hittable_list random_scene() {
+struct Scene {
+  // world
+  hittable_list world;
+
+  // env
+  color background = color(0.7, 0.8, 1.0);
+
+  // camera
+  point3 lookfrom;
+  point3 lookat;
+  double vfov;
+  double aperture;
+
+  double aspect_ratio = 16.0 / 9.0;
+  int image_width = 800;
+
+  // render
+  int samples_per_pixel = 100;
+  int max_depth = 50;
+};
+
+Scene random_scene() {
   hittable_list world;
 
   auto checker =
@@ -49,10 +73,17 @@ hittable_list random_scene() {
   auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
   world.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
 
-  return world;
+  Scene scene;
+  scene.background = color(0.7, 0.8, 1.0);
+  scene.lookfrom = point3(13, 2, 3);
+  scene.lookat = point3(0, 0, 0);
+  scene.vfov = 20.0;
+  scene.aperture = 0.1;
+
+  return scene;
 }
 
-hittable_list two_spheres() {
+Scene two_spheres() {
   hittable_list objects;
 
   auto checker =
@@ -63,10 +94,17 @@ hittable_list two_spheres() {
   objects.add(make_shared<sphere>(point3(0, 10, 0), 10,
                                   make_shared<lambertian>(checker)));
 
-  return objects;
+  Scene scene;
+  scene.world = objects;
+  scene.background = color(0.7, 0.8, 1.0);
+  scene.lookfrom = point3(13, 2, 3);
+  scene.lookat = point3(0, 0, 0);
+  scene.vfov = 20.0;
+
+  return scene;
 }
 
-hittable_list two_perlin_spheres() {
+Scene two_perlin_spheres() {
   hittable_list objects;
 
   auto pertext = make_shared<noise_texture>(4);
@@ -75,19 +113,33 @@ hittable_list two_perlin_spheres() {
   objects.add(make_shared<sphere>(point3(0, 2, 0), 2,
                                   make_shared<lambertian>(pertext)));
 
-  return objects;
+  Scene scene;
+  scene.world = objects;
+  scene.background = color(0.7, 0.8, 1.0);
+  scene.lookfrom = point3(13, 2, 3);
+  scene.lookat = point3(0, 0, 0);
+  scene.vfov = 20.0;
+
+  return scene;
 }
 
-hittable_list earth() {
+Scene earth() {
   // auto earth_texture = make_shared<image_texture>(ROOT "/res/earthmap.jpg");
   auto earth_texture = make_shared<image_texture>("/res/earthmap.jpg");
   auto earth_surface = make_shared<lambertian>(earth_texture);
   auto globe = make_shared<sphere>(point3(0, 0, 0), 2, earth_surface);
 
-  return hittable_list(globe);
+  Scene scene;
+  scene.world = hittable_list(globe);
+  scene.background = color(0.7, 0.8, 1.0);
+  scene.lookfrom = point3(13, 2, 3);
+  scene.lookat = point3(0, 0, 0);
+  scene.vfov = 20.0;
+
+  return scene;
 }
 
-hittable_list simple_light() {
+Scene simple_light() {
   hittable_list objects;
 
   auto pertext = make_shared<noise_texture>(4);
@@ -99,10 +151,18 @@ hittable_list simple_light() {
   auto difflight = make_shared<diffuse_light>(color(4, 4, 4));
   objects.add(make_shared<xy_rect>(3, 5, 1, 3, -2, difflight));
 
-  return objects;
+  Scene scene;
+  scene.world = objects;
+  scene.samples_per_pixel = 400;
+  scene.background = color(0, 0, 0);
+  scene.lookfrom = point3(26, 3, 6);
+  scene.lookat = point3(0, 2, 0);
+  scene.vfov = 20.0;
+
+  return scene;
 }
 
-hittable_list cornell_box() {
+Scene cornell_box() {
   hittable_list objects;
 
   auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -128,10 +188,21 @@ hittable_list cornell_box() {
   box2 = make_shared<rotate_y>(box2, -18);
   box2 = make_shared<translate>(box2, vec3(130, 0, 65));
   objects.add(box2);
-  return objects;
+
+  Scene scene;
+  scene.world = objects;
+  scene.aspect_ratio = 1.0;
+  scene.image_width = 600;
+  scene.samples_per_pixel = 200;
+  scene.background = color(0, 0, 0);
+  scene.lookfrom = point3(278, 278, -800);
+  scene.lookat = point3(278, 278, 0);
+  scene.vfov = 40.0;
+
+  return scene;
 }
 
-hittable_list cornell_smoke() {
+Scene cornell_smoke() {
   hittable_list objects;
 
   auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -159,10 +230,19 @@ hittable_list cornell_smoke() {
   objects.add(make_shared<constant_medium>(box1, 0.01, color(0, 0, 0)));
   objects.add(make_shared<constant_medium>(box2, 0.01, color(1, 1, 1)));
 
-  return objects;
+  Scene scene;
+  scene.world = objects;
+  scene.aspect_ratio = 1.0;
+  scene.image_width = 600;
+  scene.samples_per_pixel = 200;
+  scene.lookfrom = point3(278, 278, -800);
+  scene.lookat = point3(278, 278, 0);
+  scene.vfov = 40.0;
+
+  return scene;
 }
 
-hittable_list final_scene() {
+Scene final_scene() {
   hittable_list boxes1;
   auto ground = make_shared<lambertian>(color(0.48, 0.83, 0.53));
 
@@ -229,95 +309,38 @@ hittable_list final_scene() {
       make_shared<rotate_y>(make_shared<bvh_node>(boxes2, 0.0, 1.0), 15),
       vec3(-100, 270, 395)));
 
-  return objects;
-}
-
-struct Scene {
-  hittable_list world;
-  color background;
-  point3 lookfrom;
-  point3 lookat;
-  double vfov;
-  double aperture;
-  int samples_per_pixel = 100;
-  double aspect_ratio = 16.0 / 9.0;
-  int image_width = 800;
-  int max_depth = 50;
-};
-
-Scene setupScene(int scene_id = 2) {
   Scene scene;
-
-  switch (scene_id) {
-    case 1:
-      scene.world = random_scene();
-      scene.background = color(0.7, 0.8, 1.0);
-      scene.lookfrom = point3(13, 2, 3);
-      scene.lookat = point3(0, 0, 0);
-      scene.vfov = 20.0;
-      scene.aperture = 0.1;
-      break;
-
-    default:
-    case 2:
-      scene.world = two_spheres();
-      scene.background = color(0.7, 0.8, 1.0);
-      scene.lookfrom = point3(13, 2, 3);
-      scene.lookat = point3(0, 0, 0);
-      scene.vfov = 20.0;
-      break;
-    case 3:
-      scene.world = two_perlin_spheres();
-      scene.background = color(0.7, 0.8, 1.0);
-      scene.lookfrom = point3(13, 2, 3);
-      scene.lookat = point3(0, 0, 0);
-      scene.vfov = 20.0;
-      break;
-    case 4:
-      scene.world = earth();
-      scene.background = color(0.7, 0.8, 1.0);
-      scene.lookfrom = point3(13, 2, 3);
-      scene.lookat = point3(0, 0, 0);
-      scene.vfov = 20.0;
-      break;
-    case 5:
-      scene.world = simple_light();
-      scene.samples_per_pixel = 400;
-      scene.background = color(0, 0, 0);
-      scene.lookfrom = point3(26, 3, 6);
-      scene.lookat = point3(0, 2, 0);
-      scene.vfov = 20.0;
-      break;
-    case 6:
-      scene.world = cornell_box();
-      scene.aspect_ratio = 1.0;
-      scene.image_width = 600;
-      scene.samples_per_pixel = 200;
-      scene.background = color(0, 0, 0);
-      scene.lookfrom = point3(278, 278, -800);
-      scene.lookat = point3(278, 278, 0);
-      scene.vfov = 40.0;
-      break;
-    case 7:
-      scene.world = cornell_smoke();
-      scene.aspect_ratio = 1.0;
-      scene.image_width = 600;
-      scene.samples_per_pixel = 200;
-      scene.lookfrom = point3(278, 278, -800);
-      scene.lookat = point3(278, 278, 0);
-      scene.vfov = 40.0;
-      break;
-    case 8:
-      scene.world = final_scene();
-      scene.aspect_ratio = 1.0;
-      scene.image_width = 800;
-      scene.samples_per_pixel = 10000;
-      scene.background = color(0, 0, 0);
-      scene.lookfrom = point3(478, 278, -600);
-      scene.lookat = point3(278, 278, 0);
-      scene.vfov = 40.0;
-      break;
-  }
+  scene.aspect_ratio = 1.0;
+  scene.image_width = 800;
+  scene.samples_per_pixel = 10000;
+  scene.background = color(0, 0, 0);
+  scene.lookfrom = point3(478, 278, -600);
+  scene.lookat = point3(278, 278, 0);
+  scene.vfov = 40.0;
 
   return scene;
 }
+
+std::unordered_map<std::string, std::function<Scene()>> SceneMap{
+    {"random_scene", []() { return random_scene(); }},
+    {"two_spheres", []() { return two_spheres(); }},
+    {"two_perlin_spheres", []() { return two_perlin_spheres(); }},
+    {"earth", []() { return earth(); }},
+    {"simple_light", []() { return simple_light(); }},
+    {"cornell_box", []() { return cornell_box(); }},
+    {"cornell_smoke", []() { return cornell_smoke(); }},
+    {"final_scene", []() { return final_scene(); }}};
+
+// std::unordered_map<std::string, Scene> SceneMap{
+//     {"random_scene", random_scene()},
+//     {"two_spheres", two_spheres()},
+//     {"two_perlin_spheres", two_perlin_spheres()},
+//     {"earth", earth()},
+//     {"simple_light", simple_light()},
+//     {"cornell_box", cornell_box()},
+//     {"cornell_smoke", cornell_smoke()},
+//     {"final_scene", final_scene()}};
+
+std::vector<std::string> SceneNames{
+    "random_scene", "two_spheres", "two_perlin_spheres", "earth",
+    "simple_light", "cornell_box", "cornell_smoke",      "final_scene"};

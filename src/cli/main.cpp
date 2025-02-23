@@ -13,18 +13,19 @@ const std::string log_file_path = "./log_cli.txt";
 int main(int argc, char **argv) {
   Logger logger(log_file_path);
   logger.log("Starting...");
-  auto options = ParseCommandLine(argc, argv);
 
-  logger.log("Width: ", options.width);
-  logger.log("Height: ", options.height);
+  // TODO: Parameterize scene from cli
+  auto options = ParseCommandLine(argc, argv);
+  // logger.log("Width: ", options.width);
+  // logger.log("Height: ", options.height);
   logger.log("Samples: ", options.samples);
   logger.log("Max Depth: ", options.max_depth);
   logger.log("Scene: ", options.scene);
 
-  auto scene = setupScene(2);
+  // Scene
+  auto scene = SceneMap[SceneNames[options.scene]]();
 
   // Image
-  // TODO: Parameterize image width and height from cli
   auto aspect_ratio = scene.aspect_ratio;
   int image_width = scene.image_width;
   int samples_per_pixel = scene.samples_per_pixel;

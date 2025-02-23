@@ -24,45 +24,9 @@ const int WINDOW_HEIGHT = 1600;
 const std::string log_file_path = "./log_gui.txt";
 static Logger logger(log_file_path);
 
-// Vertex Shader
-const char *vertexShaderSrc = R"(   
-    #version 330 core
-    layout (location = 0) in vec2 aPos;
-    layout (location = 1) in vec3 aColor;
-    out vec3 vColor;
-    void main() {
-        vColor = aColor;
-        gl_Position = vec4(aPos, 0.0, 1.0);
-    }
-)";
-
-// Fragment Shader
-const char *fragmentShaderSrc = R"(
-    #version 330 core
-    in vec3 vColor;
-    out vec4 FragColor;
-    void main() {
-        FragColor = vec4(vColor, 1.0);
-    }
-)";
-
-struct GlResources {
-  // Quad
-  GLuint VBO, VAO, EBO;
-  GLuint shaderProgram;
-
-  // Texture
-  GLuint framebufferTexture;
-  int renderWidth = WINDOW_WIDTH / 2;
-  int renderHeight = WINDOW_HEIGHT / 2;
-
-  // spice
-  int duration = 0;
-
-} Resources;
-
 struct ImguiParams {
   float backgroundColor[3] = {0.1f, 0.1f, 0.1f};
+  int current_scene = 2;
 } Params;
 
 struct RayTracer {
@@ -74,35 +38,27 @@ struct RayTracer {
   std::atomic<int> progress = 0;
 } Tracer;
 
+struct GlResources {
+  //   // Quad
+  //   GLuint VBO, VAO, EBO;
+  //   GLuint shaderProgram;
+
+  // Texture
+  GLuint framebufferTexture;
+  int renderWidth = WINDOW_WIDTH / 2;
+  int renderHeight = WINDOW_HEIGHT / 2;
+
+} Resources;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Create a simple shader program
-GLuint createShaderProgram() {
-  GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSrc, nullptr);
-  glCompileShader(vertexShader);
-
-  GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSrc, nullptr);
-  glCompileShader(fragmentShader);
-
-  GLuint shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
-
-  return shaderProgram;
-}
 
 std::vector<uint8_t> raytracer_dummy(int width, int height) {
   std::vector<uint8_t> image(width * height * 3);  // RGB image
   // Your ray tracing logic here
-  Resources.duration++;
-  auto s = sin(Resources.duration * 0.1);
-  auto c = cos(Resources.duration * 0.1);
+  static int duration = 0;
+  duration++;
+  auto s = sin(duration * 0.1);
+  auto c = cos(duration * 0.1);
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       // Compute pixel color
@@ -115,50 +71,10 @@ std::vector<uint8_t> raytracer_dummy(int width, int height) {
   return image;
 }
 
-void setupQuad() {
-  // Quad Data
-  float vertices[] = {
-      -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  // Bottom-left (red)
-      0.5f,  -0.5f, 0.0f, 1.0f, 0.0f,  // Bottom-right (green)
-      0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  // Top-right (blue)
-      -0.5f, 0.5f,  1.0f, 1.0f, 0.0f   // Top-left (yellow)
-  };
-
-  unsigned int indices[] = {0, 1, 2, 2, 3, 0};
-
-  glGenVertexArrays(1, &Resources.VAO);
-  glGenBuffers(1, &Resources.VBO);
-  glGenBuffers(1, &Resources.EBO);
-
-  glBindVertexArray(Resources.VAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, Resources.VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Resources.EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-               GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void *)(2 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-
-  Resources.shaderProgram = createShaderProgram();
-
-  // Generate a texture for the framebuffer
-  glGenTextures(1, &Resources.framebufferTexture);
-  glBindTexture(GL_TEXTURE_2D, Resources.framebufferTexture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Resources.renderWidth,
-               Resources.renderHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-}
-
 void setupRaytracer() {
-  Tracer.scene = setupScene(2);
+  logger.log("Setting up scene ... ", Params.current_scene,
+             SceneNames[Params.current_scene]);
+  Tracer.scene = SceneMap[SceneNames[Params.current_scene]]();
   Tracer.image.initialize(Resources.renderWidth, Resources.renderHeight);
 }
 
@@ -172,11 +88,21 @@ void updateFramebuffer(const std::vector<uint8_t> &imageData) {
 
 void renderUI() {
   ImGui::Begin("Control Panel");
-  ImGui::ColorEdit3("Quad Color", Params.backgroundColor);
+
+  if (ImGui::BeginCombo("Scene", SceneNames[Params.current_scene].c_str())) {
+    for (int n = 0; n < SceneNames.size(); n++) {
+      const bool is_selected = (Params.current_scene == n);
+      if (ImGui::Selectable(SceneNames[n].c_str(), is_selected)) {
+        Params.current_scene = n;
+        Tracer.scene = SceneMap[SceneNames[Params.current_scene]]();
+      }
+      if (is_selected) ImGui::SetItemDefaultFocus();
+    }
+    ImGui::EndCombo();
+  }
 
   if (ImGui::Button("Render")) {
     Tracer.trace_future = std::async(std::launch::async, [&]() {
-      Resources.duration++;
       // clear render
       Tracer.image.clear();
       logger.log("Rendering... ", Resources.renderWidth, "x",
@@ -237,6 +163,16 @@ void renderOutput() {
   ImGui::End();
 }
 
+void setupFramebuffer() {
+  // generate a texture for the framebuffer
+  glGenTextures(1, &Resources.framebufferTexture);
+  glBindTexture(GL_TEXTURE_2D, Resources.framebufferTexture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Resources.renderWidth,
+               Resources.renderHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
 int main() {
   if (!glfwInit()) {
     logger.log("Failed to initialize GLFW");
@@ -265,7 +201,7 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init("#version 330");
 
-  setupQuad();
+  setupFramebuffer();
   setupRaytracer();
 
   while (!glfwWindowShouldClose(window)) {
@@ -284,18 +220,7 @@ int main() {
                  Params.backgroundColor[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // auto image = raytracer_dummy(Resources.renderWidth,
-    // Resources.renderHeight); updateFramebuffer(image);
-
-    // Render Raytracer
-    // raytracer(Tracer.image, Tracer.scene);
-
     renderOutput();
-
-    // Render Quad
-    // glUseProgram(Resources.shaderProgram);
-    // glBindVertexArray(Resources.VAO);
-    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     // Render ImGui
     ImGui::Render();
