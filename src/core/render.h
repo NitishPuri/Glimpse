@@ -7,7 +7,7 @@
 #include <thread>
 #endif
 
-#include "utils.h"
+#include "glimpse.h"
 
 color ray_color(const ray &r, const color &background, const hittable &world,
                 int depth) {
