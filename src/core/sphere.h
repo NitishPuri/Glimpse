@@ -1,7 +1,6 @@
 #pragma once
 
-#include "core/vec3.h"
-#include "hittable.h"
+#include "glimpse.h"
 
 class sphere : public hittable {
  public:

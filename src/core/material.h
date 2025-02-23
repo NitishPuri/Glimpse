@@ -1,7 +1,6 @@
 #pragma once
 
 #include "glimpse.h"
-#include "texture.h"
 
 class material {
  public:

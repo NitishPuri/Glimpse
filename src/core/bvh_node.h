@@ -3,8 +3,6 @@
 #include <algorithm>
 
 #include "glimpse.h"
-#include "hittable.h"
-#include "hittable_list.h"
 
 class bvh_node : public hittable {
  public:

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "aabb.h"
-#include "ray.h"
+#include "glimpse.h"
 
 class material;
 

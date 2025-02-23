@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cmath>
-#include <iostream>
-
+#include "glimpse.h"
 using std::sqrt;
 
 class vec3 {

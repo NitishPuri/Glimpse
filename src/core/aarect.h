@@ -1,7 +1,6 @@
 #pragma once
 
 #include "glimpse.h"
-#include "hittable.h"
 
 class xy_rect : public hittable {
  public:

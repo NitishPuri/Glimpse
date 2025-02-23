@@ -1,9 +1,9 @@
 #pragma once
 
-#include "core/color.h"
+#include "glimpse.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <string>
+// #include <string>
 
 #include "stb/stb_image_write.h"
 

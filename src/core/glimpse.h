@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <iostream>
 #include <limits>
 #include <memory>
 
@@ -46,11 +47,28 @@ inline double clamp(double x, double min, double max) {
 // Common headers
 // clang-format off
 #include "vec3.h"
+#include "color.h"
 #include "ray.h"
+#include "aabb.h"
+
+#include "hittable.h"
+#include "hittable_list.h"
+
+#include "texture.h"
+#include "material.h"
+#include "perlin.h"
+
+// hittables
+#include "aarect.h"
+#include "box.h"
+#include "sphere.h"
+#include "moving_sphere.h"
+
+
+#include "constant_medium.h"
+
 #include "bvh_node.h"
 #include "camera.h"
 #include "hittable.h"
-#include "material.h"
 #include "scenes.h"
-#include "texture.h"
 // clang-format on

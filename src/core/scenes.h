@@ -1,14 +1,6 @@
 #pragma once
 
-#include "aarect.h"
-#include "box.h"
-#include "bvh_node.h"
-#include "constant_medium.h"
-#include "hittable_list.h"
-#include "material.h"
-#include "moving_sphere.h"
-#include "perlin.h"
-#include "sphere.h"
+#include "glimpse.h"
 
 hittable_list random_scene() {
   hittable_list world;

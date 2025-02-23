@@ -1,9 +1,6 @@
 #pragma once
 
 #include "glimpse.h"
-#include "hittable.h"
-#include "material.h"
-#include "texture.h"
 
 class constant_medium : public hittable {
  public:

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "glimpse.h"
-#include "hittable.h"
 
 class moving_sphere : public hittable {
  public:

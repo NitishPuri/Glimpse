@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-
 #include "glimpse.h"
 #include "rtw_stb_image.h"
 
