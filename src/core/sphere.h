@@ -8,7 +8,7 @@ class sphere : public hittable {
   sphere(point3 c, double r, shared_ptr<material> m)
       : center{c}, radius{r}, mat_ptr(m) {}
 
-  bool hit(const ray &r, interval ray_t, hit_record &rec) const override;
+  bool hit(const ray &r, const interval &ray_t, hit_record &rec) const override;
   bool bounding_box(double time0, double time1,
                     aabb &output_box) const override;
 
@@ -34,7 +34,7 @@ class sphere : public hittable {
   shared_ptr<material> mat_ptr = nullptr;
 };
 
-bool sphere::hit(const ray &r, interval ray_t, hit_record &rec) const {
+bool sphere::hit(const ray &r, const interval &ray_t, hit_record &rec) const {
   vec3 oc = r.origin() - center;
   auto a = r.direction().length_squared();
   // TODO: Check this, why is -1 required, should the ray direction be reversed

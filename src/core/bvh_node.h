@@ -14,7 +14,7 @@ class bvh_node : public hittable {
   bvh_node(const std::vector<shared_ptr<hittable>> &src_objects, size_t start,
            size_t end, double time0, double time1);
 
-  virtual bool hit(const ray &r, interval ray_t,
+  virtual bool hit(const ray &r, const interval &ray_t,
                    hit_record &rec) const override;
 
   virtual bool bounding_box(double time0, double time1,
@@ -94,7 +94,7 @@ bool bvh_node::bounding_box(double time0, double time1,
   return true;
 }
 
-bool bvh_node::hit(const ray &r, interval ray_t, hit_record &rec) const {
+bool bvh_node::hit(const ray &r, const interval &ray_t, hit_record &rec) const {
   if (!box.hit(r, {ray_t.min, ray_t.max})) return false;
 
   bool hit_left = left->hit(r, {ray_t.min, ray_t.max}, rec);

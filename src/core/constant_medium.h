@@ -14,7 +14,7 @@ class constant_medium : public hittable {
         neg_inv_density(-1 / d),
         phase_function(make_shared<isotropic>(c)) {}
 
-  virtual bool hit(const ray &r, interval ray_t,
+  virtual bool hit(const ray &r, const interval &ray_t,
                    hit_record &rec) const override;
 
   virtual bool bounding_box(double time0, double time1,
@@ -28,7 +28,8 @@ class constant_medium : public hittable {
   double neg_inv_density;
 };
 
-bool constant_medium::hit(const ray &r, interval ray_t, hit_record &rec) const {
+bool constant_medium::hit(const ray &r, const interval &ray_t,
+                          hit_record &rec) const {
   // Print occasional samples when debugging. To enable, set enableDebug true.
   const bool enableDebug = false;
   const bool debugging = enableDebug && random_double() < 0.00001;
