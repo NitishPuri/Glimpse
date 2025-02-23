@@ -201,8 +201,8 @@ void renderUI() {
     int totalPixels = Resources.renderWidth * Resources.renderHeight *
                       Tracer.scene.samples_per_pixel;
     ImGui::Text("Rendering...%d/%d", Tracer.progress.load(), totalPixels);
-    ImGui::ProgressBar(static_cast<float>(Tracer.progress.load()) /
-                       totalPixels);
+    float progress = float(Tracer.progress.load()) / float(totalPixels);
+    ImGui::ProgressBar(progress, ImVec2(-1, 0), "Progress");
     updateFramebuffer(Tracer.image.data);
 
   } else if (Tracer.status == RayTracer::DONE) {
