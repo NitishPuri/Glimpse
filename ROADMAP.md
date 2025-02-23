@@ -13,10 +13,13 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - [x] **Refactor into CLI and GUI Apps**
 - [x] **Async Ray Tracing in GUI**
 - [ ] **Expose All Config Options in GUI** 
-  - Scene selection
-  - Samples per pixel (SPP)
-  - Max depth
-  - Resolution, aspect ratio  
+  - [x] Scene selection
+  - [x] Samples per pixel (SPP)
+  - [x] Max depth
+  - Camera controls
+  - Scene object params like position, material
+  - Use SPP=1 to show as close to real time updates as possible while user is manipulating a control, 
+    maybe make this togglable ( in cases even spp = 1 might be too much? ), 
 - [ ] **Namespace & Modular Code Cleanup**
 - [ ] **Camera Improvements**
   - Positioning & Re-rendering  
@@ -25,7 +28,7 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
   - Exposure & tone mapping
 - [ ] use glm for vector stuff.
 - [ ] Use something like Conan for package management when trying to add a new package next time.
-- [ ]improve project structure. automate, build, test scripts.
+- [ ] improve project structure. automate, build, test scripts.
 - [ ] hook with a unit testing framework
 - [ ] add unit tests
     

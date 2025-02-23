@@ -103,11 +103,14 @@ inline vec3 sqrt(vec3 v) {
 }
 
 vec3 random_in_unit_sphere() {
-  while (true) {
+  int max_iterations = 1000;
+  while (max_iterations-- > 0) {
     auto p = vec3::random(-1, 1);
     auto lensq = p.length_squared();
     if (lensq > 1e-160 && lensq <= 1) return p;
   }
+  // Return a default value if no valid vector is found
+  return vec3(1, 0, 0);
 }
 
 vec3 random_unit_vector() { return unit_vector(random_in_unit_sphere()); }
@@ -122,23 +125,28 @@ vec3 random_in_hemisphere(const vec3 &normal) {
 }
 
 vec3 random_in_unit_disk() {
-  while (true) {
+  int max_iterations = 1000;
+  while (max_iterations-- > 0) {
     auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0);
-    if (p.length_squared() >= 1) continue;
-    return p;
+    if (p.length_squared() < 1) return p;
   }
+  // Fallback in case of failure
+  return vec3(0, 0, 0);
 }
 
+// Generates a random point within a unit square centered at the origin
 vec3 sample_square() {
   return vec3(random_double() - 0.5, random_double() - 0.5, 0);
 }
-
+// Reflects vector v around normal vector n
 vec3 reflect(const vec3 &v, const vec3 &n) { return v - 2 * dot(v, n) * n; }
 
+// Refracts the vector `uv` through the surface with normal `n` using the ratio
+// of indices of refraction `etai_over_etat`
 vec3 refract(const vec3 &uv, const vec3 &n, double etai_over_etat) {
   // Derived from Snell's law,
   auto cos_theta = fmin(dot(-uv, n), 1.0);
   vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
-  vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
+  vec3 r_out_parallel = -std::sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
   return r_out_perp + r_out_parallel;
 }
