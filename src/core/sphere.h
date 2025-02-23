@@ -40,7 +40,9 @@ bool sphere::hit(const ray &r, double t_min, double t_max,
                  hit_record &rec) const {
   vec3 oc = r.origin() - center;
   auto a = r.direction().length_squared();
-  auto half_b = dot(oc, r.direction());
+  // TODO: Check this, why is -1 required, should the ray direction be reversed
+  // in all places?
+  auto half_b = dot(oc, -1 * r.direction());
   auto c = oc.length_squared() - radius * radius;
 
   auto discriminant = half_b * half_b - a * c;
@@ -50,10 +52,9 @@ bool sphere::hit(const ray &r, double t_min, double t_max,
   auto sqrtd = sqrt(discriminant);
 
   // Find the nearest root that lies in the acceptable range.
-  // TODO: Check why this has -half_b instead of +half_b
-  auto root = (-half_b - sqrtd) / a;
+  auto root = (half_b - sqrtd) / a;
   if (root < t_min || root > t_max) {
-    root = (-half_b + sqrtd) / a;
+    root = (half_b + sqrtd) / a;
     if (root < t_min || t_max < root) return false;
   }
 
