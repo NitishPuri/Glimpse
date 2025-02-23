@@ -12,17 +12,22 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - [x] **GLFW + ImGui GUI** *(Windowing & Controls)*
 - [x] **Refactor into CLI and GUI Apps**
 - [x] **Async Ray Tracing in GUI**
-- [ ] **Namespace & Modular Code Cleanup**
 - [ ] **Expose All Config Options in GUI**
   - Scene selection
   - Samples per pixel (SPP)
   - Max depth
   - Resolution, aspect ratio  
+- [ ] **Namespace & Modular Code Cleanup**
 - [ ] **Camera Improvements**
   - Positioning & Re-rendering  
   - Depth of field (Aperture, Focus Distance)
   - Motion blur
   - Exposure & tone mapping
+- [ ] use glm for vector stuff.
+- [ ] Use something like Conan for package management when trying to add a new package next time.
+- [ ]improve project structure. automate, build, test scripts.
+- [ ] hook with a unit testing framework
+- [ ] add unit tests
     
 
 #### **2. Scene Management & Experimentation**
@@ -37,7 +42,6 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
   - Load scenes from **PBRT, LuxRender, RenderMan**
   - Find open example datasets
   - Benchmark against other renderers!
-- hook with a unit testing framework
 
 #### **3. Performance & Algorithmic Enhancements**
 - [ ] **Acceleration Structures**

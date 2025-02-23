@@ -44,11 +44,13 @@ inline double clamp(double x, double min, double max) {
 // }
 
 // Common headers
+// clang-format off
+#include "vec3.h"
+#include "ray.h"
 #include "bvh_node.h"
 #include "camera.h"
 #include "hittable.h"
 #include "material.h"
-#include "ray.h"
 #include "scenes.h"
 #include "texture.h"
-#include "vec3.h"
+// clang-format on
