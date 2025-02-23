@@ -10,3 +10,4 @@ ext/imgui/
 ext/stb/
 imgui.ini
 log_cli.txt
+log_gui.txt

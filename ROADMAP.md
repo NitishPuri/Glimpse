@@ -1,0 +1,44 @@
+
+## Roadmap
+
+- [x] Add windowing
+  - [x] glfw/imgui  
+- [x] refactor into cli and gui apps
+- [x] hook ray tracer into gui
+- [x] async ray tracing and progress update when using gui 
+- [ ] add namespace
+- add all the options to gui
+  - scene selection
+- ...  
+- Add camera positioning and re-rendering the scene
+  - More camera controls, like aperture, exposure etc
+- ...
+- custom scenes, import/export to json
+- setup test scenes
+- ...
+- improved acceleration structures
+  - bvh
+- Add effects
+  - shadows
+  - refraction
+  - ...
+- ... ??
+- Add scene loaders for other ray tracing scene app formats
+  - pbrt, luxrender, renderman
+  - look for open formats that have a wide number of examples
+  - benchmark on those examples compared to other renderers on performance and quality!
+- global illumination
+- ...
+- parallelization improvements
+  - thread pools ?
+  - tiling ?
+  - SIMD
+  - openMP
+-
+- ...
+- ...??
+- ...
+- compute shaders for ray tracing
+- ...
+- vulkan/rtx
+
