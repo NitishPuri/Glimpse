@@ -82,4 +82,6 @@ inline double clamp(double x, double min, double max) {
 #include "camera.h"
 #include "hittable.h"
 #include "scenes.h"
+
+#include "image.h"
 // clang-format on

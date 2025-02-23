@@ -13,8 +13,7 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-#include "core/scenes.h"
-#include "core/image.h"
+#include "core/glimpse.h"
 #include "core/render.h"
 #include "core/logger.h"
 
@@ -39,22 +38,32 @@ class AppWindow {
     window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Glimpse", nullptr,
                               nullptr);
     if (!window) {
-      logger.log("Failed to create GLFW window");
+      const char* description;
+      int code = glfwGetError(&description);
+      logger.log("Failed to create GLFW window: ", description);
       glfwTerminate();
       return -1;
     }
 
     glfwMakeContextCurrent(window);
-    // glfwSwapInterval(1); //TODO Enable vsync
-    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    glfwSwapInterval(1);  // Enable vsync
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+      logger.log("Failed to initialize GLAD");
+      return -1;
+    }
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    setupFramebuffer();
-    setupRaytracer();
+    if (glfwGetCurrentContext() == window) {
+      setupFramebuffer();
+      setupRaytracer();
+    } else {
+      logger.log("Failed to initialize OpenGL context");
+      return -1;
+    }
 
     return 0;
   }
@@ -113,14 +122,39 @@ class AppWindow {
 
   void setupFramebuffer() {
     glGenTextures(1, &Resources.framebufferTexture);
+    if (checkGLError("glGenTextures")) return;
+
     glBindTexture(GL_TEXTURE_2D, Resources.framebufferTexture);
+    if (checkGLError("glBindTexture")) return;
+
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Resources.renderWidth,
                  Resources.renderHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    if (checkGLError("glTexImage2D")) return;
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (checkGLError("glTexParameteri MIN_FILTER")) return;
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    if (checkGLError("glTexParameteri MAG_FILTER")) return;
+  }
+
+  bool checkGLError(const std::string& functionName) {
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+      logger.log("OpenGL error in ", functionName, ": ", err);
+      return true;
+    }
+    return false;
   }
 
   void setupRaytracer() {
+    // Ensure current_scene is within valid range
+    if (ImGuiParams.current_scene < 0 ||
+        ImGuiParams.current_scene >= SceneNames.size()) {
+      logger.log("Invalid scene index: ", ImGuiParams.current_scene);
+      return;
+    }
+
     // TODO: use size from scene
     logger.log("Setting up scene ... ", ImGuiParams.current_scene,
                SceneNames[ImGuiParams.current_scene]);
@@ -133,6 +167,7 @@ class AppWindow {
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Resources.renderWidth,
                     Resources.renderHeight, GL_RGB, GL_UNSIGNED_BYTE,
                     imageData.data());
+    if (checkGLError("glTexSubImage2D")) return;
   }
 
   void renderUI() {
