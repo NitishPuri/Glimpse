@@ -22,8 +22,7 @@ struct hit_record {
 class hittable {
  public:
   virtual ~hittable() = default;
-  virtual bool hit(const ray& r, double t_min, double t_max,
-                   hit_record& rec) const = 0;
+  virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
   virtual bool bounding_box(double time0, double time1,
                             aabb& output_box) const = 0;
 };
@@ -33,7 +32,7 @@ class translate : public hittable {
   translate(shared_ptr<hittable> p, const vec3& displacement)
       : ptr(p), offset(displacement) {}
 
-  virtual bool hit(const ray& r, double t_min, double t_max,
+  virtual bool hit(const ray& r, interval ray_t,
                    hit_record& rec) const override;
 
   virtual bool bounding_box(double time0, double time1,
@@ -44,10 +43,9 @@ class translate : public hittable {
   vec3 offset;
 };
 
-bool translate::hit(const ray& r, double t_min, double t_max,
-                    hit_record& rec) const {
+bool translate::hit(const ray& r, interval ray_t, hit_record& rec) const {
   ray moved_r(r.origin() - offset, r.direction(), r.time());
-  if (!ptr->hit(moved_r, t_min, t_max, rec)) return false;
+  if (!ptr->hit(moved_r, {ray_t.min, ray_t.max}, rec)) return false;
 
   rec.p += offset;
   rec.set_face_normal(moved_r, rec.normal);
@@ -68,7 +66,7 @@ class rotate_y : public hittable {
  public:
   rotate_y(shared_ptr<hittable> p, double angle);
 
-  virtual bool hit(const ray& r, double t_min, double t_max,
+  virtual bool hit(const ray& r, interval ray_t,
                    hit_record& rec) const override;
 
   virtual bool bounding_box(double time0, double time1,
@@ -117,8 +115,7 @@ rotate_y::rotate_y(shared_ptr<hittable> p, double angle) : ptr(p) {
   bbox = aabb(min, max);
 }
 
-bool rotate_y::hit(const ray& r, double t_min, double t_max,
-                   hit_record& rec) const {
+bool rotate_y::hit(const ray& r, interval ray_t, hit_record& rec) const {
   auto origin = r.origin();
   auto direction = r.direction();
 
@@ -130,7 +127,7 @@ bool rotate_y::hit(const ray& r, double t_min, double t_max,
 
   ray rotated_r(origin, direction, r.time());
 
-  if (!ptr->hit(rotated_r, t_min, t_max, rec)) return false;
+  if (!ptr->hit(rotated_r, {ray_t.min, ray_t.max}, rec)) return false;
 
   auto p = rec.p;
   auto normal = rec.normal;

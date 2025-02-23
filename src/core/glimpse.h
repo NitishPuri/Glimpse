@@ -48,6 +48,7 @@ inline double clamp(double x, double min, double max) {
 // clang-format off
 #include "vec3.h"
 #include "color.h"
+#include "interval.h"
 #include "ray.h"
 #include "aabb.h"
 

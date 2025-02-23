@@ -17,7 +17,7 @@ color ray_color(const ray &r, const color &background, const hittable &world,
   if (depth < 0) return color(0, 0, 0);
 
   // If the ray hits nothing, return the background color.
-  if (!world.hit(r, 0.001, infinity, rec)) return background;
+  if (!world.hit(r, {0.001, infinity}, rec)) return background;
 
   ray scattered;
   color attenuation;

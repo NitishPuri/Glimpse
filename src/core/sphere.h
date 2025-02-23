@@ -8,8 +8,7 @@ class sphere : public hittable {
   sphere(point3 c, double r, shared_ptr<material> m)
       : center{c}, radius{r}, mat_ptr(m) {}
 
-  bool hit(const ray &r, double t_min, double t_max,
-           hit_record &rec) const override;
+  bool hit(const ray &r, interval ray_t, hit_record &rec) const override;
   bool bounding_box(double time0, double time1,
                     aabb &output_box) const override;
 
@@ -35,8 +34,7 @@ class sphere : public hittable {
   shared_ptr<material> mat_ptr = nullptr;
 };
 
-bool sphere::hit(const ray &r, double t_min, double t_max,
-                 hit_record &rec) const {
+bool sphere::hit(const ray &r, interval ray_t, hit_record &rec) const {
   vec3 oc = r.origin() - center;
   auto a = r.direction().length_squared();
   // TODO: Check this, why is -1 required, should the ray direction be reversed
@@ -52,9 +50,9 @@ bool sphere::hit(const ray &r, double t_min, double t_max,
 
   // Find the nearest root that lies in the acceptable range.
   auto root = (half_b - sqrtd) / a;
-  if (root < t_min || root > t_max) {
+  if (root < ray_t.min || root > ray_t.max) {
     root = (half_b + sqrtd) / a;
-    if (root < t_min || t_max < root) return false;
+    if (root < ray_t.min || ray_t.max < root) return false;
   }
 
   rec.t = root;

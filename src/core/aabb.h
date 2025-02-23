@@ -10,17 +10,17 @@ class aabb {
   point3 min() const { return minimum; }
   point3 max() const { return maximum; }
 
-  //   bool hit(const ray &r, double t_min, double t_max) const;
+  //   bool hit(const ray &r, interval ray_t) const;
 
-  bool hit(const ray &r, double t_min, double t_max) const {
+  bool hit(const ray &r, interval ray_t) const {
     for (int a = 0; a < 3; ++a) {
       auto invD = 1.0f / r.direction()[a];
       auto t0 = (minimum[a] - r.origin()[a]) * invD;
       auto t1 = (maximum[a] - r.origin()[a]) * invD;
       if (invD < 0.0f) std::swap(t0, t1);
-      t_min = t0 > t_min ? t0 : t_min;
-      t_max = t1 < t_max ? t1 : t_max;
-      if (t_max < t_min) return false;
+      ray_t.min = t0 > ray_t.min ? t0 : ray_t.min;
+      ray_t.max = t1 < ray_t.max ? t1 : ray_t.max;
+      if (ray_t.max < ray_t.min) return false;
     }
     return true;
   }
