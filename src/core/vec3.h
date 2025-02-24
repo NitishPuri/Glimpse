@@ -1,6 +1,7 @@
 #pragma once
 
-#include "glimpse.h"
+// #include "glimpse.h"
+#include "common.h"
 using std::sqrt;
 
 class vec3 {
@@ -102,7 +103,7 @@ inline vec3 sqrt(vec3 v) {
   return vec3(sqrt(v.e[0]), sqrt(v.e[1]), sqrt(v.e[2]));
 }
 
-vec3 random_in_unit_sphere() {
+inline vec3 random_in_unit_sphere() {
   int max_iterations = 1000;
   while (max_iterations-- > 0) {
     auto p = vec3::random(-1, 1);
@@ -113,9 +114,11 @@ vec3 random_in_unit_sphere() {
   return vec3(1, 0, 0);
 }
 
-vec3 random_unit_vector() { return unit_vector(random_in_unit_sphere()); }
+inline vec3 random_unit_vector() {
+  return unit_vector(random_in_unit_sphere());
+}
 
-vec3 random_in_hemisphere(const vec3 &normal) {
+inline vec3 random_in_hemisphere(const vec3 &normal) {
   vec3 in_unit_sphere = random_in_unit_sphere();
   if (dot(in_unit_sphere, normal) > 0.0)
     // In the same hemisphere as the normal
@@ -124,7 +127,7 @@ vec3 random_in_hemisphere(const vec3 &normal) {
     return -in_unit_sphere;
 }
 
-vec3 random_in_unit_disk() {
+inline vec3 random_in_unit_disk() {
   int max_iterations = 1000;
   while (max_iterations-- > 0) {
     auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0);
@@ -135,15 +138,17 @@ vec3 random_in_unit_disk() {
 }
 
 // Generates a random point within a unit square centered at the origin
-vec3 sample_square() {
+inline vec3 sample_square() {
   return vec3(random_double() - 0.5, random_double() - 0.5, 0);
 }
 // Reflects vector v around normal vector n
-vec3 reflect(const vec3 &v, const vec3 &n) { return v - 2 * dot(v, n) * n; }
+inline vec3 reflect(const vec3 &v, const vec3 &n) {
+  return v - 2 * dot(v, n) * n;
+}
 
-// Refracts the vector `uv` through the surface with normal `n` using the ratio
-// of indices of refraction `etai_over_etat`
-vec3 refract(const vec3 &uv, const vec3 &n, double etai_over_etat) {
+// Refracts the vector `uv` through the surface with normal `n` using the
+// ratio of indices of refraction `etai_over_etat`
+inline vec3 refract(const vec3 &uv, const vec3 &n, double etai_over_etat) {
   // Derived from Snell's law,
   auto cos_theta = fmin(dot(-uv, n), 1.0);
   vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);

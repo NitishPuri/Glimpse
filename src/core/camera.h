@@ -29,12 +29,12 @@ class camera {
 
   ray get_ray(double s, double t) const {
     vec3 rd = lens_radius * random_in_unit_disk();
-    vec3 offset = u * rd.x() + v * rd.x();
+    vec3 offset = u * rd.x() + v * rd.y();
 
     auto ray_origin = origin + offset;
     auto ray_direction =
         lower_left_corner + s * horizontal + t * vertical - ray_origin;
-    // TODO: why random time ???
+    // Random time for motion blur?
     return ray(ray_origin, ray_direction, random_double(time0, time1));
   }
 

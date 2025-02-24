@@ -10,7 +10,7 @@
 #include <sstream>
 #include <string>
 
-#define CONSOLE_LOG 0
+#define CONSOLE_LOG 1
 
 class Logger {
  public:

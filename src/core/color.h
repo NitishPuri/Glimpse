@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glimpse.h"
+#include "vec3.h"
 
 struct ImageColor {
   using uchar = unsigned char;
