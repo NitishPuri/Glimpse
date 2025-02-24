@@ -1,3 +1,3 @@
 cls
 rmdir /s /q build
-cmake -Bbuild
+cmake --preset default

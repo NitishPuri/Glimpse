@@ -21,6 +21,7 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
   - Use SPP=1 to show as close to real time updates as possible while user is manipulating a control, 
     maybe make this togglable ( in cases even spp = 1 might be too much? ), 
 - [ ] **Namespace & Modular Code Cleanup**
+- Make core into a shared lib
 - [ ] **Camera Improvements**
   - Positioning & Re-rendering  
   - Depth of field (Aperture, Focus Distance)
