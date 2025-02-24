@@ -51,6 +51,8 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
   - BVH (Bounding Volume Hierarchy)
   - SAH BVH (Surface Area Heuristic)
   - Experiment with alternative structures (KD-Trees, Grids, etc.)  
+- Performance profiling
+  - Visual Studio, ? what other options?
 - [ ] **Parallelization Improvements**
   - Thread pools (C++ standard or custom)  
   - Tiling techniques (Divide image into patches for better caching)  
