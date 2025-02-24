@@ -50,10 +50,3 @@ Reference implementations
 
 
 See [Roadmap](ROADMAP.md)
-
-
-#### Setup
-
-`git clone https://github.com/microsoft/vcpkg.git`
-`cd vcpkg; .\bootstrap-vcpkg.bat`
-Add to path if required.
