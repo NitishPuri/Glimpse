@@ -27,25 +27,12 @@ class Image {
       return;
     }
 
-    // data[(x + y * width) * num_components + 0] = color.rgb[0];
-    // data[(x + y * width) * num_components + 1] = color.rgb[1];
-    // data[(x + y * width) * num_components + 2] = color.rgb[2];
-
     memcpy(data.data() + (x + y * width) * num_components, color.rgb,
            num_components);
   }
 
-  // Color get(int x, int y) const {
-  //     Color c {};
-  //     c.rgb[0] = data[x + y * width + 0];
-  //     c.rgb[1] = data[x + y * width + 1];
-  //     c.rgb[2] = data[x + y * width + 2];
-  //     return c;
-  // }
-
   int write(const std::string &filename, bool flip = true);
 
-  //  private:
   std::vector<uint8_t> data;
   int width = 0;
   int height = 0;
