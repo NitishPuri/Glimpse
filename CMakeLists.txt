@@ -8,20 +8,20 @@ project(${NAME} VERSION 0.0.1)
 
 
 # Core library
-# file(GLOB_RECURSE CORE_SOURCES ${PROJECT_SOURCE_DIR}/src/core/*.cpp)
-# file(GLOB_RECURSE CORE_HEADERS ${PROJECT_SOURCE_DIR}/src/core/*.h)
-# add_library(${NAME}_core ${CORE_SOURCES} ${CORE_HEADERS})
-# target_include_directories(${NAME}_core PUBLIC ${PROJECT_SOURCE_DIR}/ext)
-# target_compile_features(${NAME}_core PUBLIC cxx_std_17)
+file(GLOB_RECURSE CORE_SOURCES ${PROJECT_SOURCE_DIR}/src/core/*.cpp)
+file(GLOB_RECURSE CORE_HEADERS ${PROJECT_SOURCE_DIR}/src/core/*.h)
+add_library(${NAME}_core ${CORE_SOURCES} ${CORE_HEADERS})
+target_include_directories(${NAME}_core PUBLIC ${PROJECT_SOURCE_DIR}/ext)
+target_compile_features(${NAME}_core PUBLIC cxx_std_17)
 
 
 # cli 
 add_executable(${NAME}_cli src/cli/main.cpp)
 target_include_directories(${NAME}_cli PUBLIC 
     ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_SOURCE_DIR}/ext
+    # ${PROJECT_SOURCE_DIR}/ext
 )
-# target_link_libraries(${NAME}_cli ${NAME}_core)
+target_link_libraries(${NAME}_cli ${NAME}_core)
 target_compile_features(${NAME}_cli PUBLIC cxx_std_17)
 
 

@@ -1,12 +1,10 @@
 
 #include <future>
 
-#include "core/camera.h"
 #include "core/cli.h"
-#include "core/image.h"
+#include "core/glimpse.h"
 #include "core/logger.h"
 #include "core/render.h"
-#include "core/scenes.h"
 
 const std::string log_file_path = "./log_cli.txt";
 
