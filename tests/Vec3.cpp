@@ -1,6 +1,6 @@
-#include "core/vec3.h"
-
 #include "gtest/gtest.h"
+//
+#include "core/vec3.h"
 
 // Test the default constructor
 TEST(Vec3Test, DefaultConstructor) {
