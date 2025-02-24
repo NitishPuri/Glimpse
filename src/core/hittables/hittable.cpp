@@ -1,6 +1,4 @@
-#pragma once
 
-// #include "aabb.h"
 #include "hittable.h"
 
 bool translate::hit(const ray& r, const interval& ray_t,

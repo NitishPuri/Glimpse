@@ -62,26 +62,24 @@
 #include "ray.h"
 #include "aabb.h"
 
-#include "hittable.h"
-#include "hittable_list.h"
+#include "hittables/hittable.h"
 
 #include "texture.h"
 #include "material.h"
 #include "perlin.h"
 
-// hittables
-#include "aarect.h"
-#include "box.h"
-#include "sphere.h"
-#include "moving_sphere.h"
-
-
-#include "constant_medium.h"
-
-#include "bvh_node.h"
 #include "camera.h"
-#include "hittable.h"
-#include "scenes.h"
-
 #include "image.h"
+
+// hittables
+#include "hittables/hittable_list.h"
+#include "hittables/aarect.h"
+#include "hittables/box.h"
+#include "hittables/sphere.h"
+#include "hittables/moving_sphere.h"
+
+#include "hittables/constant_medium.h"
+#include "hittables/bvh_node.h"
+
+#include "scenes.h"
 // clang-format on

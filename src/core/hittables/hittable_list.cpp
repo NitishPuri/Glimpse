@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hittable.h"
+#include "hittable_list.h"
 
 bool hittable_list::hit(const ray& r, const interval& ray_t,
                         hit_record& rec) const {
