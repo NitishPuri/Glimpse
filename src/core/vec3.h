@@ -1,6 +1,7 @@
 #pragma once
 
-#include "glimpse.h"
+// #include "glimpse.h"
+#include "common.h"
 using std::sqrt;
 
 class vec3 {

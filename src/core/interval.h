@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glimpse.h"
+#include "common.h"
 
 class interval {
  public:
