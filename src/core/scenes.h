@@ -83,6 +83,26 @@ Scene random_scene() {
   return scene;
 }
 
+Scene single_sphere() {
+  hittable_list objects;
+
+  auto material = make_shared<lambertian>(color(0.8, 0.3, 0.3));
+  objects.add(make_shared<sphere>(point3(0, 0, -1), 0.5, material));
+
+  objects.add(
+      make_shared<sphere>(point3(0, -100.5, -1), 100,
+                          make_shared<lambertian>(color(0.8, 0.8, 0.0))));
+
+  Scene scene;
+  scene.world = objects;
+  scene.background = color(0.7, 0.8, 1.0);
+  scene.lookfrom = point3(13, 2, 3);
+  scene.lookat = point3(0, 0, 0);
+  scene.vfov = 20.0;
+
+  return scene;
+}
+
 Scene two_spheres() {
   hittable_list objects;
 
@@ -329,7 +349,8 @@ std::unordered_map<std::string, std::function<Scene()>> SceneMap{
     {"simple_light", []() { return simple_light(); }},
     {"cornell_box", []() { return cornell_box(); }},
     {"cornell_smoke", []() { return cornell_smoke(); }},
-    {"final_scene", []() { return final_scene(); }}};
+    {"final_scene", []() { return final_scene(); }},
+    {"single_sphere", []() { return single_sphere(); }}};
 
 // std::unordered_map<std::string, Scene> SceneMap{
 //     {"random_scene", random_scene()},
@@ -342,5 +363,6 @@ std::unordered_map<std::string, std::function<Scene()>> SceneMap{
 //     {"final_scene", final_scene()}};
 
 std::vector<std::string> SceneNames{
-    "random_scene", "two_spheres", "two_perlin_spheres", "earth",
-    "simple_light", "cornell_box", "cornell_smoke",      "final_scene"};
+    "single_sphere",      "random_scene",  "two_spheres",
+    "two_perlin_spheres", "earth",         "simple_light",
+    "cornell_box",        "cornell_smoke", "final_scene"};

@@ -68,6 +68,7 @@ class AppWindow {
   }
 
   void run() {
+    bool firstFrame = true;
     while (!glfwWindowShouldClose(window)) {
       glfwPollEvents();
 
@@ -76,6 +77,11 @@ class AppWindow {
       ImGui::NewFrame();
 
       renderUI();
+
+      if (firstFrame) {
+        firstFrame = false;
+        renderSceneAsync();
+      }
 
       glClearColor(ImGuiParams.backgroundColor[0],
                    ImGuiParams.backgroundColor[1],
@@ -97,7 +103,7 @@ class AppWindow {
  private:
   struct {
     float backgroundColor[3] = {0.1f, 0.1f, 0.1f};
-    int current_scene = 2;
+    int current_scene = 0;
   } ImGuiParams;
 
   struct RayTracerSt {
@@ -177,6 +183,28 @@ class AppWindow {
     if (checkGLError("glTexSubImage2D")) return;
   }
 
+  void renderSceneAsync() {
+    RayTracer.trace_future = std::async(std::launch::async, [&]() {
+      RayTracer.image.clear();
+      logger.log("Rendering... ", GLResources.renderWidth, "x",
+                 GLResources.renderHeight, " with ",
+                 RayTracer.scene.samples_per_pixel, " samples per pixel");
+      auto startTime = std::chrono::high_resolution_clock::now();
+
+      RayTracer.status = RayTracerSt::RENDERING;
+      render_scene(RayTracer.scene, RayTracer.image, &RayTracer.progress);
+      RayTracer.status = RayTracerSt::DONE;
+
+      auto endTime = std::chrono::high_resolution_clock::now();
+      auto duration =
+          std::chrono::duration<float, std::chrono::seconds::period>(endTime -
+                                                                     startTime)
+              .count();
+
+      logger.log("Image generated in ", duration, " seconds");
+    });
+  }
+
   void renderUI() {
     ImGui::Begin("Control Panel");
 
@@ -210,25 +238,7 @@ class AppWindow {
     //                    0.1f, 1000.0f);
 
     if (ImGui::Button("Render")) {
-      RayTracer.trace_future = std::async(std::launch::async, [&]() {
-        RayTracer.image.clear();
-        logger.log("Rendering... ", GLResources.renderWidth, "x",
-                   GLResources.renderHeight, " with ",
-                   RayTracer.scene.samples_per_pixel, " samples per pixel");
-        auto startTime = std::chrono::high_resolution_clock::now();
-
-        RayTracer.status = RayTracerSt::RENDERING;
-        render_scene(RayTracer.scene, RayTracer.image, &RayTracer.progress);
-        RayTracer.status = RayTracerSt::DONE;
-
-        auto endTime = std::chrono::high_resolution_clock::now();
-        auto duration =
-            std::chrono::duration<float, std::chrono::seconds::period>(
-                endTime - startTime)
-                .count();
-
-        logger.log("Image generated in ", duration, " seconds");
-      });
+      renderSceneAsync();
     }
     if (RayTracer.status == RayTracerSt::RENDERING) {
       int totalPixels = GLResources.renderWidth * GLResources.renderHeight *
