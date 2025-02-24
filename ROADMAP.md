@@ -4,6 +4,15 @@
 This roadmap prioritizes a **progressive learning experience** while keeping it **modular and experimental**.
 Also prioritize **algorithmic flexibility** and **infrastructure improvements**, so I can explore different paths at any stage.  
 
+## References and inspirations
+
+- [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
+- [Ray Tracing the Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
+- [Ray Tracing Next Week](https://raytracing.github.io/books/RayTracingNextWeek.html)
+- [pbrt](https://github.com/mmp/pbrt-v4)
+- [nanort](https://github.com/lighttransport/nanort?tab=readme-ov-file)
+- [LuxCore](https://github.com/LuxCoreRender/LuxCore)
+
 
 ### **Refined Roadmap: A Learning-Focused Ray Tracer**  
 
@@ -32,6 +41,11 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - [ ] improve project structure. automate, build, test scripts.
 - [ ] hook with a unit testing framework
 - [ ] add unit tests
+- Glass, mirrors
+- dispersion, rainbows, scattering
+- spectral emission/radiance
+- add loaders for ply
+- add loaders for lux and pbrt scenes
     
 
 #### **2. Scene Management & Experimentation**

@@ -40,6 +40,14 @@ void UIRenderer::renderUI(ImGuiParams& ImGuiParams, RayTracer& RayTracer,
     RayTracer.renderSceneAsync(logger, GLResources);
   }
 
+  // Scene parameters
+  if (ImGui::ColorEdit3("Background Color", ImGuiParams.backgroundColor)) {
+    RayTracer.scene.background =
+        color(ImGuiParams.backgroundColor[0], ImGuiParams.backgroundColor[1],
+              ImGuiParams.backgroundColor[2]);
+    RayTracer.renderSceneAsync(logger, GLResources);
+  }
+
   if (ImGui::Button("Render")) {
     // Call renderSceneAsync from AppWindow
     RayTracer.renderSceneAsync(logger, GLResources);

@@ -6,8 +6,8 @@
 #include "ui.h"
 
 // GL Window dimensions
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
+const int WINDOW_WIDTH = 1800;
+const int WINDOW_HEIGHT = 1600;
 
 const std::string log_file_path = "./log_gui.txt";
 
@@ -74,9 +74,7 @@ class AppWindow {
         RayTracer.renderSceneAsync(logger, GLResources);
       }
 
-      glClearColor(ImGuiParams.backgroundColor[0],
-                   ImGuiParams.backgroundColor[1],
-                   ImGuiParams.backgroundColor[2], 1.0f);
+      glClearColor(.1f, .1f, .1f, 1.0f);  // Set background color to dark gray
       glClear(GL_COLOR_BUFFER_BIT);
 
       ui.renderOutput(GLResources);
