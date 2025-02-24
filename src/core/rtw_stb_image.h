@@ -14,3 +14,5 @@
 // Microsoft Visual C++ Compiler
 #pragma warning(pop)
 #endif
+
+// This header should only be included in one cpp file

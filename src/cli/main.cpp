@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
   logger.log("Scene: ", options.scene);
 
   // Scene
-  auto scene = SceneMap[SceneNames[options.scene]]();
+  auto scene = Scene::SceneMap[Scene::SceneNames[options.scene]]();
 
   // Image
   auto aspect_ratio = scene.aspect_ratio;
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
              samples_per_pixel, " samples per pixel");
   auto startTime = std::chrono::high_resolution_clock::now();
 
-  render_scene(scene, image);
+  Renderer::render_scene(scene, image);
 
   auto endTime = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration<float, std::chrono::seconds::period>(
