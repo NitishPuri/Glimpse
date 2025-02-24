@@ -10,9 +10,9 @@ project(${NAME} VERSION 0.0.1)
 # Core library
 file(GLOB_RECURSE CORE_SOURCES ${PROJECT_SOURCE_DIR}/src/core/*.cpp)
 file(GLOB_RECURSE CORE_HEADERS ${PROJECT_SOURCE_DIR}/src/core/*.h)
-add_library(${NAME}_core ${CORE_SOURCES} ${CORE_HEADERS})
-target_include_directories(${NAME}_core PUBLIC ${PROJECT_SOURCE_DIR}/ext)
-target_compile_features(${NAME}_core PUBLIC cxx_std_17)
+add_library(${NAME} ${CORE_SOURCES} ${CORE_HEADERS})
+target_include_directories(${NAME} PUBLIC ${PROJECT_SOURCE_DIR}/ext)
+target_compile_features(${NAME} PUBLIC cxx_std_17)
 
 
 # cli 
@@ -21,7 +21,7 @@ target_include_directories(${NAME}_cli PUBLIC
     ${PROJECT_SOURCE_DIR}/src
     # ${PROJECT_SOURCE_DIR}/ext
 )
-target_link_libraries(${NAME}_cli ${NAME}_core)
+target_link_libraries(${NAME}_cli ${NAME})
 target_compile_features(${NAME}_cli PUBLIC cxx_std_17)
 
 
@@ -30,6 +30,7 @@ option(BUILD_GUI "Build the GUI Viewer" ON)
 if(BUILD_GUI)
 
     set(GUI_NAME ${NAME}_gui)
+    set(GUI_PATH ${PROJECT_SOURCE_DIR}/src/gui)
 
     # GLFW
     set(GLFW_PATH ${PROJECT_SOURCE_DIR}/ext/glfw-3.4.bin.WIN64)
@@ -45,14 +46,18 @@ if(BUILD_GUI)
     set(GLAD_INCLUDE ${GLAD_PATH}/include)
     file(GLOB_RECURSE GLAD_SOURCES ${GLAD_PATH}/src/*.c)
 
-    add_executable(${GUI_NAME} src/gui/app.cpp)
+    file(GLOB_RECURSE APP_HEADERS ${GUI_PATH}/*.h)
+    file(GLOB_RECURSE APP_SOURCES ${GUI_PATH}/*.cpp)
+
+    add_executable(${GUI_NAME} ${APP_SOURCES} ${APP_HEADERS})
     target_sources(${GUI_NAME} PRIVATE ${GLAD_SOURCES})
     target_sources(${GUI_NAME} PRIVATE ${IMGUI_SOURCES})
 
     target_compile_features(${GUI_NAME} PUBLIC cxx_std_17)
 
     target_link_directories(${GUI_NAME} PUBLIC ${GLFW_LIB_DIR})
-    target_link_libraries(${GUI_NAME} 
+    target_link_libraries(${GUI_NAME}
+        ${NAME} 
         glfw3
         opengl32.lib
     )

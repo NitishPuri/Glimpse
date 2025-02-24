@@ -3,7 +3,8 @@
 #include "image.h"
 #include "scenes.h"
 
-struct Renderer {
+class Renderer {
+ public:
   // static color ray_color(const ray &r, const color &background,
   //                        const hittable &world, int depth);
 

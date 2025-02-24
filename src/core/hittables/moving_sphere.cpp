@@ -1,5 +1,3 @@
-#pragma once
-
 #include "moving_sphere.h"
 
 bool moving_sphere::hit(const ray &r, const interval &ray_t,

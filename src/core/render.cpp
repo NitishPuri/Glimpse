@@ -1,7 +1,6 @@
-#pragma once
+
 
 #define MULTITHREADED
-
 #ifdef MULTITHREADED
 #include <future>
 #include <thread>

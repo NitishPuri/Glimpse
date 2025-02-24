@@ -318,7 +318,7 @@ Scene final_scene() {
   return scene;
 }
 
-std::unordered_map<std::string, std::function<Scene()>> Scene::SceneMap{
+std::unordered_map<std::string, std::function<Scene()>> Scene::SceneMap = {
     {"random_scene", []() { return random_scene(); }},
     {"two_spheres", []() { return two_spheres(); }},
     {"two_perlin_spheres", []() { return two_perlin_spheres(); }},
@@ -339,7 +339,7 @@ std::unordered_map<std::string, std::function<Scene()>> Scene::SceneMap{
 //     {"cornell_smoke", cornell_smoke()},
 //     {"final_scene", final_scene()}};
 
-std::vector<std::string> Scene::SceneNames{
+std::vector<std::string> Scene::SceneNames = {
     "single_sphere",      "random_scene",  "two_spheres",
     "two_perlin_spheres", "earth",         "simple_light",
     "cornell_box",        "cornell_smoke", "final_scene"};

@@ -1,4 +1,3 @@
-
 #include "sphere.h"
 
 bool sphere::hit(const ray &r, const interval &ray_t, hit_record &rec) const {

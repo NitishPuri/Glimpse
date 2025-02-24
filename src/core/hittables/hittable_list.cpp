@@ -1,5 +1,3 @@
-#pragma once
-
 #include "hittable_list.h"
 
 bool hittable_list::hit(const ray& r, const interval& ray_t,

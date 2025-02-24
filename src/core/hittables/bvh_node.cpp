@@ -1,5 +1,3 @@
-#pragma once
-
 #include "bvh_node.h"
 
 #include <algorithm>
