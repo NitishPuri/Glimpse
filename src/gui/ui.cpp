@@ -12,7 +12,7 @@ void UIRenderer::renderUI(ImGuiParams& ImGuiParams, RayTracer& RayTracer,
       const bool is_selected = (ImGuiParams.current_scene == n);
       if (ImGui::Selectable(Scene::SceneNames[n].c_str(), is_selected)) {
         ImGuiParams.current_scene = n;
-        if (window) window->setupRaytracer();
+        if (window) window->setupScene();
       }
       if (is_selected) ImGui::SetItemDefaultFocus();
     }
@@ -28,9 +28,21 @@ void UIRenderer::renderUI(ImGuiParams& ImGuiParams, RayTracer& RayTracer,
   ImGui::SliderFloat("Field of View", &RayTracer.scene.vfov, 1.0f, 180.0f);
   ImGui::SliderFloat("Aperture", &RayTracer.scene.aperture, 0.0f, 10.0f);
 
+  if (ImGui::SliderFloat3("Look From", ImGuiParams.lookFrom, -10.0f, 10.0f)) {
+    RayTracer.scene.lookfrom =
+        point3(ImGuiParams.lookFrom[0], ImGuiParams.lookFrom[1],
+               ImGuiParams.lookFrom[2]);
+    RayTracer.renderSceneAsync(logger, GLResources);
+  }
+  if (ImGui::SliderFloat3("Look At", ImGuiParams.lookAt, -10.0f, 10.0f)) {
+    RayTracer.scene.lookat = point3(
+        ImGuiParams.lookAt[0], ImGuiParams.lookAt[1], ImGuiParams.lookAt[2]);
+    RayTracer.renderSceneAsync(logger, GLResources);
+  }
+
   if (ImGui::Button("Render")) {
     // Call renderSceneAsync from AppWindow
-    if (window) window->RayTracer.renderSceneAsync(logger, GLResources);
+    RayTracer.renderSceneAsync(logger, GLResources);
   }
   if (RayTracer.status == RayTracer::RENDERING) {
     int totalPixels = GLResources.renderWidth * GLResources.renderHeight *
@@ -56,8 +68,9 @@ void UIRenderer::renderUI(ImGuiParams& ImGuiParams, RayTracer& RayTracer,
 
 void UIRenderer::renderOutput(GLResources& GLResources) {
   ImGui::Begin("Render Output");
+  // flip vertically
   ImGui::Image(ImTextureID(GLResources.framebufferTexture),
-               calculatePanelSize(GLResources));
+               calculatePanelSize(GLResources), ImVec2(0, 1), ImVec2(1, 0));
   ImGui::End();
 }
 

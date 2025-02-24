@@ -6,8 +6,8 @@
 #include "ui.h"
 
 // GL Window dimensions
-const int WINDOW_WIDTH = 1800;
-const int WINDOW_HEIGHT = 1600;
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 600;
 
 const std::string log_file_path = "./log_gui.txt";
 
@@ -16,6 +16,7 @@ class AppWindow {
   AppWindow() : logger(log_file_path) {}
 
   int initApp() {
+    // Initialize GLFW and OpenGL
     if (!glfwInit()) {
       logger.log("Failed to initialize GLFW");
       return -1;
@@ -38,13 +39,15 @@ class AppWindow {
       return -1;
     }
 
+    // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
+    // Setup Raytracer
     if (glfwGetCurrentContext() == window) {
-      setupRaytracer();
+      setupScene();
     } else {
       logger.log("Failed to initialize OpenGL context");
       return -1;
@@ -88,16 +91,7 @@ class AppWindow {
     glfwTerminate();
   }
 
-  RayTracer RayTracer;
-  GLResources GLResources;
-  ImGuiParams ImGuiParams;
-  UIRenderer ui;
-
-  GLFWwindow* window;
-  Logger logger;
-
- public:
-  void setupRaytracer() {
+  void setupScene() {
     // Ensure current_scene is within valid range
     if (ImGuiParams.current_scene < 0 ||
         ImGuiParams.current_scene >= Scene::SceneNames.size()) {
@@ -105,7 +99,6 @@ class AppWindow {
       return;
     }
 
-    // TODO: use size from scene
     logger.log("Setting up scene ... ", ImGuiParams.current_scene, " ",
                Scene::SceneNames[ImGuiParams.current_scene]);
     RayTracer.scene =
@@ -117,6 +110,14 @@ class AppWindow {
     RayTracer.image.initialize(GLResources.renderWidth,
                                GLResources.renderHeight);
 
+    auto vec3tofloat = [](const vec3& v, float f[3]) {
+      f[0] = static_cast<float>(v[0]);
+      f[1] = static_cast<float>(v[1]);
+      f[2] = static_cast<float>(v[2]);
+    };
+    vec3tofloat(RayTracer.scene.lookfrom, ImGuiParams.lookFrom);
+    vec3tofloat(RayTracer.scene.lookat, ImGuiParams.lookAt);
+
     GLResources.setupFramebuffer(logger);
   }
 
@@ -127,4 +128,12 @@ class AppWindow {
                     imageData.data());
     if (GLResources.checkGLError("glTexSubImage2D", logger)) return;
   }
+
+  RayTracer RayTracer;
+  GLResources GLResources;
+  ImGuiParams ImGuiParams;
+  UIRenderer ui;
+
+  GLFWwindow* window;
+  Logger logger;
 };

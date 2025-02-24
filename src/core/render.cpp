@@ -8,6 +8,7 @@
 
 #include "render.h"
 
+// Recursive ray tracing with depth limiting
 color ray_color(const ray &r, const color &background, const hittable &world,
                 int depth) {
   hit_record rec;
@@ -40,15 +41,18 @@ void render_section(Image &image, int start_row, int end_row, int image_width,
                     int max_depth, std::atomic<int> *progress = nullptr) {
   double pixel_sample_scale = 1.0 / samples_per_pixel;
   for (int j = end_row - 1; j >= start_row; --j) {
+    // for (int j = start_row; j < end_row; ++j) {
     for (int i = 0; i < image_width; ++i) {
       color pixel_color(0, 0, 0);
       for (int s = 0; s < samples_per_pixel; ++s) {
-        auto u = (i + random_double()) / (image_width - 1);
-        auto v = (j + random_double()) / (image_height - 1);
+        // sample pixels with random offset for anti-aliasing
+        auto u = (i + random_double(-0.5, 0.5)) / (image_width - 1);
+        auto v = (j + random_double(-0.5, 0.5)) / (image_height - 1);
         ray r = cam.get_ray(u, v);
         pixel_color += ray_color(r, background, world_bvh, max_depth);
         if (progress) (*progress)++;
       }
+      // gamma correction
       pixel_color = sqrt(pixel_color * pixel_sample_scale);
       image.set(i, j, pixel_color);
     }
@@ -64,12 +68,11 @@ void Renderer::render_scene(const Scene &scene, Image &image,
   auto background = scene.background;
   auto max_depth = scene.max_depth;
 
-  vec3 vup(0, 1, 0);
   double focal_length = 10.0;
   double time0 = 0.0;
   double time1 = 1.0;
-  camera cam(scene.lookfrom, scene.lookat, vup, scene.vfov, scene.aspect_ratio,
-             scene.aperture, focal_length, time0, time1);
+  camera cam(scene.lookfrom, scene.lookat, scene.vup, scene.vfov,
+             scene.aspect_ratio, scene.aperture, focal_length, time0, time1);
 
   auto world_bvh = bvh_node(scene.world, 0, 1);
 

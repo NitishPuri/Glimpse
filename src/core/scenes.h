@@ -15,6 +15,8 @@ struct Scene {
   // camera
   point3 lookfrom;
   point3 lookat;
+  point3 vup = vec3(0, 1, 0);
+
   float vfov;
   float aperture;
 

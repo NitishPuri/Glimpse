@@ -64,18 +64,29 @@ Scene single_sphere() {
   hittable_list objects;
 
   auto material = make_shared<lambertian>(color(0.8, 0.3, 0.3));
-  objects.add(make_shared<sphere>(point3(0, 0, -1), 0.5, material));
+  objects.add(make_shared<sphere>(point3(0, 0, 0), 0.5, material));
 
-  objects.add(
-      make_shared<sphere>(point3(0, -100.5, -1), 100,
-                          make_shared<lambertian>(color(0.8, 0.8, 0.0))));
+  objects.add(make_shared<sphere>(
+      point3(10, 0, 2), 0.5, make_shared<lambertian>(color(0.2, 0.8, 0.2))));
+  objects.add(make_shared<sphere>(
+      point3(-10, 0, -2), 0.5, make_shared<lambertian>(color(0.2, 0.2, 0.8))));
+
+  objects.add(make_shared<sphere>(
+      point3(0, 10, 0), 0.5, make_shared<lambertian>(color(0.2, 0.8, 0.8))));
+  objects.add(make_shared<sphere>(
+      point3(0, -10, 0), 0.5, make_shared<lambertian>(color(0.2, 0.2, 0.8))));
+
+  // objects.add(
+  //     make_shared<sphere>(point3(0, -100.5, -1), 100,
+  //                         make_shared<lambertian>(color(0.8, 0.8, 0.0))));
 
   Scene scene;
   scene.world = objects;
   scene.background = color(0.7, 0.8, 1.0);
-  scene.lookfrom = point3(13, 2, 3);
+  scene.lookfrom = point3(0, 0, 10);
   scene.lookat = point3(0, 0, 0);
-  scene.vfov = 20.0;
+  scene.vfov = 120.0;
+  scene.samples_per_pixel = 10;
 
   return scene;
 }

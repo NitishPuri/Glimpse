@@ -8,7 +8,9 @@
 
 struct ImGuiParams {
   float backgroundColor[3] = {0.1f, 0.1f, 0.1f};
-  int current_scene;
+  int current_scene = 0;
+  float lookFrom[3] = {13.0f, 2.0f, 3.0f};
+  float lookAt[3] = {0.0f, 0.0f, 0.0f};
 };
 
 class AppWindow;
