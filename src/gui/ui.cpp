@@ -2,71 +2,91 @@
 
 #include "app.h"
 
-void UIRenderer::renderUI(ImGuiParams& ImGuiParams, RayTracer& RayTracer,
-                          GLResources& GLResources, Logger& logger) {
+void cameraUI(RayTracer& raytracer, ImGuiParams& gui_params, Logger& logger,
+              GLResources& gl_res) {
+  // Render parameters
+  if (ImGui::SliderInt("Samples per Pixel",
+                       &raytracer.scene.cam.samples_per_pixel, 1, 1000)) {
+    raytracer.renderSceneAsync(logger, gl_res);
+  }
+  if (ImGui::SliderInt("Max Depth", &raytracer.scene.cam.max_depth, 1, 100)) {
+    raytracer.renderSceneAsync(logger, gl_res);
+  }
+
+  // Camera parameters
+  if (ImGui::SliderFloat("Field of View", &raytracer.scene.cam.vfov, 1.0f,
+                         180.0f)) {
+    raytracer.renderSceneAsync(logger, gl_res);
+  }
+  if (ImGui::SliderFloat("Aperture", &raytracer.scene.cam.aperture, 0.0f,
+                         10.0f)) {
+    raytracer.renderSceneAsync(logger, gl_res);
+  }
+  if (ImGui::SliderFloat("Focus Distance", &raytracer.scene.cam.focus_distance,
+                         0.0f, 50.0f)) {
+    raytracer.renderSceneAsync(logger, gl_res);
+  }
+
+  if (ImGui::SliderFloat3("Look From", gui_params.lookFrom, -10.0f, 10.0f)) {
+    raytracer.scene.cam.lookfrom = point3(
+        gui_params.lookFrom[0], gui_params.lookFrom[1], gui_params.lookFrom[2]);
+    raytracer.renderSceneAsync(logger, gl_res);
+  }
+  if (ImGui::SliderFloat3("Look At", gui_params.lookAt, -10.0f, 10.0f)) {
+    raytracer.scene.cam.lookat = point3(
+        gui_params.lookAt[0], gui_params.lookAt[1], gui_params.lookAt[2]);
+    raytracer.renderSceneAsync(logger, gl_res);
+  }
+}
+
+void UIRenderer::renderUI(ImGuiParams& gui_params, RayTracer& raytracer,
+                          GLResources& gl_res, Logger& logger) {
   ImGui::Begin("Control Panel");
 
   if (ImGui::BeginCombo("Scene",
-                        Scene::SceneNames[ImGuiParams.current_scene].c_str())) {
+                        Scene::SceneNames[gui_params.current_scene].c_str())) {
     for (int n = 0; n < Scene::SceneNames.size(); n++) {
-      const bool is_selected = (ImGuiParams.current_scene == n);
+      const bool is_selected = (gui_params.current_scene == n);
       if (ImGui::Selectable(Scene::SceneNames[n].c_str(), is_selected)) {
-        ImGuiParams.current_scene = n;
+        gui_params.current_scene = n;
         if (window) window->setupScene();
+        raytracer.renderSceneAsync(logger, gl_res);
       }
       if (is_selected) ImGui::SetItemDefaultFocus();
     }
     ImGui::EndCombo();
   }
 
-  // Render parameters
-  ImGui::SliderInt("Samples per Pixel", &RayTracer.scene.samples_per_pixel, 1,
-                   1000);
-  ImGui::SliderInt("Max Depth", &RayTracer.scene.max_depth, 1, 100);
-
   // Camera parameters
-  ImGui::SliderFloat("Field of View", &RayTracer.scene.vfov, 1.0f, 180.0f);
-  ImGui::SliderFloat("Aperture", &RayTracer.scene.aperture, 0.0f, 10.0f);
-
-  if (ImGui::SliderFloat3("Look From", ImGuiParams.lookFrom, -10.0f, 10.0f)) {
-    RayTracer.scene.lookfrom =
-        point3(ImGuiParams.lookFrom[0], ImGuiParams.lookFrom[1],
-               ImGuiParams.lookFrom[2]);
-    RayTracer.renderSceneAsync(logger, GLResources);
-  }
-  if (ImGui::SliderFloat3("Look At", ImGuiParams.lookAt, -10.0f, 10.0f)) {
-    RayTracer.scene.lookat = point3(
-        ImGuiParams.lookAt[0], ImGuiParams.lookAt[1], ImGuiParams.lookAt[2]);
-    RayTracer.renderSceneAsync(logger, GLResources);
-  }
+  cameraUI(raytracer, gui_params, logger, gl_res);
 
   // Scene parameters
-  if (ImGui::ColorEdit3("Background Color", ImGuiParams.backgroundColor)) {
-    RayTracer.scene.background =
-        color(ImGuiParams.backgroundColor[0], ImGuiParams.backgroundColor[1],
-              ImGuiParams.backgroundColor[2]);
-    RayTracer.renderSceneAsync(logger, GLResources);
+  if (ImGui::ColorEdit3("Background Color", gui_params.backgroundColor)) {
+    raytracer.scene.background =
+        color(gui_params.backgroundColor[0], gui_params.backgroundColor[1],
+              gui_params.backgroundColor[2]);
+    raytracer.renderSceneAsync(logger, gl_res);
   }
 
   if (ImGui::Button("Render")) {
     // Call renderSceneAsync from AppWindow
-    RayTracer.renderSceneAsync(logger, GLResources);
+    raytracer.renderSceneAsync(logger, gl_res);
   }
-  if (RayTracer.status == RayTracer::RENDERING) {
-    int totalPixels = GLResources.renderWidth * GLResources.renderHeight *
-                      RayTracer.scene.samples_per_pixel;
-    ImGui::Text("Rendering...%d/%d", RayTracer.progress.load(), totalPixels);
-    float progress = float(RayTracer.progress.load()) / float(totalPixels);
+  if (raytracer.status == RayTracer::RENDERING) {
+    int totalPixels = gl_res.renderWidth * gl_res.renderHeight *
+                      raytracer.scene.cam.samples_per_pixel;
+    ImGui::Text("Rendering...%d/%d", raytracer.progress.load(), totalPixels);
+    float progress = float(raytracer.progress.load()) / float(totalPixels);
     ImGui::ProgressBar(progress, ImVec2(-1, 0), "Progress");
     // Call updateFramebuffer from AppWindow
     if (window) window->updateFramebuffer(window->RayTracer.image.data);
 
-  } else if (RayTracer.status == RayTracer::DONE) {
+  } else if (raytracer.status == RayTracer::DONE) {
     // Call updateFramebuffer from AppWindow
     if (window) window->updateFramebuffer(window->RayTracer.image.data);
     ImGui::Text("Done");
-    RayTracer.status = RayTracer::IDLE;
-    RayTracer.progress = 0;
+    raytracer.status = RayTracer::IDLE;
+    raytracer.progress = 0;
   } else {
     ImGui::Text("Idle");
   }

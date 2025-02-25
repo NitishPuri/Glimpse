@@ -1,6 +1,8 @@
 #pragma once
 
-#include "glimpse.h"
+#include "hittables/hittable.h"
+#include "ray.h"
+#include "texture.h"
 
 class material {
  public:

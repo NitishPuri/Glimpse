@@ -3,7 +3,8 @@
 #include <functional>
 #include <unordered_map>
 
-#include "glimpse.h"
+#include "camera.h"
+#include "hittables/hittable_list.h"
 
 struct Scene {
   // world
@@ -12,20 +13,7 @@ struct Scene {
   // env
   color background = color(0.7, 0.8, 1.0);
 
-  // camera
-  point3 lookfrom;
-  point3 lookat;
-  point3 vup = vec3(0, 1, 0);
-
-  float vfov;
-  float aperture;
-
-  double aspect_ratio = 16.0 / 9.0;
-  int image_width = 800;
-
-  // render
-  int samples_per_pixel = 100;
-  int max_depth = 50;
+  camera cam;
 
   static std::unordered_map<std::string, std::function<Scene()>> SceneMap;
   static std::vector<std::string> SceneNames;

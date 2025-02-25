@@ -52,10 +52,10 @@ Scene random_scene() {
 
   Scene scene;
   scene.background = color(0.7, 0.8, 1.0);
-  scene.lookfrom = point3(13, 2, 3);
-  scene.lookat = point3(0, 0, 0);
-  scene.vfov = 20.0f;
-  scene.aperture = 0.1f;
+  scene.cam.lookfrom = point3(13, 2, 3);
+  scene.cam.lookat = point3(0, 0, 0);
+  scene.cam.vfov = 20.0f;
+  scene.cam.aperture = 0.1f;
 
   return scene;
 }
@@ -83,10 +83,10 @@ Scene directions_test() {
   Scene scene;
   scene.world = objects;
   scene.background = color(0.7, 0.8, 1.0);
-  scene.lookfrom = point3(0, 0, 10);
-  scene.lookat = point3(0, 0, 0);
-  scene.vfov = 120.0;
-  scene.samples_per_pixel = 10;
+  scene.cam.lookfrom = point3(0, 0, 10);
+  scene.cam.lookat = point3(0, 0, 0);
+  scene.cam.vfov = 120.0;
+  scene.cam.samples_per_pixel = 10;
 
   return scene;
 }
@@ -103,9 +103,9 @@ Scene two_diffuse_spheres() {
   Scene scene;
   scene.world = objects;
   scene.background = color(0.7, 0.8, 1.0);
-  scene.lookfrom = point3(13, 2, 3);
-  scene.lookat = point3(0, 0, 0);
-  scene.vfov = 40.0;
+  scene.cam.lookfrom = point3(13, 2, 3);
+  scene.cam.lookat = point3(0, 0, 0);
+  scene.cam.vfov = 40.0;
 
   return scene;
 }
@@ -124,9 +124,9 @@ Scene two_spheres_check() {
   Scene scene;
   scene.world = objects;
   scene.background = color(0.7, 0.8, 1.0);
-  scene.lookfrom = point3(13, 2, 3);
-  scene.lookat = point3(0, 0, 0);
-  scene.vfov = 20.0;
+  scene.cam.lookfrom = point3(13, 2, 3);
+  scene.cam.lookat = point3(0, 0, 0);
+  scene.cam.vfov = 20.0;
 
   return scene;
 }
@@ -143,9 +143,9 @@ Scene two_perlin_spheres() {
   Scene scene;
   scene.world = objects;
   scene.background = color(0.7, 0.8, 1.0);
-  scene.lookfrom = point3(13, 2, 3);
-  scene.lookat = point3(0, 0, 0);
-  scene.vfov = 20.0;
+  scene.cam.lookfrom = point3(13, 2, 3);
+  scene.cam.lookat = point3(0, 0, 0);
+  scene.cam.vfov = 20.0;
 
   return scene;
 }
@@ -159,9 +159,9 @@ Scene earth() {
   Scene scene;
   scene.world = hittable_list(globe);
   scene.background = color(0.7, 0.8, 1.0);
-  scene.lookfrom = point3(13, 2, 3);
-  scene.lookat = point3(0, 0, 0);
-  scene.vfov = 20.0;
+  scene.cam.lookfrom = point3(13, 2, 3);
+  scene.cam.lookat = point3(0, 0, 0);
+  scene.cam.vfov = 20.0;
 
   return scene;
 }
@@ -180,11 +180,11 @@ Scene simple_light() {
 
   Scene scene;
   scene.world = objects;
-  scene.samples_per_pixel = 400;
+  scene.cam.samples_per_pixel = 400;
   scene.background = color(0, 0, 0);
-  scene.lookfrom = point3(26, 3, 6);
-  scene.lookat = point3(0, 2, 0);
-  scene.vfov = 20.0;
+  scene.cam.lookfrom = point3(26, 3, 6);
+  scene.cam.lookat = point3(0, 2, 0);
+  scene.cam.vfov = 20.0;
 
   return scene;
 }
@@ -218,13 +218,13 @@ Scene cornell_box() {
 
   Scene scene;
   scene.world = objects;
-  scene.aspect_ratio = 1.0;
-  scene.image_width = 600;
-  scene.samples_per_pixel = 200;
+  scene.cam.aspect_ratio = 1.0;
+  scene.cam.image_width = 600;
+  scene.cam.samples_per_pixel = 200;
   scene.background = color(0, 0, 0);
-  scene.lookfrom = point3(278, 278, -800);
-  scene.lookat = point3(278, 278, 0);
-  scene.vfov = 40.0;
+  scene.cam.lookfrom = point3(278, 278, -800);
+  scene.cam.lookat = point3(278, 278, 0);
+  scene.cam.vfov = 40.0;
 
   return scene;
 }
@@ -259,12 +259,12 @@ Scene cornell_smoke() {
 
   Scene scene;
   scene.world = objects;
-  scene.aspect_ratio = 1.0;
-  scene.image_width = 600;
-  scene.samples_per_pixel = 200;
-  scene.lookfrom = point3(278, 278, -800);
-  scene.lookat = point3(278, 278, 0);
-  scene.vfov = 40.0;
+  scene.cam.aspect_ratio = 1.0;
+  scene.cam.image_width = 600;
+  scene.cam.samples_per_pixel = 200;
+  scene.cam.lookfrom = point3(278, 278, -800);
+  scene.cam.lookat = point3(278, 278, 0);
+  scene.cam.vfov = 40.0;
 
   return scene;
 }
@@ -337,13 +337,13 @@ Scene final_scene() {
       vec3(-100, 270, 395)));
 
   Scene scene;
-  scene.aspect_ratio = 1.0;
-  scene.image_width = 800;
-  scene.samples_per_pixel = 10000;
+  scene.cam.aspect_ratio = 1.0;
+  scene.cam.image_width = 800;
+  scene.cam.samples_per_pixel = 10000;
   scene.background = color(0, 0, 0);
-  scene.lookfrom = point3(478, 278, -600);
-  scene.lookat = point3(278, 278, 0);
-  scene.vfov = 40.0;
+  scene.cam.lookfrom = point3(478, 278, -600);
+  scene.cam.lookat = point3(278, 278, 0);
+  scene.cam.vfov = 40.0;
 
   return scene;
 }
@@ -383,9 +383,9 @@ Scene material_showcase() {
   Scene scene;
   scene.world = objects;
   scene.background = color(0.7, 0.8, 1.0);
-  scene.lookfrom = point3(0, 7, 15);
-  scene.lookat = point3(0, 0, 0);
-  scene.vfov = 60.0;
+  scene.cam.lookfrom = point3(0, 7, 15);
+  scene.cam.lookat = point3(0, 0, 0);
+  scene.cam.vfov = 60.0;
 
   return scene;
 }

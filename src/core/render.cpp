@@ -6,6 +6,9 @@
 #include <thread>
 #endif
 
+#include "camera.h"
+#include "hittables/bvh_node.h"
+#include "material.h"
 #include "render.h"
 
 // Recursive ray tracing with depth limiting
@@ -65,19 +68,17 @@ void render_section(Image &image, int start_row, int end_row, int image_width,
 
 void Renderer::render_scene(const Scene &scene, Image &image,
                             std::atomic<int> *progress) {
-  auto aspect_ratio = scene.aspect_ratio;
-  auto image_width = scene.image_width;
+  auto aspect_ratio = scene.cam.aspect_ratio;
+  auto image_width = scene.cam.image_width;
   auto image_height = static_cast<int>(image_width / aspect_ratio);
-  auto samples_per_pixel = scene.samples_per_pixel;
+  auto samples_per_pixel = scene.cam.samples_per_pixel;
   auto background = scene.background;
-  auto max_depth = scene.max_depth;
+  auto max_depth = scene.cam.max_depth;
 
-  double focal_length = 10.0;
   double time0 = 0.0;
   double time1 = 1.0;
-  camera cam(scene.lookfrom, scene.lookat, scene.vup, scene.vfov,
-             scene.aspect_ratio, scene.aperture, focal_length, time0, time1);
-
+  camera cam = scene.cam;
+  cam.initialize();
   auto world_bvh = bvh_node(scene.world, 0, 1);
 
   // Image

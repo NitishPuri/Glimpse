@@ -102,9 +102,9 @@ class AppWindow {
     RayTracer.scene =
         Scene::SceneMap[Scene::SceneNames[ImGuiParams.current_scene]]();
 
-    GLResources.renderWidth = RayTracer.scene.image_width;
-    GLResources.renderHeight = static_cast<int>(RayTracer.scene.image_width /
-                                                RayTracer.scene.aspect_ratio);
+    GLResources.renderWidth = RayTracer.scene.cam.image_width;
+    GLResources.renderHeight = static_cast<int>(
+        RayTracer.scene.cam.image_width / RayTracer.scene.cam.aspect_ratio);
     RayTracer.image.initialize(GLResources.renderWidth,
                                GLResources.renderHeight);
 
@@ -113,8 +113,8 @@ class AppWindow {
       f[1] = static_cast<float>(v[1]);
       f[2] = static_cast<float>(v[2]);
     };
-    vec3tofloat(RayTracer.scene.lookfrom, ImGuiParams.lookFrom);
-    vec3tofloat(RayTracer.scene.lookat, ImGuiParams.lookAt);
+    vec3tofloat(RayTracer.scene.cam.lookfrom, ImGuiParams.lookFrom);
+    vec3tofloat(RayTracer.scene.cam.lookat, ImGuiParams.lookAt);
 
     GLResources.setupFramebuffer(logger);
   }

@@ -20,8 +20,8 @@ struct RayTracer {
     trace_future = std::async(std::launch::async, [&]() {
       image.clear();
       logger.log("Rendering... ", GLResources.renderWidth, "x",
-                 GLResources.renderHeight, " with ", scene.samples_per_pixel,
-                 " samples per pixel");
+                 GLResources.renderHeight, " with ",
+                 scene.cam.samples_per_pixel, " samples per pixel");
       auto startTime = std::chrono::high_resolution_clock::now();
 
       status = RENDERING;
