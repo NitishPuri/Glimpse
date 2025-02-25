@@ -51,6 +51,7 @@ Scene random_scene() {
   world.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
 
   Scene scene;
+  scene.world = world;
   scene.background = color(0.7, 0.8, 1.0);
   scene.cam.lookfrom = point3(13, 2, 3);
   scene.cam.lookat = point3(0, 0, 0);
@@ -339,7 +340,7 @@ Scene final_scene() {
   Scene scene;
   scene.cam.aspect_ratio = 1.0;
   scene.cam.image_width = 800;
-  scene.cam.samples_per_pixel = 10000;
+  scene.cam.samples_per_pixel = 100;
   scene.background = color(0, 0, 0);
   scene.cam.lookfrom = point3(478, 278, -600);
   scene.cam.lookat = point3(278, 278, 0);
