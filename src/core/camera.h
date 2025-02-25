@@ -15,13 +15,6 @@
 
 class camera {
  public:
-  // camera(point3 lookFrom_, point3 lookat, vec3 vup, double vfov_,
-  //        double aspect_ratio, double aperture, double focus_dist,
-  //        double _time0 = 0, double _time1 = 0)
-  //     : vfov(vfov_) {
-  //   initialize();
-  // }
-
   void initialize() {
     image_height = static_cast<int>(image_width / aspect_ratio);
 
@@ -41,9 +34,6 @@ class camera {
         origin - horizontal / 2 - vertical / 2 - focus_distance * w;
 
     lens_radius = aperture / 2;
-
-    // time0 = _time0;
-    // time1 = _time1;
   }
 
   ray get_ray(double s, double t) const {
@@ -84,6 +74,5 @@ class camera {
   vec3 horizontal;
   vec3 vertical;
   vec3 u, v, w;
-  // double vfov = 90;  // vertical field of view
   double lens_radius;
 };

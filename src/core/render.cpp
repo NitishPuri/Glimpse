@@ -48,7 +48,6 @@ void render_section(Image &image, int start_row, int end_row,
                     int max_depth, std::atomic<int> *progress = nullptr) {
   double pixel_sample_scale = 1.0 / samples_per_pixel;
   for (int j = end_row - 1; j >= start_row; --j) {
-    // for (int j = start_row; j < end_row; ++j) {
     for (int i = 0; i < cam.image_width; ++i) {
       color pixel_color(0, 0, 0);
       for (int s = 0; s < samples_per_pixel; ++s) {
@@ -69,8 +68,6 @@ void render_section(Image &image, int start_row, int end_row,
 void Renderer::render_scene(const Scene &scene, Image &image,
                             std::atomic<int> *progress) {
   auto aspect_ratio = scene.cam.aspect_ratio;
-  // auto image_width = scene.cam.image_width;
-  // auto image_height = static_cast<int>(image_width / aspect_ratio);
   auto samples_per_pixel = scene.cam.samples_per_pixel;
   auto background = scene.background;
   auto max_depth = scene.cam.max_depth;
@@ -93,9 +90,6 @@ void Renderer::render_scene(const Scene &scene, Image &image,
     int end_row =
         (t == num_threads - 1) ? cam.image_height : start_row + rows_per_thread;
 
-    // std::async(std::launch::async, render_section, std::ref(image),
-    // start_row, end_row, image_width, image_height, samples_per_pixel,
-    // std::ref(cam), std::ref(background), std::ref(world_bvh), max_depth);
     futures.push_back(std::async(
         std::launch::async, render_section, std::ref(image), start_row, end_row,
         samples_per_pixel, std::ref(cam), std::ref(background),
