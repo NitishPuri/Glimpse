@@ -51,7 +51,6 @@ class aabb {
 
   static const aabb empty, universe;
 
- private:
   interval x, y, z;
 
   void pad_to_minimums() {
@@ -64,3 +63,11 @@ class aabb {
     if (z.size() < delta) z = z.expand(delta);
   }
 };
+
+inline aabb operator+(const aabb& bbox, const vec3& offset) {
+  return aabb(bbox.x + offset.x(), bbox.y + offset.y(), bbox.z + offset.z());
+}
+
+inline aabb operator+(const vec3& offset, const aabb& bbox) {
+  return bbox + offset;
+}

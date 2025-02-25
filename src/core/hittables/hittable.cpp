@@ -4,19 +4,18 @@
 bool translate::hit(const ray& r, const interval& ray_t,
                     hit_record& rec) const {
   ray moved_r(r.origin() - offset, r.direction(), r.time());
-  if (!ptr->hit(moved_r, {ray_t.min, ray_t.max}, rec)) return false;
+  if (!ptr->hit(moved_r, ray_t, rec)) return false;
 
   rec.p += offset;
-  rec.set_face_normal(moved_r, rec.normal);
 
   return true;
 }
 
-rotate_y::rotate_y(shared_ptr<hittable> p, double angle) : ptr(p) {
+rotate_y::rotate_y(shared_ptr<hittable> p, double angle) : object(p) {
   auto radians = degrees_to_radians(angle);
   sin_theta = sin(radians);
   cos_theta = cos(radians);
-  // hasbox = ptr->bounding_box(0, 1, bbox);
+  bbox = object->bounding_box();
 
   point3 min(infinity, infinity, infinity);
   point3 max(-infinity, -infinity, -infinity);
@@ -45,18 +44,25 @@ rotate_y::rotate_y(shared_ptr<hittable> p, double angle) : ptr(p) {
 }
 
 bool rotate_y::hit(const ray& r, const interval& ray_t, hit_record& rec) const {
-  auto origin = r.origin();
-  auto direction = r.direction();
+  // Transform the ray from world space to object space.
+  auto origin =
+      point3((cos_theta * r.origin().x()) - (sin_theta * r.origin().z()),
+             r.origin().y(),
+             (sin_theta * r.origin().x()) + (cos_theta * r.origin().z()));
 
-  origin[0] = cos_theta * r.origin()[0] - sin_theta * r.origin()[2];
-  origin[2] = sin_theta * r.origin()[0] + cos_theta * r.origin()[2];
-
-  direction[0] = cos_theta * r.direction()[0] - sin_theta * r.direction()[2];
-  direction[2] = sin_theta * r.direction()[0] + cos_theta * r.direction()[2];
+  auto direction =
+      vec3((cos_theta * r.direction().x()) - (sin_theta * r.direction().z()),
+           r.direction().y(),
+           (sin_theta * r.direction().x()) + (cos_theta * r.direction().z()));
 
   ray rotated_r(origin, direction, r.time());
 
-  if (!ptr->hit(rotated_r, {ray_t.min, ray_t.max}, rec)) return false;
+  // Determine whether an intersection exists in object space (and if so,
+  // where).
+
+  if (!object->hit(rotated_r, ray_t, rec)) return false;
+
+  // Transform the intersection from object space back to world space.
 
   auto p = rec.p;
   auto normal = rec.normal;

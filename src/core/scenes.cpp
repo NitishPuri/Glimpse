@@ -214,26 +214,23 @@ Scene cornell_box() {
   world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0),
                               vec3(0, 555, 0), white));
 
-  world.add(box(point3(130, 0, 65), point3(295, 165, 230), white));
-  world.add(box(point3(265, 0, 295), point3(430, 330, 460), white));
+  shared_ptr<hittable> box1 =
+      box(point3(0, 0, 0), point3(165, 330, 165), white);
+  box1 = make_shared<rotate_y>(box1, 15);
+  box1 = make_shared<translate>(box1, vec3(265, 0, 295));
+  world.add(box1);
 
-  // shared_ptr<hittable> box1 =
-  //     box(point3(0, 0, 0), point3(165, 330, 165), white);
-  // box1 = make_shared<rotate_y>(box1, 15);
-  // box1 = make_shared<translate>(box1, vec3(265, 0, 295));
-  // world.add(box1);
-
-  // shared_ptr<hittable> box2 =
-  //     box(point3(0, 0, 0), point3(165, 165, 165), white);
-  // box2 = make_shared<rotate_y>(box2, -18);
-  // box2 = make_shared<translate>(box2, vec3(130, 0, 65));
-  // world.add(box2);
+  shared_ptr<hittable> box2 =
+      box(point3(0, 0, 0), point3(165, 165, 165), white);
+  box2 = make_shared<rotate_y>(box2, -18);
+  box2 = make_shared<translate>(box2, vec3(130, 0, 65));
+  world.add(box2);
 
   Scene scene;
   scene.world = world;
   scene.cam.aspect_ratio = 1.0;
   scene.cam.image_width = 600;
-  scene.cam.samples_per_pixel = 150;
+  scene.cam.samples_per_pixel = 50;
   scene.background = color(0, 0, 0);
   scene.cam.lookfrom = point3(278, 278, -800);
   scene.cam.lookat = point3(278, 278, 0);
@@ -302,9 +299,6 @@ Scene final_scene() {
       auto x1 = x0 + w;
       auto y1 = random_double(1, 101);
       auto z1 = z0 + w;
-
-      // boxes1.add(
-      //     make_shared<box>(point3(x0, y0, z0), point3(x1, y1, z1), ground));
     }
   }
 
@@ -335,10 +329,8 @@ Scene final_scene() {
       make_shared<sphere>(point3(0, 0, 0), 5000, make_shared<dielectric>(1.5));
   objects.add(make_shared<constant_medium>(boundary, .0001, color(1, 1, 1)));
 
-  // auto emat = make_shared<lambertian>(make_shared<image_texture>(ROOT
-  // "/res/earthmap.jpg"));
   auto emat =
-      make_shared<lambertian>(make_shared<image_texture>("/res/earthmap.jpg"));
+      make_shared<lambertian>(make_shared<image_texture>("./res/earthmap.jpg"));
   objects.add(make_shared<sphere>(point3(400, 200, 400), 100, emat));
   auto pertext = make_shared<noise_texture>(0.1);
   objects.add(make_shared<sphere>(point3(220, 280, 300), 80,
