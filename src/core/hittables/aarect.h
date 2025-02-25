@@ -15,6 +15,7 @@ class xy_rect : public hittable {
 
   virtual bool bounding_box(double time0, double time1,
                             aabb &output_box) const override;
+  aabb bounding_box() const override { return {}; }
 
  public:
   shared_ptr<material> mp;
@@ -34,6 +35,7 @@ class xz_rect : public hittable {
 
   virtual bool bounding_box(double time0, double time1,
                             aabb &output_box) const override;
+  aabb bounding_box() const override { return {}; }
 
  public:
   shared_ptr<material> mp;
@@ -53,6 +55,7 @@ class yz_rect : public hittable {
 
   virtual bool bounding_box(double time0, double time1,
                             aabb &output_box) const override;
+  aabb bounding_box() const override { return {}; }
 
  public:
   shared_ptr<material> mp;
