@@ -351,18 +351,29 @@ Scene final_scene() {
 Scene material_showcase() {
   hittable_list objects;
 
-  objects.add(
-      make_shared<sphere>(point3(0, 2, 0), 2, make_shared<dielectric>(0.4)));
-
+  // diffuse
   objects.add(make_shared<sphere>(
       point3(-4, 2, -4), 2, make_shared<lambertian>(color(0.5, 0.8, 0.7))));
   objects.add(make_shared<sphere>(
-      point3(0, 2, -4), 2, make_shared<lambertian>(color(0.1, 0.8, 0.5))));
+      point3(2, 2, -6), 2, make_shared<lambertian>(color(0.1, 0.8, 0.5))));
 
+  // metal
   objects.add(make_shared<sphere>(
-      point3(6, 2, 2), 2, make_shared<metal>(color(0.6, 0.2, 0.8), 0.2)));
+      point3(5, 2, -3), 2, make_shared<metal>(color(0.6, 0.2, 0.8), 0.2)));
   objects.add(make_shared<sphere>(
-      point3(4, 2, -4), 2, make_shared<metal>(color(0.3, 0.5, 0.8), 0.01)));
+      point3(-8, 2, -4), 2, make_shared<metal>(color(0.3, 0.5, 0.8), 0.01)));
+
+  // // "air bubble"
+  objects.add(
+      make_shared<sphere>(point3(0, 2, 0), 2, make_shared<dielectric>(1.5)));
+  objects.add(make_shared<sphere>(point3(0, 2, 0), 1.95,
+                                  make_shared<dielectric>(1.0 / 1.5)));
+
+  // glass sphere
+  objects.add(
+      make_shared<sphere>(point3(-4, 2, 0), 2, make_shared<dielectric>(1.33)));
+  objects.add(make_shared<sphere>(point3(-4, 2, 0), 1.4,
+                                  make_shared<dielectric>(1.0 / 1.33)));
 
   // ground
   objects.add(
@@ -372,7 +383,7 @@ Scene material_showcase() {
   Scene scene;
   scene.world = objects;
   scene.background = color(0.7, 0.8, 1.0);
-  scene.lookfrom = point3(0, 10, 15);
+  scene.lookfrom = point3(0, 7, 15);
   scene.lookat = point3(0, 0, 0);
   scene.vfov = 60.0;
 

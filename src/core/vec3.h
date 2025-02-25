@@ -141,7 +141,16 @@ inline vec3 random_in_unit_disk() {
 inline vec3 sample_square() {
   return vec3(random_double() - 0.5, random_double() - 0.5, 0);
 }
+
 // Reflects vector v around normal vector n
+// project v onto n and subtract the result twice to get the reflected vector
+/*
+   \ n /|
+   v\|/ |
+ ----|-------
+     v\ |
+       \|
+*/
 inline vec3 reflect(const vec3 &v, const vec3 &n) {
   return v - 2 * dot(v, n) * n;
 }

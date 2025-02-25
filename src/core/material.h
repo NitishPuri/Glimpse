@@ -4,6 +4,8 @@
 
 class material {
  public:
+  // TODO: Add rand_state to seed randomness for reproducability.
+  //  This can be configured in other places that use randomness as well.
   virtual bool scatter(const ray &r_in, const hit_record &rec,
                        color &attenuation, ray &scattered) const = 0;
 
@@ -54,34 +56,50 @@ class metal : public material {
 
 class dielectric : public material {
  public:
-  dielectric(double index_of_refraction) : ir(index_of_refraction) {}
+  dielectric(double index_of_refraction)
+      : refraction_index(index_of_refraction) {}
 
   virtual bool scatter(const ray &r_in, const hit_record &rec,
                        color &attenuation, ray &scattered) const override {
     attenuation = color(1.0, 1.0, 1.0);
-    double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
+    double refraction_ratio =
+        rec.front_face ? (1.0 / refraction_index) : refraction_index;
+    // double refraction_ratio =
+    //     (!rec.front_face) ? (1.0 / refraction_index) : refraction_index;
 
     vec3 unit_direction = unit_vector(r_in.direction());
     double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
     double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
+    // Snell's law again,
+    // assuming only interaction between vacuum/air and material
+    // refraction_index captures whether we are going in the material or out.
+    // according to snells law sin(theta_r) = sin (theta_i) * n1 / n2
+    // if this term is more than one, refraction cannot occur.
     bool cannot_refract = refraction_ratio * sin_theta > 1.0;
     vec3 direction;
 
     if (cannot_refract ||
-        reflectance(cos_theta, refraction_ratio) > random_double())
+        reflectance(cos_theta, refraction_ratio) > random_double()) {
       direction = reflect(unit_direction, rec.normal);
-    else
+    } else {
       direction = refract(unit_direction, rec.normal, refraction_ratio);
+    }
 
     scattered = ray(rec.p, direction, r_in.time());
     return true;
   }
 
  public:
-  double ir;  // Index o  f refraction
+  // Refractive index in vacuum or air, or the ratio of the material's
+  // refractive index over
+  // the refractive index of the enclosing media
+  double refraction_index;
 
  private:
+  // Glass has reflectivity that varies with aangle, a window looked at a steep
+  // angle becomes a mirror. There is a big ugle equation for that, but
+  // everybody uses a cheap and accurate apprimation by Christophe Schlick
   static double reflectance(double cosine, double ref_idx) {
     // Use Schlick's approximation for reflactance
     auto r0 = (1 - ref_idx) / (1 + ref_idx);

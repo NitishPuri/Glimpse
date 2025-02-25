@@ -12,6 +12,7 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - [pbrt](https://github.com/mmp/pbrt-v4)
 - [nanort](https://github.com/lighttransport/nanort?tab=readme-ov-file)
 - [LuxCore](https://github.com/LuxCoreRender/LuxCore)
+- Smallpaints
 
 
 ### **Refined Roadmap: A Learning-Focused Ray Tracer**  
