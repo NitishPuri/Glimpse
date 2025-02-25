@@ -25,7 +25,9 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
   - [x] Scene selection
   - [x] Samples per pixel (SPP)
   - [x] Max depth
-  - Camera controls
+  - [x] Camera controls (lookat, vfov, aspect ratio)
+  - add mouse controls for camera, something like lux does where rendering restarts on camera move
+  - also, make the workload distribution smarter for async ray tracing to get a wave of ray tracing going at once
   - Scene object params like position, material
   - Use SPP=1 to show as close to real time updates as possible while user is manipulating a control, 
     maybe make this togglable ( in cases even spp = 1 might be too much? ), 
@@ -43,9 +45,9 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - [ ] add unit tests
 - Glass, mirrors
 - dispersion, rainbows, scattering
-- spectral emission/radiance
-- add loaders for ply
-- add loaders for lux and pbrt scenes
+- spectral emission/radiance - ??
+- add loaders for ply - find ready made solutions ?
+- add loaders for lux and pbrt scenes - port their loaders ?
     
 
 #### **2. Scene Management & Experimentation**
@@ -63,16 +65,17 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 
 #### **3. Performance & Algorithmic Enhancements**
 - [ ] **Acceleration Structures**
-  - BVH (Bounding Volume Hierarchy)
+  - [x]  BVH (Bounding Volume Hierarchy)
   - SAH BVH (Surface Area Heuristic)
   - Experiment with alternative structures (KD-Trees, Grids, etc.)  
 - Performance profiling
   - Visual Studio, ? what other options?
 - [ ] **Parallelization Improvements**
   - Thread pools (C++ standard or custom)  
-  - Tiling techniques (Divide image into patches for better caching)  
+  - [x] Tiling techniques (Divide image into patches for better caching)  
   - SIMD (AVX, SSE)  
   - OpenMP & Task-based parallelism
+    - do i need to setup any infra for this? like for cuda?
 - **Raymarching**
     - procedural terrains, SDFs, metaballs for terrain, geometr, clouds, fogs
     - Volumetric effects like fog, haze?

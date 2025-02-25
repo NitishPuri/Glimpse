@@ -348,6 +348,37 @@ Scene final_scene() {
   return scene;
 }
 
+Scene material_showcase() {
+  hittable_list objects;
+
+  objects.add(
+      make_shared<sphere>(point3(0, 2, 0), 2, make_shared<dielectric>(0.4)));
+
+  objects.add(make_shared<sphere>(
+      point3(-4, 2, -4), 2, make_shared<lambertian>(color(0.5, 0.8, 0.7))));
+  objects.add(make_shared<sphere>(
+      point3(0, 2, -4), 2, make_shared<lambertian>(color(0.1, 0.8, 0.5))));
+
+  objects.add(make_shared<sphere>(
+      point3(6, 2, 2), 2, make_shared<metal>(color(0.6, 0.2, 0.8), 0.2)));
+  objects.add(make_shared<sphere>(
+      point3(4, 2, -4), 2, make_shared<metal>(color(0.3, 0.5, 0.8), 0.01)));
+
+  // ground
+  objects.add(
+      make_shared<sphere>(point3(0, -1000, 0), 1000,
+                          make_shared<lambertian>(color(0.8, 0.0, 0.8))));
+
+  Scene scene;
+  scene.world = objects;
+  scene.background = color(0.7, 0.8, 1.0);
+  scene.lookfrom = point3(0, 10, 15);
+  scene.lookat = point3(0, 0, 0);
+  scene.vfov = 60.0;
+
+  return scene;
+}
+
 std::unordered_map<std::string, std::function<Scene()>> Scene::SceneMap = {
     {"random_scene", []() { return random_scene(); }},
     {"two_diffuse_spheres", []() { return two_diffuse_spheres(); }},
@@ -359,10 +390,17 @@ std::unordered_map<std::string, std::function<Scene()>> Scene::SceneMap = {
     {"cornell_smoke", []() { return cornell_smoke(); }},
     {"final_scene", []() { return final_scene(); }},
     {"directions_test", []() { return directions_test(); }},
+    {"material_showcase", []() { return material_showcase(); }},
 };
 
-std::vector<std::string> Scene::SceneNames = {
-    "directions_test",   "two_diffuse_spheres", "random_scene",
-    "two_spheres_check", "two_perlin_spheres",  "earth",
-    "simple_light",      "cornell_box",         "cornell_smoke",
-    "final_scene"};
+std::vector<std::string> Scene::SceneNames = {"directions_test",
+                                              "two_diffuse_spheres",
+                                              "two_spheres_check",
+                                              "material_showcase",
+                                              "earth",
+                                              "two_perlin_spheres",
+                                              "simple_light",
+                                              "cornell_box",
+                                              "random_scene",
+                                              "cornell_smoke",
+                                              "final_scene"};

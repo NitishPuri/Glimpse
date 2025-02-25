@@ -18,22 +18,25 @@ color ray_color(const ray &r, const color &background, const hittable &world,
 
   // If the ray hits nothing, return the background color.
   // Use eps = 0.001 to avoid self-intersections
-  if (!world.hit(r, {0.001, infinity}, rec)) {
-    return background;
+  if (world.hit(r, {0.001, infinity}, rec)) {
+    ray scattered;
+    color attenuation;
+    color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+
+    // Scattered reflectance
+    if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+      return emitted +
+             attenuation * ray_color(scattered, background, world, depth - 1);
+    }
+
+    return emitted;
   }
 
-  ray scattered;
-  color attenuation;
-  color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+  vec3 unit_direction = unit_vector(r.direction());
+  auto t = 0.5 * (unit_direction.y() + 1.0);
+  return (1.0 - t) * color(1.0, 1.0, 1.0) + t * background;
 
-  if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered)) return emitted;
-
-  return emitted +
-         attenuation * ray_color(scattered, background, world, depth - 1);
-
-  // vec3 unit_direction = unit_vector(r.direction());
-  // auto t = 0.5 * (unit_direction.y() + 1.0);
-  // return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
+  // return background;
 }
 
 void render_section(Image &image, int start_row, int end_row, int image_width,
