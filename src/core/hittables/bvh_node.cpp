@@ -7,13 +7,6 @@ inline bool box_compare(const shared_ptr<hittable> a,
   auto a_axis_interval = a->bounding_box().axis_interval(axis_index);
   auto b_axis_interval = b->bounding_box().axis_interval(axis_index);
   return a_axis_interval.min < b_axis_interval.min;
-  // aabb box_a;
-  // aabb box_b;
-
-  // if (!a->bounding_box(0, 0, box_a) || !b->bounding_box(0, 0, box_b))
-  //   std::cerr << "No bounding box in bvh_node constructor.\n";
-
-  // return box_a.min().e[axis] < box_b.min().e[axis];
 }
 
 bool box_x_compare(const shared_ptr<hittable> a, const shared_ptr<hittable> b) {
@@ -30,9 +23,6 @@ bool box_z_compare(const shared_ptr<hittable> a, const shared_ptr<hittable> b) {
 
 bvh_node::bvh_node(std::vector<shared_ptr<hittable>> &objects, size_t start,
                    size_t end, double time0, double time1) {
-  // auto objects =
-  //     src_objects;  // Create a modifiable array of the source scene objects
-
   // Build the bounding box of the span of source objects.
   bbox = aabb::empty;
   for (size_t object_index = start; object_index < end; object_index++)
@@ -40,7 +30,6 @@ bvh_node::bvh_node(std::vector<shared_ptr<hittable>> &objects, size_t start,
 
   int axis = bbox.longest_axis();
 
-  // int axis = random_int(0, 2);
   auto comparator = (axis == 0)   ? box_x_compare
                     : (axis == 1) ? box_y_compare
                                   : box_z_compare;
@@ -66,14 +55,6 @@ bvh_node::bvh_node(std::vector<shared_ptr<hittable>> &objects, size_t start,
   }
 
   bbox = aabb(left->bounding_box(), right->bounding_box());
-
-  // aabb box_left, box_right;
-
-  // if (!left->bounding_box(time0, time1, box_left) ||
-  //     !right->bounding_box(time0, time1, box_right))
-  //   std::cerr << "No bounding box in bvh_node constructor.\n";
-
-  // box = aabb(box_left, box_right);
 }
 
 bool bvh_node::bounding_box(double time0, double time1,

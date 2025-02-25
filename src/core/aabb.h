@@ -48,10 +48,5 @@ class aabb {
   static const aabb empty, universe;
 
  private:
-  // point3 minimum;
-  // point3 maximum;
-
   interval x, y, z;
 };
-
-// aabb surrounding_box(aabb box0, aabb box1);
