@@ -10,36 +10,41 @@ class texture {
 class solid_color : public texture {
  public:
   solid_color() {}
-  solid_color(const color &c) : color_value(c) {}
+  solid_color(const color &c) : albedo(c) {}
 
   solid_color(double red, double green, double blue)
       : solid_color(color(red, green, blue)) {}
 
   color value(double u, double v, const point3 &p) const override {
-    return color_value;
+    return albedo;
   }
 
  private:
-  color color_value;
+  color albedo;
 };
 
 class checker_texture : public texture {
  public:
   checker_texture() {}
-  checker_texture(shared_ptr<texture> _even, shared_ptr<texture> _odd)
-      : even(_even), odd(_odd) {}
-  checker_texture(color c1, color c2)
-      : even(make_shared<solid_color>(c1)), odd(make_shared<solid_color>(c2)) {}
+  checker_texture(double scale, shared_ptr<texture> _even,
+                  shared_ptr<texture> _odd)
+      : inv_scale(1.0 / scale), even(_even), odd(_odd) {}
+  checker_texture(double scale, color c1, color c2)
+      : checker_texture(scale, make_shared<solid_color>(c1),
+                        (make_shared<solid_color>(c2))) {}
 
   color value(double u, double v, const point3 &p) const override {
-    auto sines = sin(10 * p.x()) * sin(10 * p.y()) * sin(10 * p.z());
-    if (sines < 0)
-      return odd->value(u, v, p);
-    else
-      return even->value(u, v, p);
+    auto xInteger = int(std::floor(inv_scale * p.x()));
+    auto yInteger = int(std::floor(inv_scale * p.y()));
+    auto zInteger = int(std::floor(inv_scale * p.z()));
+
+    bool isEven = (xInteger + yInteger + zInteger) % 2 == 0;
+
+    return isEven ? even->value(u, v, p) : odd->value(u, v, p);
   }
 
  private:
+  double inv_scale;
   shared_ptr<texture> odd;
   shared_ptr<texture> even;
 };

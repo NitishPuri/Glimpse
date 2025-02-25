@@ -6,8 +6,8 @@
 Scene random_scene() {
   hittable_list world;
 
-  auto checker =
-      make_shared<checker_texture>(color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
+  auto checker = make_shared<checker_texture>(1, color(0.2, 0.3, 0.1),
+                                              color(0.9, 0.9, 0.9));
   auto ground_material = make_shared<lambertian>(checker);
   world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
 
@@ -114,8 +114,8 @@ Scene two_diffuse_spheres() {
 Scene two_spheres_check() {
   hittable_list objects;
 
-  auto checker =
-      make_shared<checker_texture>(color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
+  auto checker = make_shared<checker_texture>(1, color(0.2, 0.3, 0.1),
+                                              color(0.9, 0.9, 0.9));
 
   objects.add(make_shared<sphere>(point3(0, -10, 0), 10,
                                   make_shared<lambertian>(checker)));
