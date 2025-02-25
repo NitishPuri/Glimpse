@@ -28,6 +28,7 @@
 // hittables
 #include "hittables/hittable_list.h"
 #include "hittables/aarect.h"
+#include "hittables/quad.h"
 #include "hittables/box.h"
 #include "hittables/sphere.h"
 #include "hittables/moving_sphere.h"
