@@ -42,19 +42,19 @@ color ray_color(const ray &r, const color &background, const hittable &world,
   // return background;
 }
 
-void render_section(Image &image, int start_row, int end_row, int image_width,
-                    int image_height, int samples_per_pixel, const camera &cam,
+void render_section(Image &image, int start_row, int end_row,
+                    int samples_per_pixel, const camera &cam,
                     const color &background, const bvh_node &world_bvh,
                     int max_depth, std::atomic<int> *progress = nullptr) {
   double pixel_sample_scale = 1.0 / samples_per_pixel;
   for (int j = end_row - 1; j >= start_row; --j) {
     // for (int j = start_row; j < end_row; ++j) {
-    for (int i = 0; i < image_width; ++i) {
+    for (int i = 0; i < cam.image_width; ++i) {
       color pixel_color(0, 0, 0);
       for (int s = 0; s < samples_per_pixel; ++s) {
         // sample pixels with random offset for anti-aliasing
-        auto u = (i + random_double(-0.5, 0.5)) / (image_width - 1);
-        auto v = (j + random_double(-0.5, 0.5)) / (image_height - 1);
+        auto u = (i + random_double(-0.5, 0.5)) / (cam.image_width - 1);
+        auto v = (j + random_double(-0.5, 0.5)) / (cam.image_height - 1);
         ray r = cam.get_ray(u, v);
         pixel_color += ray_color(r, background, world_bvh, max_depth);
         if (progress) (*progress)++;
@@ -69,8 +69,8 @@ void render_section(Image &image, int start_row, int end_row, int image_width,
 void Renderer::render_scene(const Scene &scene, Image &image,
                             std::atomic<int> *progress) {
   auto aspect_ratio = scene.cam.aspect_ratio;
-  auto image_width = scene.cam.image_width;
-  auto image_height = static_cast<int>(image_width / aspect_ratio);
+  // auto image_width = scene.cam.image_width;
+  // auto image_height = static_cast<int>(image_width / aspect_ratio);
   auto samples_per_pixel = scene.cam.samples_per_pixel;
   auto background = scene.background;
   auto max_depth = scene.cam.max_depth;
@@ -86,20 +86,20 @@ void Renderer::render_scene(const Scene &scene, Image &image,
 #ifdef MULTITHREADED
   const int num_threads = std::thread::hardware_concurrency();
   std::vector<std::future<void>> futures;
-  int rows_per_thread = image_height / num_threads;
+  int rows_per_thread = cam.image_height / num_threads;
 
   for (int t = 0; t < num_threads; ++t) {
     int start_row = t * rows_per_thread;
     int end_row =
-        (t == num_threads - 1) ? image_height : start_row + rows_per_thread;
+        (t == num_threads - 1) ? cam.image_height : start_row + rows_per_thread;
 
     // std::async(std::launch::async, render_section, std::ref(image),
     // start_row, end_row, image_width, image_height, samples_per_pixel,
     // std::ref(cam), std::ref(background), std::ref(world_bvh), max_depth);
     futures.push_back(std::async(
         std::launch::async, render_section, std::ref(image), start_row, end_row,
-        image_width, image_height, samples_per_pixel, std::ref(cam),
-        std::ref(background), std::ref(world_bvh), max_depth, progress));
+        samples_per_pixel, std::ref(cam), std::ref(background),
+        std::ref(world_bvh), max_depth, progress));
   }
 
   for (auto &f : futures) {

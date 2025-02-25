@@ -23,6 +23,8 @@ class camera {
   // }
 
   void initialize() {
+    image_height = static_cast<int>(image_width / aspect_ratio);
+
     auto theta = degrees_to_radians(vfov);
     auto h = tan(theta / 2);
     auto viewport_height = 2.0 * h;
@@ -73,6 +75,9 @@ class camera {
       10.0f;  // distance from camera lookfrom point to plane of perfect focus
 
   double time0, time1;  // shutter open/close times
+
+  int image_height = 0;
+
  private:
   point3 origin;
   point3 lower_left_corner;
