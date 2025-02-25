@@ -68,8 +68,6 @@ void Renderer::render_scene(const Scene &scene, Image &image,
   auto background = scene.background;
   auto max_depth = scene.cam.max_depth;
 
-  double time0 = 0.0;
-  double time1 = 1.0;
   camera cam = scene.cam;
   cam.initialize();
   auto world_bvh = bvh_node(scene.world, 0, 1);

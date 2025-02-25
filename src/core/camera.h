@@ -100,7 +100,7 @@ class camera {
   float focus_distance =
       10.0f;  // distance from camera lookfrom point to plane of perfect focus
 
-  double time0, time1;  // shutter open/close times
+  double time0 = 0.0, time1 = 1.0;  // default shutter open/close times
 
   int image_height = 0;
   double pixel_samples_scale;  // Color scale factor for a sum of pixel samples
