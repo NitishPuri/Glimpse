@@ -17,19 +17,25 @@ class camera {
  public:
   void initialize() {
     image_height = static_cast<int>(image_width / aspect_ratio);
+    image_height = (image_height < 1) ? 1 : image_height;
 
+    pixel_samples_scale = 1.0 / samples_per_pixel;
+    origin = lookfrom;
+
+    // Determine viewport dimensions.
     auto theta = degrees_to_radians(vfov);
     auto h = tan(theta / 2);
-    auto viewport_height = 2.0 * h;
+    auto viewport_height = 2.0 * h * focus_distance;
     auto viewport_width = aspect_ratio * viewport_height;
 
+    // Calculate the u,v,w unit basis vectors for the camera coordinate frame.
     w = unit_vector(lookfrom - lookat);
     u = unit_vector(cross(vup, w));
     v = cross(w, u);
 
-    origin = lookfrom;
-    horizontal = focus_distance * viewport_width * u;
-    vertical = focus_distance * viewport_height * v;
+    horizontal = viewport_width * u;
+    vertical = viewport_height * v;
+
     lower_left_corner =
         origin - horizontal / 2 - vertical / 2 - focus_distance * w;
 
@@ -67,6 +73,7 @@ class camera {
   double time0, time1;  // shutter open/close times
 
   int image_height = 0;
+  double pixel_samples_scale;  // Color scale factor for a sum of pixel samples
 
  private:
   point3 origin;

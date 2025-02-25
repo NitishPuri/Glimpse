@@ -38,28 +38,24 @@ color ray_color(const ray &r, const color &background, const hittable &world,
   vec3 unit_direction = unit_vector(r.direction());
   auto t = 0.5 * (unit_direction.y() + 1.0);
   return (1.0 - t) * color(1.0, 1.0, 1.0) + t * background;
-
-  // return background;
 }
 
-void render_section(Image &image, int start_row, int end_row,
-                    int samples_per_pixel, const camera &cam,
+void render_section(Image &image, int start_row, int end_row, const camera &cam,
                     const color &background, const bvh_node &world_bvh,
-                    int max_depth, std::atomic<int> *progress = nullptr) {
-  double pixel_sample_scale = 1.0 / samples_per_pixel;
+                    std::atomic<int> *progress = nullptr) {
   for (int j = end_row - 1; j >= start_row; --j) {
     for (int i = 0; i < cam.image_width; ++i) {
       color pixel_color(0, 0, 0);
-      for (int s = 0; s < samples_per_pixel; ++s) {
+      for (int s = 0; s < cam.samples_per_pixel; ++s) {
         // sample pixels with random offset for anti-aliasing
         auto u = (i + random_double(-0.5, 0.5)) / (cam.image_width - 1);
         auto v = (j + random_double(-0.5, 0.5)) / (cam.image_height - 1);
         ray r = cam.get_ray(u, v);
-        pixel_color += ray_color(r, background, world_bvh, max_depth);
+        pixel_color += ray_color(r, background, world_bvh, cam.max_depth);
         if (progress) (*progress)++;
       }
       // gamma correction
-      pixel_color = sqrt(pixel_color * pixel_sample_scale);
+      pixel_color = sqrt(pixel_color * cam.pixel_samples_scale);
       image.set(i, j, pixel_color);
     }
   }
@@ -92,8 +88,7 @@ void Renderer::render_scene(const Scene &scene, Image &image,
 
     futures.push_back(std::async(
         std::launch::async, render_section, std::ref(image), start_row, end_row,
-        samples_per_pixel, std::ref(cam), std::ref(background),
-        std::ref(world_bvh), max_depth, progress));
+        std::ref(cam), std::ref(background), std::ref(world_bvh), progress));
   }
 
   for (auto &f : futures) {
