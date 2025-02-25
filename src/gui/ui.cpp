@@ -49,7 +49,8 @@ void UIRenderer::renderUI(ImGuiParams& gui_params, RayTracer& raytracer,
       const bool is_selected = (gui_params.current_scene == n);
       if (ImGui::Selectable(Scene::SceneNames[n].c_str(), is_selected)) {
         gui_params.current_scene = n;
-        if (window) window->setupScene();
+        raytracer.setupScene(logger, gl_res, gui_params.current_scene,
+                             gui_params.lookFrom, gui_params.lookAt);
         raytracer.renderSceneAsync(logger, gl_res);
       }
       if (is_selected) ImGui::SetItemDefaultFocus();
@@ -79,11 +80,11 @@ void UIRenderer::renderUI(ImGuiParams& gui_params, RayTracer& raytracer,
     float progress = float(raytracer.progress.load()) / float(totalPixels);
     ImGui::ProgressBar(progress, ImVec2(-1, 0), "Progress");
     // Call updateFramebuffer from AppWindow
-    if (window) window->updateFramebuffer(window->RayTracer.image.data);
+    gl_res.updateFramebuffer(raytracer.image.data, logger);
 
   } else if (raytracer.status == RayTracer::DONE) {
     // Call updateFramebuffer from AppWindow
-    if (window) window->updateFramebuffer(window->RayTracer.image.data);
+    gl_res.updateFramebuffer(raytracer.image.data, logger);
     ImGui::Text("Done");
     raytracer.status = RayTracer::IDLE;
     raytracer.progress = 0;

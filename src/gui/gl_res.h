@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "glad/glad.h"
 //
 #include "GLFW/glfw3.h"
@@ -35,5 +37,13 @@ struct GLResources {
       return true;
     }
     return false;
+  }
+
+  void updateFramebuffer(const std::vector<uint8_t>& imageData,
+                         Logger& logger) {
+    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, renderWidth, renderHeight, GL_RGB,
+                    GL_UNSIGNED_BYTE, imageData.data());
+    if (checkGLError("glTexSubImage2D", logger)) return;
   }
 };

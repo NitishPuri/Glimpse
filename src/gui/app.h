@@ -47,7 +47,8 @@ class AppWindow {
 
     // Setup Raytracer
     if (glfwGetCurrentContext() == window) {
-      setupScene();
+      raytracer.setupScene(logger, GLResources, ImGuiParams.current_scene,
+                           ImGuiParams.lookFrom, ImGuiParams.lookAt);
     } else {
       logger.log("Failed to initialize OpenGL context");
       return -1;
@@ -67,11 +68,11 @@ class AppWindow {
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
 
-      ui.renderUI(ImGuiParams, RayTracer, GLResources, logger);
+      ui.renderUI(ImGuiParams, raytracer, GLResources, logger);
 
       if (firstFrame) {
         firstFrame = false;
-        RayTracer.renderSceneAsync(logger, GLResources);
+        raytracer.renderSceneAsync(logger, GLResources);
       }
 
       glClearColor(.1f, .1f, .1f, 1.0f);  // Set background color to dark gray
@@ -89,45 +90,7 @@ class AppWindow {
     glfwTerminate();
   }
 
-  void setupScene() {
-    // Ensure current_scene is within valid range
-    if (ImGuiParams.current_scene < 0 ||
-        ImGuiParams.current_scene >= Scene::SceneNames.size()) {
-      logger.log("Invalid scene index: ", ImGuiParams.current_scene);
-      return;
-    }
-
-    logger.log("Setting up scene ... ", ImGuiParams.current_scene, " ",
-               Scene::SceneNames[ImGuiParams.current_scene]);
-    RayTracer.scene =
-        Scene::SceneMap[Scene::SceneNames[ImGuiParams.current_scene]]();
-
-    GLResources.renderWidth = RayTracer.scene.cam.image_width;
-    GLResources.renderHeight = static_cast<int>(
-        RayTracer.scene.cam.image_width / RayTracer.scene.cam.aspect_ratio);
-    RayTracer.image.initialize(GLResources.renderWidth,
-                               GLResources.renderHeight);
-
-    auto vec3tofloat = [](const vec3& v, float f[3]) {
-      f[0] = static_cast<float>(v[0]);
-      f[1] = static_cast<float>(v[1]);
-      f[2] = static_cast<float>(v[2]);
-    };
-    vec3tofloat(RayTracer.scene.cam.lookfrom, ImGuiParams.lookFrom);
-    vec3tofloat(RayTracer.scene.cam.lookat, ImGuiParams.lookAt);
-
-    GLResources.setupFramebuffer(logger);
-  }
-
-  void updateFramebuffer(const std::vector<uint8_t>& imageData) {
-    glBindTexture(GL_TEXTURE_2D, GLResources.framebufferTexture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GLResources.renderWidth,
-                    GLResources.renderHeight, GL_RGB, GL_UNSIGNED_BYTE,
-                    imageData.data());
-    if (GLResources.checkGLError("glTexSubImage2D", logger)) return;
-  }
-
-  RayTracer RayTracer;
+  RayTracer raytracer;
   GLResources GLResources;
   ImGuiParams ImGuiParams;
   UIRenderer ui;
