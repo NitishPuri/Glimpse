@@ -152,8 +152,7 @@ Scene two_perlin_spheres() {
 }
 
 Scene earth() {
-  // auto earth_texture = make_shared<image_texture>(ROOT "/res/earthmap.jpg");
-  auto earth_texture = make_shared<image_texture>("/res/earthmap.jpg");
+  auto earth_texture = make_shared<image_texture>("./res/earthmap.jpg");
   auto earth_surface = make_shared<lambertian>(earth_texture);
   auto globe = make_shared<sphere>(point3(0, 0, 0), 2, earth_surface);
 
