@@ -1,11 +1,9 @@
 #include "sphere.h"
 
 bool sphere::hit(const ray &r, const interval &ray_t, hit_record &rec) const {
-  vec3 oc = r.origin() - center;
+  vec3 oc = center - r.origin();
   auto a = r.direction().length_squared();
-  // TODO: Check this, why is -1 required, should the ray direction be reversed
-  // in all places?
-  auto half_b = dot(oc, -1 * r.direction());
+  auto half_b = dot(oc, r.direction());
   auto c = oc.length_squared() - radius * radius;
 
   auto discriminant = half_b * half_b - a * c;
