@@ -24,6 +24,16 @@ class constant_medium : public hittable {
     return boundary->bounding_box(time0, time1, output_box);
   }
 
+  aabb bounding_box() const override {
+    // ??
+    aabb output_box;
+    if (boundary->bounding_box(0, 1, output_box)) {
+      return output_box;
+    } else {
+      return aabb(point3(0, 0, 0), point3(0, 0, 0));
+    }
+  }
+
  public:
   shared_ptr<hittable> boundary;
   shared_ptr<material> phase_function;

@@ -16,7 +16,7 @@ bool translate::bounding_box(double time0, double time1,
                              aabb& output_box) const {
   if (!ptr->bounding_box(time0, time1, output_box)) return false;
 
-  output_box = aabb(output_box.min() + offset, output_box.max() + offset);
+  // output_box = aabb(output_box.min() + offset, output_box.max() + offset);
 
   return true;
 }
