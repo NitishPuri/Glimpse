@@ -35,9 +35,10 @@ color ray_color(const ray &r, const color &background, const hittable &world,
     return emitted;
   }
 
-  vec3 unit_direction = unit_vector(r.direction());
-  auto t = 0.5 * (unit_direction.y() + 1.0);
-  return (1.0 - t) * color(1.0, 1.0, 1.0) + t * background;
+  return background;
+  // vec3 unit_direction = unit_vector(r.direction());
+  // auto t = 0.5 * (unit_direction.y() + 1.0);
+  // return (1.0 - t) * color(1.0, 1.0, 1.0) + t * background;
 }
 
 void render_section(Image &image, int start_row, int end_row, const camera &cam,

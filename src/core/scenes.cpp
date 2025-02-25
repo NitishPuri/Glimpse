@@ -176,7 +176,9 @@ Scene simple_light() {
                                   make_shared<lambertian>(pertext)));
 
   auto difflight = make_shared<diffuse_light>(color(4, 4, 4));
-  objects.add(make_shared<xy_rect>(3, 5, 1, 3, -2, difflight));
+  objects.add(make_shared<sphere>(point3(0, 7, 0), 2, difflight));
+  objects.add(make_shared<quad>(point3{3, 1, -2}, vec3{2, 0, 0}, vec3{0, 2, 0},
+                                difflight));
 
   Scene scene;
   scene.world = objects;
@@ -190,37 +192,48 @@ Scene simple_light() {
 }
 
 Scene cornell_box() {
-  hittable_list objects;
+  hittable_list world;
 
   auto red = make_shared<lambertian>(color(.65, .05, .05));
   auto white = make_shared<lambertian>(color(.73, .73, .73));
   auto green = make_shared<lambertian>(color(.12, .45, .15));
   auto light = make_shared<diffuse_light>(color(15, 15, 15));
 
-  objects.add(make_shared<yz_rect>(0, 555, 0, 555, 555, green));
-  objects.add(make_shared<yz_rect>(0, 555, 0, 555, 0, red));
-  objects.add(make_shared<xz_rect>(213, 343, 227, 332, 554, light));
-  objects.add(make_shared<xz_rect>(0, 555, 0, 555, 0, white));
-  objects.add(make_shared<xz_rect>(0, 555, 0, 555, 555, white));
-  objects.add(make_shared<xy_rect>(0, 555, 0, 555, 555, white));
+  world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0),
+                              vec3(0, 0, 555), green));
 
-  shared_ptr<hittable> box1 =
-      make_shared<box>(point3(0, 0, 0), point3(165, 330, 165), white);
-  box1 = make_shared<rotate_y>(box1, 15);
-  box1 = make_shared<translate>(box1, vec3(265, 0, 295));
-  objects.add(box1);
+  world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555),
+                              red));
+  world.add(make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0),
+                              vec3(0, 0, -105), light));
 
-  shared_ptr<hittable> box2 =
-      make_shared<box>(point3(0, 0, 0), point3(165, 165, 165), white);
-  box2 = make_shared<rotate_y>(box2, -18);
-  box2 = make_shared<translate>(box2, vec3(130, 0, 65));
-  objects.add(box2);
+  world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555),
+                              white));
+  world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0),
+                              vec3(0, 0, -555), white));
+  world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0),
+                              vec3(0, 555, 0), white));
+
+  world.add(box(point3(130, 0, 65), point3(295, 165, 230), white));
+  world.add(box(point3(265, 0, 295), point3(430, 330, 460), white));
+
+  // shared_ptr<hittable> box1 =
+  //     box(point3(0, 0, 0), point3(165, 330, 165), white);
+  // box1 = make_shared<rotate_y>(box1, 15);
+  // box1 = make_shared<translate>(box1, vec3(265, 0, 295));
+  // world.add(box1);
+
+  // shared_ptr<hittable> box2 =
+  //     box(point3(0, 0, 0), point3(165, 165, 165), white);
+  // box2 = make_shared<rotate_y>(box2, -18);
+  // box2 = make_shared<translate>(box2, vec3(130, 0, 65));
+  // world.add(box2);
 
   Scene scene;
-  scene.world = objects;
+  scene.world = world;
   scene.cam.aspect_ratio = 1.0;
   scene.cam.image_width = 600;
-  scene.cam.samples_per_pixel = 200;
+  scene.cam.samples_per_pixel = 150;
   scene.background = color(0, 0, 0);
   scene.cam.lookfrom = point3(278, 278, -800);
   scene.cam.lookat = point3(278, 278, 0);
@@ -237,20 +250,26 @@ Scene cornell_smoke() {
   auto green = make_shared<lambertian>(color(.12, .45, .15));
   auto light = make_shared<diffuse_light>(color(7, 7, 7));
 
-  objects.add(make_shared<yz_rect>(0, 555, 0, 555, 555, green));
-  objects.add(make_shared<yz_rect>(0, 555, 0, 555, 0, red));
-  objects.add(make_shared<xz_rect>(113, 443, 127, 432, 554, light));
-  objects.add(make_shared<xz_rect>(0, 555, 0, 555, 555, white));
-  objects.add(make_shared<xz_rect>(0, 555, 0, 555, 0, white));
-  objects.add(make_shared<xy_rect>(0, 555, 0, 555, 555, white));
+  objects.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0),
+                                vec3(0, 0, 555), green));
+  objects.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0),
+                                vec3(0, 0, 555), red));
+  objects.add(make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0),
+                                vec3(0, 0, -105), light));
+  objects.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0),
+                                vec3(0, 0, 555), white));
+  objects.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0),
+                                vec3(0, 0, -555), white));
+  objects.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0),
+                                vec3(0, 555, 0), white));
 
   shared_ptr<hittable> box1 =
-      make_shared<box>(point3(0, 0, 0), point3(165, 330, 165), white);
+      box(point3(0, 0, 0), point3(165, 330, 165), white);
   box1 = make_shared<rotate_y>(box1, 15);
   box1 = make_shared<translate>(box1, vec3(265, 0, 295));
 
   shared_ptr<hittable> box2 =
-      make_shared<box>(point3(0, 0, 0), point3(165, 165, 165), white);
+      box(point3(0, 0, 0), point3(165, 165, 165), white);
   box2 = make_shared<rotate_y>(box2, -18);
   box2 = make_shared<translate>(box2, vec3(130, 0, 65));
 
@@ -284,8 +303,8 @@ Scene final_scene() {
       auto y1 = random_double(1, 101);
       auto z1 = z0 + w;
 
-      boxes1.add(
-          make_shared<box>(point3(x0, y0, z0), point3(x1, y1, z1), ground));
+      // boxes1.add(
+      //     make_shared<box>(point3(x0, y0, z0), point3(x1, y1, z1), ground));
     }
   }
 
@@ -294,7 +313,7 @@ Scene final_scene() {
   objects.add(make_shared<bvh_node>(boxes1, 0, 1));
 
   auto light = make_shared<diffuse_light>(color(7, 7, 7));
-  objects.add(make_shared<xz_rect>(123, 423, 147, 412, 554, light));
+  // objects.add(make_shared<xz_rect>(123, 423, 147, 412, 554, light));
 
   auto center1 = point3(400, 400, 200);
   auto center2 = center1 + vec3(30, 0, 0);
@@ -396,6 +415,46 @@ Scene material_showcase() {
   return scene;
 }
 
+Scene quads() {
+  hittable_list world;
+
+  // Materials
+  auto left_red = make_shared<lambertian>(color(1.0, 0.2, 0.2));
+  auto back_green = make_shared<lambertian>(color(0.2, 1.0, 0.2));
+  auto right_blue = make_shared<lambertian>(color(0.2, 0.2, 1.0));
+  auto upper_orange = make_shared<lambertian>(color(1.0, 0.5, 0.0));
+  auto lower_teal = make_shared<lambertian>(color(0.2, 0.8, 0.8));
+
+  // Quads
+  world.add(make_shared<quad>(point3(-3, -2, 5), vec3(0, 0, -4), vec3(0, 4, 0),
+                              left_red));
+  world.add(make_shared<quad>(point3(-2, -2, 0), vec3(4, 0, 0), vec3(0, 4, 0),
+                              back_green));
+  world.add(make_shared<quad>(point3(3, -2, 1), vec3(0, 0, 4), vec3(0, 4, 0),
+                              right_blue));
+  world.add(make_shared<quad>(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4),
+                              upper_orange));
+  world.add(make_shared<quad>(point3(-2, -3, 5), vec3(4, 0, 0), vec3(0, 0, -4),
+                              lower_teal));
+
+  Scene scene;
+  scene.world = world;
+  scene.background = color(0.7, 0.8, 1.0);
+  scene.cam.aspect_ratio = 1.0;
+  scene.cam.image_width = 400;
+  scene.cam.samples_per_pixel = 100;
+  scene.cam.max_depth = 50;
+
+  scene.cam.vfov = 80;
+  scene.cam.lookfrom = point3(0, 0, 9);
+  scene.cam.lookat = point3(0, 0, 0);
+  scene.cam.vup = vec3(0, 1, 0);
+
+  scene.cam.defocus_angle = 0;
+
+  return scene;
+}
+
 std::unordered_map<std::string, std::function<Scene()>> Scene::SceneMap = {
     {"random_scene", []() { return random_scene(); }},
     {"two_diffuse_spheres", []() { return two_diffuse_spheres(); }},
@@ -408,6 +467,7 @@ std::unordered_map<std::string, std::function<Scene()>> Scene::SceneMap = {
     {"final_scene", []() { return final_scene(); }},
     {"directions_test", []() { return directions_test(); }},
     {"material_showcase", []() { return material_showcase(); }},
+    {"quads", []() { return quads(); }},
 };
 
 std::vector<std::string> Scene::SceneNames = {"directions_test",
@@ -416,6 +476,7 @@ std::vector<std::string> Scene::SceneNames = {"directions_test",
                                               "material_showcase",
                                               "earth",
                                               "two_perlin_spheres",
+                                              "quads",
                                               "simple_light",
                                               "cornell_box",
                                               "random_scene",

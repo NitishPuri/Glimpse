@@ -11,7 +11,10 @@ class hittable_list : public hittable {
   }
 
   void clear() { objects.clear(); }
-  void add(std::shared_ptr<hittable> object) { objects.push_back(object); }
+  void add(std::shared_ptr<hittable> object) {
+    objects.push_back(object);
+    bbox = aabb(bbox, object->bounding_box());
+  }
 
   virtual bool hit(const ray& r, const interval& ray_t,
                    hit_record& rec) const override;
