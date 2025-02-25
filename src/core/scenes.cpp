@@ -24,7 +24,7 @@ Scene random_scene() {
           auto albedo = color::random() * color::random();
           sphere_material = make_shared<lambertian>(albedo);
           auto center2 = center + vec3(0, random_double(0, 0.5), 0);
-          world.add(make_shared<moving_sphere>(center, center2, 0.0, 1.0, 0.2,
+          world.add(make_shared<moving_sphere>(center, center2, 0.2,
                                                sphere_material));
         } else if (choose_mat < 0.95) {
           // metal
@@ -300,8 +300,8 @@ Scene final_scene() {
   auto center1 = point3(400, 400, 200);
   auto center2 = center1 + vec3(30, 0, 0);
   auto moving_sphere_material = make_shared<lambertian>(color(0.7, 0.3, 0.1));
-  objects.add(make_shared<moving_sphere>(center1, center2, 0, 1, 50,
-                                         moving_sphere_material));
+  objects.add(
+      make_shared<moving_sphere>(center1, center2, 50, moving_sphere_material));
 
   objects.add(make_shared<sphere>(point3(260, 150, 45), 50,
                                   make_shared<dielectric>(1.5)));
@@ -375,6 +375,11 @@ Scene material_showcase() {
       make_shared<sphere>(point3(-4, 2, 0), 2, make_shared<dielectric>(1.33)));
   objects.add(make_shared<sphere>(point3(-4, 2, 0), 1.4,
                                   make_shared<dielectric>(1.0 / 1.33)));
+
+  // bouncing balls
+  objects.add(make_shared<moving_sphere>(
+      point3(-8, 2, 2), point3(-8, 2.2, 2), 2,
+      make_shared<metal>(color(0.6, 0.2, 0.8), 0.04)));
 
   // ground
   objects.add(
