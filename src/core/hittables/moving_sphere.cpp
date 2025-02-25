@@ -29,15 +29,3 @@ bool moving_sphere::hit(const ray &r, const interval &ray_t,
 
   return true;
 }
-
-bool moving_sphere::bounding_box(double _time0, double _time1,
-                                 aabb &output_box) const {
-  auto center0 = center.at(_time0);
-  auto center1 = center.at(_time1);
-  aabb box0(center0 - vec3(radius, radius, radius),
-            center0 + vec3(radius, radius, radius));
-  aabb box1(center1 - vec3(radius, radius, radius),
-            center1 + vec3(radius, radius, radius));
-  output_box = aabb(box0, box1);
-  return true;
-}

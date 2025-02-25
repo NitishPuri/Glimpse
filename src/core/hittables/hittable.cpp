@@ -12,20 +12,11 @@ bool translate::hit(const ray& r, const interval& ray_t,
   return true;
 }
 
-bool translate::bounding_box(double time0, double time1,
-                             aabb& output_box) const {
-  if (!ptr->bounding_box(time0, time1, output_box)) return false;
-
-  // output_box = aabb(output_box.min() + offset, output_box.max() + offset);
-
-  return true;
-}
-
 rotate_y::rotate_y(shared_ptr<hittable> p, double angle) : ptr(p) {
   auto radians = degrees_to_radians(angle);
   sin_theta = sin(radians);
   cos_theta = cos(radians);
-  hasbox = ptr->bounding_box(0, 1, bbox);
+  // hasbox = ptr->bounding_box(0, 1, bbox);
 
   point3 min(infinity, infinity, infinity);
   point3 max(-infinity, -infinity, -infinity);

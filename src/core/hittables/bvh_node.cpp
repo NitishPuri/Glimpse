@@ -57,12 +57,6 @@ bvh_node::bvh_node(std::vector<shared_ptr<hittable>> &objects, size_t start,
   bbox = aabb(left->bounding_box(), right->bounding_box());
 }
 
-bool bvh_node::bounding_box(double time0, double time1,
-                            aabb &output_box) const {
-  output_box = bbox;
-  return true;
-}
-
 bool bvh_node::hit(const ray &r, const interval &ray_t, hit_record &rec) const {
   if (!bbox.hit(r, ray_t)) return false;
 

@@ -20,9 +20,6 @@ class bvh_node : public hittable {
 
   bool hit(const ray &r, const interval &ray_t, hit_record &rec) const override;
 
-  bool bounding_box(double time0, double time1,
-                    aabb &output_box) const override;
-
   aabb bounding_box() const override { return bbox; }
 
  public:

@@ -19,19 +19,9 @@ class constant_medium : public hittable {
   virtual bool hit(const ray &r, const interval &ray_t,
                    hit_record &rec) const override;
 
-  virtual bool bounding_box(double time0, double time1,
-                            aabb &output_box) const override {
-    return boundary->bounding_box(time0, time1, output_box);
-  }
-
   aabb bounding_box() const override {
-    // ??
     aabb output_box;
-    if (boundary->bounding_box(0, 1, output_box)) {
-      return output_box;
-    } else {
-      return aabb(point3(0, 0, 0), point3(0, 0, 0));
-    }
+    return output_box;
   }
 
  public:

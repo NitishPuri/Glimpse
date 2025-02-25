@@ -16,19 +16,3 @@ bool hittable_list::hit(const ray& r, const interval& ray_t,
 
   return hit_anything;
 }
-
-bool hittable_list::bounding_box(double time0, double time1,
-                                 aabb& output_box) const {
-  if (objects.empty()) return false;
-
-  aabb temp_box;
-  bool first_box = true;
-
-  for (const auto& object : objects) {
-    if (!object->bounding_box(time0, time1, temp_box)) return false;
-    output_box = first_box ? temp_box : aabb(output_box, temp_box);
-    first_box = false;
-  }
-
-  return true;
-}

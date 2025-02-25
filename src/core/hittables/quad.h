@@ -22,11 +22,6 @@ class quad : public hittable {
     bbox = aabb(bbox_diagonal1, bbox_diagonal2);
   }
 
-  virtual bool bounding_box(double time0, double time1,
-                            aabb& output_box) const override {
-    return false;
-  };
-
   aabb bounding_box() const override { return bbox; }
 
   bool hit(const ray& r, const interval& ray_t,
