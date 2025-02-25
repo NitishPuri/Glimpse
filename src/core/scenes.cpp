@@ -355,7 +355,8 @@ Scene material_showcase() {
   objects.add(make_shared<sphere>(
       point3(-4, 2, -4), 2, make_shared<lambertian>(color(0.5, 0.8, 0.7))));
   objects.add(make_shared<sphere>(
-      point3(2, 2, -6), 2, make_shared<lambertian>(color(0.1, 0.8, 0.5))));
+      point3(2, 2, -6), 2,
+      make_shared<lambertian>(make_shared<noise_texture>(4))));
 
   // metal
   objects.add(make_shared<sphere>(

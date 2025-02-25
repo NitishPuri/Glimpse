@@ -1,25 +1,17 @@
 #pragma once
 
-#include "glimpse.h"
+#include "vec3.h"
 
 class perlin {
  public:
   perlin() {
-    ranvec = new vec3[point_count];
     for (int i = 0; i < point_count; ++i) {
-      ranvec[i] = unit_vector(vec3::random(-1, 1));
+      randvec[i] = unit_vector(vec3::random(-1, 1));
     }
 
-    perm_x = perlin_generate_perm();
-    perm_y = perlin_generate_perm();
-    perm_z = perlin_generate_perm();
-  }
-
-  ~perlin() {
-    delete[] ranvec;
-    delete[] perm_x;
-    delete[] perm_y;
-    delete[] perm_z;
+    perlin_generate_perm(perm_x);
+    perlin_generate_perm(perm_y);
+    perlin_generate_perm(perm_z);
   }
 
   double noise(const point3 &p) const {
@@ -39,8 +31,8 @@ class perlin {
       for (int dj = 0; dj < 2; dj++)
         for (int dk = 0; dk < 2; dk++)
           c[di][dj][dk] =
-              ranvec[perm_x[(i + di) & 255] ^ perm_y[(j + dj) & 255] ^
-                     perm_z[(k + dk) & 255]];
+              randvec[perm_x[(i + di) & 255] ^ perm_y[(j + dj) & 255] ^
+                      perm_z[(k + dk) & 255]];
 
     return perlin_interp(c, u, v, w);
   }
@@ -61,10 +53,10 @@ class perlin {
 
  private:
   static const int point_count = 256;
-  vec3 *ranvec;
-  int *perm_x;
-  int *perm_y;
-  int *perm_z;
+  vec3 randvec[point_count];
+  int perm_x[point_count];
+  int perm_y[point_count];
+  int perm_z[point_count];
 
   static double trilinear_interp(double c[2][2][2], double u, double v,
                                  double w) {
@@ -96,16 +88,12 @@ class perlin {
     return accum;
   }
 
-  static int *perlin_generate_perm() {
-    auto p = new int[point_count];
-
-    for (int i = 0; i < perlin::point_count; ++i) {
+  static void perlin_generate_perm(int *p) {
+    for (int i = 0; i < point_count; i++) {
       p[i] = i;
     }
 
     permute(p, point_count);
-
-    return p;
   }
 
   static void permute(int *p, int n) {
@@ -124,8 +112,8 @@ class noise_texture : public texture {
   virtual color value(double u, double v, const point3 &p) const override {
     // return color(1, 1, 1) * 0.5 * (1.0 + noise.noise(scale * p));
     // return color(1, 1, 1) * noise.turb(scale * p);
-    return color(1, 1, 1) * 0.5 *
-           (1.0 + sin(scale * p.z() + 10 * noise.turb(p)));
+    return color(.5, .5, .5) *
+           (1 + std::sin(scale * p.z() + 10 * noise.turb(p, 7)));
   }
 
  private:
