@@ -8,9 +8,10 @@ bool constant_medium::hit(const ray &r, const interval &ray_t,
 
   hit_record rec1, rec2;
 
-  if (!boundary->hit(r, {-infinity, infinity}, rec1)) return false;
+  if (!boundary->hit(r, interval::universe, rec1)) return false;
 
-  if (!boundary->hit(r, {rec1.t + 0.0001, infinity}, rec2)) return false;
+  if (!boundary->hit(r, interval{rec1.t + 0.0001, infinity}, rec2))
+    return false;
 
   if (debugging)
     std::cerr << "\nray_t.min=" << rec1.t << ", ray_t.max=" << rec2.t << '\n';
