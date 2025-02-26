@@ -22,7 +22,10 @@ class camera {
     image_height = static_cast<int>(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
 
-    pixel_samples_scale = 1.0 / samples_per_pixel;
+    sqrt_spp = int(std::sqrt(samples_per_pixel));
+    pixel_samples_scale = 1.0 / (sqrt_spp * sqrt_spp);
+    recip_sqrt_spp = 1.0 / sqrt_spp;
+
     origin = lookfrom;
 
     // Determine viewport dimensions.
@@ -41,16 +44,14 @@ class camera {
     horizontal = viewport_width * u;
     vertical = viewport_height * v;  // TODO: should this be inverted ?
 
-    lower_left_corner =
-        origin - horizontal / 2 - vertical / 2 - focus_distance * w;
+    lower_left_corner = origin - horizontal / 2 - vertical / 2 - focus_distance * w;
 
 #if DEFOCUS_IMPL == 0
     lens_radius = aperture / 2;
 #else
     // Calculate the camera defocus disk basis vectors.
     defocus_angle = aperture;
-    auto defocus_radius =
-        focus_distance * std::tan(degrees_to_radians(defocus_angle / 2));
+    auto defocus_radius = focus_distance * std::tan(degrees_to_radians(defocus_angle / 2));
     defocus_disk_u = u * defocus_radius;
     defocus_disk_v = v * defocus_radius;
 #endif
@@ -69,8 +70,7 @@ class camera {
     auto ray_origin = (defocus_angle <= 0) ? origin : defocus_disk_sample();
 #endif
 
-    auto ray_direction =
-        lower_left_corner + s * horizontal + t * vertical - ray_origin;
+    auto ray_direction = lower_left_corner + s * horizontal + t * vertical - ray_origin;
 
     // Random time for motion blur?
     return ray(ray_origin, ray_direction, random_double(time0, time1));
@@ -87,7 +87,10 @@ class camera {
  public:
   double aspect_ratio = 16.0 / 9.0;  // Ratio of image width over height
   int image_width = 800;             // rendered image width in pixels
+  double pixel_samples_scale;        // Color scale factor for a sum of pixel samples
   int samples_per_pixel = 100;       // count of random samples for each pixel
+  int sqrt_spp;                      // Square root of number of samples per pixel
+  double recip_sqrt_spp;             // 1/sqrt_spp
   int max_depth = 50;                // maximum number of ray bounces into scene
 
   float vfov = 60.0f;                 // vertical field of view
@@ -95,15 +98,13 @@ class camera {
   point3 lookat = point3(0, 0, -1);   // point camera is looking at
   point3 vup = vec3(0, 1, 0);         // camera realtive "up" direction
 
-  float aperture = 0.1f;    //
-  float defocus_angle = 0;  // variation angle of rays through each pixel
-  float focus_distance =
-      10.0f;  // distance from camera lookfrom point to plane of perfect focus
+  float aperture = 0.1f;         //
+  float defocus_angle = 0;       // variation angle of rays through each pixel
+  float focus_distance = 10.0f;  // distance from camera lookfrom point to plane of perfect focus
 
   double time0 = 0.0, time1 = 1.0;  // default shutter open/close times
 
   int image_height = 0;
-  double pixel_samples_scale;  // Color scale factor for a sum of pixel samples
 
  private:
   point3 origin;
