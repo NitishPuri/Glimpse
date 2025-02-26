@@ -6,13 +6,22 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 
 ## References and inspirations
 
-- [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
-- [Ray Tracing the Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
-- [Ray Tracing Next Week](https://raytracing.github.io/books/RayTracingNextWeek.html)
-- [pbrt](https://github.com/mmp/pbrt-v4)
-- [nanort](https://github.com/lighttransport/nanort?tab=readme-ov-file)
-- [LuxCore](https://github.com/LuxCoreRender/LuxCore)
-- Smallpaints
+- [x] [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
+- [x] [Ray Tracing Next Week](https://raytracing.github.io/books/RayTracingNextWeek.html)
+- [x] [Ray Tracing the Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
+- [ ] [pbrt](https://github.com/mmp/pbrt-v4)
+- [ ] Smallpaints
+- [ ] [nanort](https://github.com/lighttransport/nanort?tab=readme-ov-file)
+- [ ] [LuxCore](https://github.com/LuxCoreRender/LuxCore)
+
+## OpenGL Compute shaders
+- https://github.com/wsandst/gpu-raytracer/tree/master/src
+
+### Vilkan / RTX integrations
+- https://github.com/nvpro-samples/vk_mini_path_tracer?tab=readme-ov-file
+- https://github.com/nvpro-samples/vk_raytracing_tutorial_KHR?tab=readme-ov-file
+- https://github.com/grigoryoskin/vulkan-compute-ray-tracing/tree/master
+
 
 
 ### **Refined Roadmap: A Learning-Focused Ray Tracer**  
@@ -42,7 +51,10 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - [ ] use glm for vector stuff.
 - [ ] Use something like Conan for package management when trying to add a new package next time.
 - [ ] improve project structure. automate, build, test scripts.
-- [ ] hook with a unit testing framework
+- [ ] hook with a unit testing framework 
+  - use a header only framework and hook with ctest, much simpler.
+  - also, find simple header only lib for image comparison.
+  hook with github actions!
 - [ ] add unit tests
 - Glass, mirrors
 - dispersion, rainbows, scattering
