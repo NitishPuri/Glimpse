@@ -29,7 +29,15 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
 
     // Scattered reflectance
     if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-      return emitted + attenuation * ray_color(scattered, background, world, depth - 1);
+      double scattering_pdf = rec.mat_ptr->scattering_pdf(r, rec, scattered);
+      // double pdf_value = scattering_pdf;
+      double pdf_value = 1 / (2 * pi);
+
+      color color_from_scatter =
+          (attenuation * scattering_pdf * ray_color(scattered, background, world, depth - 1)) / pdf_value;
+
+      return emitted + color_from_scatter;
+      // return emitted + attenuation * ray_color(scattered, background, world, depth - 1);
     }
 
     return emitted;
