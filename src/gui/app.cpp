@@ -1,36 +1,16 @@
 #include "app.h"
 
 int AppWindow::initApp() {
-  // Initialize GLFW and OpenGL
-  if (!glfwInit()) {
-    logger.log("Failed to initialize GLFW");
-    return -1;
-  }
-
-  window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Glimpse", nullptr, nullptr);
-  if (!window) {
-    const char* description;
-    int code = glfwGetError(&description);
-    logger.log("Failed to create GLFW window: ", description);
-    glfwTerminate();
-    return -1;
-  }
-
-  glfwMakeContextCurrent(window);
-  glfwSwapInterval(1);  // Enable vsync
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    logger.log("Failed to initialize GLAD");
-    return -1;
-  }
+  if (gl_res.initGL(logger) == -1) return -1;
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplGlfw_InitForOpenGL(gl_res.window, true);
   ImGui_ImplOpenGL3_Init("#version 330");
 
   // Setup Raytracer
-  if (glfwGetCurrentContext() == window) {
+  if (glfwGetCurrentContext() == gl_res.window) {
     if (!ui_params.startScene.empty()) {
       ui_params.current_scene =
           static_cast<int>(std::find(Scene::SceneNames.begin(), Scene::SceneNames.end(), ui_params.startScene) -
@@ -49,7 +29,7 @@ int AppWindow::initApp() {
 
 void AppWindow::run() {
   bool firstFrame = true;
-  while (!glfwWindowShouldClose(window)) {
+  while (!glfwWindowShouldClose(gl_res.window)) {
     glfwPollEvents();
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -71,10 +51,10 @@ void AppWindow::run() {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(gl_res.window);
   }
 
-  glfwDestroyWindow(window);
+  glfwDestroyWindow(gl_res.window);
   glfwTerminate();
 }
 

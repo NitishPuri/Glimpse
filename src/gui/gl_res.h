@@ -11,7 +11,9 @@ struct GLResources {
   GLuint framebufferTexture;
   int renderWidth;
   int renderHeight;
-  // GLFWwindow* window;
+  GLFWwindow* window;
+
+  int initGL(Logger& logger);
 
   void setupFramebuffer(Logger& logger);
   bool checkGLError(const std::string& functionName, Logger& logger);

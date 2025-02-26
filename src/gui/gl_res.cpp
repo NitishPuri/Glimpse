@@ -1,6 +1,34 @@
 
 #include "gl_res.h"
 
+#include "config.h"
+
+int GLResources::initGL(Logger& logger) {
+  // Initialize GLFW and OpenGL
+  if (!glfwInit()) {
+    logger.log("Failed to initialize GLFW");
+    return -1;
+  }
+
+  window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Glimpse", nullptr, nullptr);
+  if (!window) {
+    const char* description;
+    int code = glfwGetError(&description);
+    logger.log("Failed to create GLFW window: ", description);
+    glfwTerminate();
+    return -1;
+  }
+
+  glfwMakeContextCurrent(window);
+  glfwSwapInterval(1);  // Enable vsync
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    logger.log("Failed to initialize GLAD");
+    return -1;
+  }
+
+  return 0;
+}
+
 void GLResources::setupFramebuffer(Logger& logger) {
   glGenTextures(1, &framebufferTexture);
   if (checkGLError("glGenTextures", logger)) return;
