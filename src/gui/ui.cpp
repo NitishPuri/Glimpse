@@ -43,7 +43,7 @@ void renderControl(ImGuiParams& gui_params, RayTracer& raytracer, GLResources& g
 
     std::ostringstream ss;
     ss << "./results/" << std::put_time(std::localtime(&now_time), "%Y%m%d%H%M%S") << "_"
-       << Scene::SceneNames[gui_params.current_scene] << ".jpg";
+       << Scene::SceneNames[gui_params.current_scene] << "_samples_" << raytracer.scene.cam.samples_per_pixel << ".jpg";
     auto outfile_path = ss.str();
 
     if (raytracer.image.write(outfile_path) != 0) {

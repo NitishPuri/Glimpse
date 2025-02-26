@@ -27,11 +27,11 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
     color attenuation;
     color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
 
+    double pdf_value = 1.0;
     // Scattered reflectance
-    if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+    if (rec.mat_ptr->scatter(r, rec, attenuation, scattered, pdf_value)) {
       double scattering_pdf = rec.mat_ptr->scattering_pdf(r, rec, scattered);
-      // double pdf_value = scattering_pdf;
-      double pdf_value = 1 / (2 * pi);
+      pdf_value = scattering_pdf;
 
       color color_from_scatter =
           (attenuation * scattering_pdf * ray_color(scattered, background, world, depth - 1)) / pdf_value;
@@ -82,6 +82,12 @@ void render_section(Image &image, int start_row, int end_row, const camera &cam,
           ray r = cam.get_ray(u, v);
           pixel_color += ray_color(r, background, world_bvh, cam.max_depth);
           if (progress) (*progress)++;
+
+          int samples_computed = (s_j * cam.sqrt_spp) + s_i + 1;
+          // if (samples_computed % 100 == 0) {
+          //   std::cout << "Samples computed :: " << samples_computed << std::endl;
+          // }
+          // image.set(i, j, pixel_color / samples_computed);
         }
       }
 #endif
