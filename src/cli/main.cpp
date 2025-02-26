@@ -24,10 +24,10 @@ int main(int argc, char **argv) {
   auto scene = Scene::SceneMap[Scene::SceneNames[options.scene]]();
 
   // Image
-  auto aspect_ratio = scene.aspect_ratio;
-  int image_width = scene.image_width;
-  int samples_per_pixel = scene.samples_per_pixel;
-  int max_depth = scene.max_depth;
+  auto aspect_ratio = scene.cam.aspect_ratio;
+  int image_width = scene.cam.image_width;
+  int samples_per_pixel = scene.cam.samples_per_pixel;
+  int max_depth = scene.cam.max_depth;
 
   const int image_height = static_cast<int>(image_width / aspect_ratio);
   Image image(image_width, image_height);
