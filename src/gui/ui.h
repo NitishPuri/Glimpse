@@ -7,8 +7,8 @@
 #include "raytracer.h"
 
 struct ImGuiParams {
-  int current_scene = 11;
-  std::string syatyScene = "two_diffuse_spheres";
+  int current_scene = 8;
+  std::string startScene = "two_diffuse_spheres";
   float backgroundColor[3] = {0.1f, 0.1f, 0.1f};
   float lookFrom[3] = {13.0f, 2.0f, 3.0f};
   float lookAt[3] = {0.0f, 0.0f, 0.0f};

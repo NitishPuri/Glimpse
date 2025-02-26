@@ -47,8 +47,8 @@ class AppWindow {
 
     // Setup Raytracer
     if (glfwGetCurrentContext() == window) {
-      raytracer.setupScene(logger, GLResources, ImGuiParams.current_scene,
-                           ImGuiParams.lookFrom, ImGuiParams.lookAt);
+      raytracer.setupScene(logger, gl_res, ui_params.current_scene,
+                           ui_params.lookFrom, ui_params.lookAt);
     } else {
       logger.log("Failed to initialize OpenGL context");
       return -1;
@@ -68,17 +68,17 @@ class AppWindow {
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
 
-      ui.renderUI(ImGuiParams, raytracer, GLResources, logger);
+      ui.renderUI(ui_params, raytracer, gl_res, logger);
 
       if (firstFrame) {
         firstFrame = false;
-        raytracer.renderSceneAsync(logger, GLResources);
+        raytracer.renderSceneAsync(logger, gl_res);
       }
 
       glClearColor(.1f, .1f, .1f, 1.0f);  // Set background color to dark gray
       glClear(GL_COLOR_BUFFER_BIT);
 
-      ui.renderOutput(GLResources);
+      ui.renderOutput(gl_res);
 
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -91,8 +91,8 @@ class AppWindow {
   }
 
   RayTracer raytracer;
-  GLResources GLResources;
-  ImGuiParams ImGuiParams;
+  GLResources gl_res;
+  ImGuiParams ui_params;
   UIRenderer ui;
 
   GLFWwindow* window;
