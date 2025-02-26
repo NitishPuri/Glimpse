@@ -6,17 +6,15 @@ class bvh_node : public hittable {
  public:
   bvh_node();
 
-  bvh_node(hittable_list list, double time0, double time1)
-      : bvh_node(list.objects, 0, list.objects.size(), time0, time1) {
+  bvh_node(std::vector<shared_ptr<hittable>> &objects, size_t start, size_t end);
+
+  bvh_node(hittable_list list) : bvh_node(list.objects, 0, list.objects.size()) {
     // There's a C++ subtlety here. This constructor (without span indices)
     // creates an implicit copy of the hittable list, which we will modify. The
     // lifetime of the copied list only extends until this constructor exits.
     // That's OK, because we only need to persist the resulting bounding volume
     // hierarchy.
   }
-
-  bvh_node(std::vector<shared_ptr<hittable>> &objects, size_t start, size_t end,
-           double time0, double time1);
 
   bool hit(const ray &r, const interval &ray_t, hit_record &rec) const override;
 
