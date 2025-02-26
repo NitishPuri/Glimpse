@@ -105,6 +105,18 @@ inline vec3 random_in_hemisphere(const vec3 &normal) {
     return -in_unit_sphere;
 }
 
+inline vec3 random_cosine_direction() {
+  auto r1 = random_double();
+  auto r2 = random_double();
+
+  auto phi = 2 * pi * r1;
+  auto x = std::cos(phi) * std::sqrt(r2);
+  auto y = std::sin(phi) * std::sqrt(r2);
+  auto z = std::sqrt(1 - r2);
+
+  return vec3(x, y, z);
+}
+
 inline vec3 random_in_unit_disk() {
   int max_iterations = 1000;
   while (max_iterations-- > 0) {
