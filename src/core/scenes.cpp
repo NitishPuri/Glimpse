@@ -205,7 +205,7 @@ Scene cornell_box() {
   scene.world = world;
   scene.cam.aspect_ratio = 1.0;
   scene.cam.image_width = 600;
-  scene.cam.samples_per_pixel = 1000;
+  scene.cam.samples_per_pixel = 100;
   scene.background = color(0, 0, 0);
   scene.cam.lookfrom = point3(278, 278, -800);
   scene.cam.lookat = point3(278, 278, 0);
