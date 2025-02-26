@@ -6,8 +6,7 @@
 Scene random_scene() {
   hittable_list world;
 
-  auto checker = make_shared<checker_texture>(1, color(0.2, 0.3, 0.1),
-                                              color(0.9, 0.9, 0.9));
+  auto checker = make_shared<checker_texture>(1, color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
   auto ground_material = make_shared<lambertian>(checker);
   world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
 
@@ -24,8 +23,7 @@ Scene random_scene() {
           auto albedo = color::random() * color::random();
           sphere_material = make_shared<lambertian>(albedo);
           auto center2 = center + vec3(0, random_double(0, 0.5), 0);
-          world.add(make_shared<moving_sphere>(center, center2, 0.2,
-                                               sphere_material));
+          world.add(make_shared<moving_sphere>(center, center2, 0.2, sphere_material));
         } else if (choose_mat < 0.95) {
           // metal
           auto albedo = color::random(0.5, 1);
@@ -67,15 +65,11 @@ Scene directions_test() {
   auto material = make_shared<lambertian>(color(0.8, 0.3, 0.3));
   objects.add(make_shared<sphere>(point3(0, 0, 0), 0.5, material));
 
-  objects.add(make_shared<sphere>(
-      point3(10, 0, 2), 0.5, make_shared<lambertian>(color(0.2, 0.8, 0.2))));
-  objects.add(make_shared<sphere>(
-      point3(-10, 0, -2), 0.5, make_shared<lambertian>(color(0.2, 0.2, 0.8))));
+  objects.add(make_shared<sphere>(point3(10, 0, 2), 0.5, make_shared<lambertian>(color(0.2, 0.8, 0.2))));
+  objects.add(make_shared<sphere>(point3(-10, 0, -2), 0.5, make_shared<lambertian>(color(0.2, 0.2, 0.8))));
 
-  objects.add(make_shared<sphere>(
-      point3(0, 10, 0), 0.5, make_shared<lambertian>(color(0.2, 0.8, 0.8))));
-  objects.add(make_shared<sphere>(
-      point3(0, -10, 0), 0.5, make_shared<lambertian>(color(0.2, 0.2, 0.8))));
+  objects.add(make_shared<sphere>(point3(0, 10, 0), 0.5, make_shared<lambertian>(color(0.2, 0.8, 0.8))));
+  objects.add(make_shared<sphere>(point3(0, -10, 0), 0.5, make_shared<lambertian>(color(0.2, 0.2, 0.8))));
 
   // objects.add(
   //     make_shared<sphere>(point3(0, -100.5, -1), 100,
@@ -95,11 +89,8 @@ Scene directions_test() {
 Scene two_diffuse_spheres() {
   hittable_list objects;
 
-  objects.add(
-      make_shared<sphere>(point3(0, -1000, 0), 1000,
-                          make_shared<lambertian>(color(0.8, 0.8, 0.0))));
-  objects.add(make_shared<sphere>(
-      point3(0, 2, 0), 2, make_shared<lambertian>(color(0.8, 0.0, 0.8))));
+  objects.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(color(0.8, 0.8, 0.0))));
+  objects.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(color(0.8, 0.0, 0.8))));
 
   Scene scene;
   scene.world = objects;
@@ -114,13 +105,10 @@ Scene two_diffuse_spheres() {
 Scene two_spheres_check() {
   hittable_list objects;
 
-  auto checker = make_shared<checker_texture>(1, color(0.2, 0.3, 0.1),
-                                              color(0.9, 0.9, 0.9));
+  auto checker = make_shared<checker_texture>(1, color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
 
-  objects.add(make_shared<sphere>(point3(0, -10, 0), 10,
-                                  make_shared<lambertian>(checker)));
-  objects.add(make_shared<sphere>(point3(0, 10, 0), 10,
-                                  make_shared<lambertian>(checker)));
+  objects.add(make_shared<sphere>(point3(0, -10, 0), 10, make_shared<lambertian>(checker)));
+  objects.add(make_shared<sphere>(point3(0, 10, 0), 10, make_shared<lambertian>(checker)));
 
   Scene scene;
   scene.world = objects;
@@ -136,10 +124,8 @@ Scene two_perlin_spheres() {
   hittable_list objects;
 
   auto pertext = make_shared<noise_texture>(4);
-  objects.add(make_shared<sphere>(point3(0, -1000, 0), 1000,
-                                  make_shared<lambertian>(pertext)));
-  objects.add(make_shared<sphere>(point3(0, 2, 0), 2,
-                                  make_shared<lambertian>(pertext)));
+  objects.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
+  objects.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(pertext)));
 
   Scene scene;
   scene.world = objects;
@@ -170,15 +156,12 @@ Scene simple_light() {
   hittable_list objects;
 
   auto pertext = make_shared<noise_texture>(4);
-  objects.add(make_shared<sphere>(point3(0, -1000, 0), 1000,
-                                  make_shared<lambertian>(pertext)));
-  objects.add(make_shared<sphere>(point3(0, 2, 0), 2,
-                                  make_shared<lambertian>(pertext)));
+  objects.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
+  objects.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(pertext)));
 
   auto difflight = make_shared<diffuse_light>(color(4, 4, 4));
   objects.add(make_shared<sphere>(point3(0, 7, 0), 2, difflight));
-  objects.add(make_shared<quad>(point3{3, 1, -2}, vec3{2, 0, 0}, vec3{0, 2, 0},
-                                difflight));
+  objects.add(make_shared<quad>(point3{3, 1, -2}, vec3{2, 0, 0}, vec3{0, 2, 0}, difflight));
 
   Scene scene;
   scene.world = objects;
@@ -199,29 +182,21 @@ Scene cornell_box() {
   auto green = make_shared<lambertian>(color(.12, .45, .15));
   auto light = make_shared<diffuse_light>(color(15, 15, 15));
 
-  world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0),
-                              vec3(0, 0, 555), green));
+  world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
 
-  world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555),
-                              red));
-  world.add(make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0),
-                              vec3(0, 0, -105), light));
+  world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+  world.add(make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light));
 
-  world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555),
-                              white));
-  world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0),
-                              vec3(0, 0, -555), white));
-  world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0),
-                              vec3(0, 555, 0), white));
+  world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+  world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+  world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
-  shared_ptr<hittable> box1 =
-      box(point3(0, 0, 0), point3(165, 330, 165), white);
+  shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), white);
   box1 = make_shared<rotate_y>(box1, 15);
   box1 = make_shared<translate>(box1, vec3(265, 0, 295));
   world.add(box1);
 
-  shared_ptr<hittable> box2 =
-      box(point3(0, 0, 0), point3(165, 165, 165), white);
+  shared_ptr<hittable> box2 = box(point3(0, 0, 0), point3(165, 165, 165), white);
   box2 = make_shared<rotate_y>(box2, -18);
   box2 = make_shared<translate>(box2, vec3(130, 0, 65));
   world.add(box2);
@@ -230,7 +205,7 @@ Scene cornell_box() {
   scene.world = world;
   scene.cam.aspect_ratio = 1.0;
   scene.cam.image_width = 600;
-  scene.cam.samples_per_pixel = 50;
+  scene.cam.samples_per_pixel = 1000;
   scene.background = color(0, 0, 0);
   scene.cam.lookfrom = point3(278, 278, -800);
   scene.cam.lookat = point3(278, 278, 0);
@@ -247,27 +222,19 @@ Scene cornell_smoke() {
   auto green = make_shared<lambertian>(color(.12, .45, .15));
   auto light = make_shared<diffuse_light>(color(15, 15, 15));
 
-  objects.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0),
-                                vec3(0, 0, 555), green));
-  objects.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0),
-                                vec3(0, 0, 555), red));
-  objects.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0),
-                                vec3(0, 0, 305), light));
-  objects.add(make_shared<quad>(point3(0, 555, 0), vec3(555, 0, 0),
-                                vec3(0, 0, 555), white));
-  objects.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0),
-                                vec3(0, 0, 555), white));
-  objects.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0),
-                                vec3(0, 555, 0), white));
+  objects.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+  objects.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+  objects.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light));
+  objects.add(make_shared<quad>(point3(0, 555, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+  objects.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+  objects.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
-  shared_ptr<hittable> box1 =
-      box(point3(0, 0, 0), point3(165, 330, 165), white);
+  shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), white);
   box1 = make_shared<rotate_y>(box1, 15);
   box1 = make_shared<translate>(box1, vec3(265, 0, 295));
   // objects.add(box1);
 
-  shared_ptr<hittable> box2 =
-      box(point3(0, 0, 0), point3(165, 165, 165), white);
+  shared_ptr<hittable> box2 = box(point3(0, 0, 0), point3(165, 165, 165), white);
   box2 = make_shared<rotate_y>(box2, -18);
   box2 = make_shared<translate>(box2, vec3(130, 0, 65));
   // objects.add(box2);
@@ -314,35 +281,27 @@ Scene final_scene() {
   world.add(make_shared<bvh_node>(boxes1, 0, 1));
 
   auto light = make_shared<diffuse_light>(color(7, 7, 7));
-  world.add(make_shared<quad>(point3(123, 554, 147), vec3(300, 0, 0),
-                              vec3(0, 0, 265), light));
+  world.add(make_shared<quad>(point3(123, 554, 147), vec3(300, 0, 0), vec3(0, 0, 265), light));
   // objects.add(make_shared<xz_rect>(123, 423, 147, 412, 554, light));
 
   auto center1 = point3(400, 400, 200);
   auto center2 = center1 + vec3(30, 0, 0);
   auto moving_sphere_material = make_shared<lambertian>(color(0.7, 0.3, 0.1));
-  world.add(
-      make_shared<moving_sphere>(center1, center2, 50, moving_sphere_material));
+  world.add(make_shared<moving_sphere>(center1, center2, 50, moving_sphere_material));
 
-  world.add(make_shared<sphere>(point3(260, 150, 45), 50,
-                                make_shared<dielectric>(1.5)));
-  world.add(make_shared<sphere>(point3(0, 150, 145), 50,
-                                make_shared<metal>(color(0.8, 0.8, 0.9), 1.0)));
+  world.add(make_shared<sphere>(point3(260, 150, 45), 50, make_shared<dielectric>(1.5)));
+  world.add(make_shared<sphere>(point3(0, 150, 145), 50, make_shared<metal>(color(0.8, 0.8, 0.9), 1.0)));
 
-  auto boundary = make_shared<sphere>(point3(360, 150, 145), 70,
-                                      make_shared<dielectric>(1.5));
+  auto boundary = make_shared<sphere>(point3(360, 150, 145), 70, make_shared<dielectric>(1.5));
   world.add(boundary);
   world.add(make_shared<constant_medium>(boundary, 0.2, color(0.2, 0.4, 0.9)));
-  boundary =
-      make_shared<sphere>(point3(0, 0, 0), 5000, make_shared<dielectric>(1.5));
+  boundary = make_shared<sphere>(point3(0, 0, 0), 5000, make_shared<dielectric>(1.5));
   world.add(make_shared<constant_medium>(boundary, .0001, color(1, 1, 1)));
 
-  auto emat =
-      make_shared<lambertian>(make_shared<image_texture>("./res/earthmap.jpg"));
+  auto emat = make_shared<lambertian>(make_shared<image_texture>("./res/earthmap.jpg"));
   world.add(make_shared<sphere>(point3(400, 200, 400), 100, emat));
   auto pertext = make_shared<noise_texture>(0.1);
-  world.add(make_shared<sphere>(point3(220, 280, 300), 80,
-                                make_shared<lambertian>(pertext)));
+  world.add(make_shared<sphere>(point3(220, 280, 300), 80, make_shared<lambertian>(pertext)));
 
   hittable_list boxes2;
   auto white = make_shared<lambertian>(color(.73, .73, .73));
@@ -351,9 +310,8 @@ Scene final_scene() {
     boxes2.add(make_shared<sphere>(point3::random(0, 165), 10, white));
   }
 
-  world.add(make_shared<translate>(
-      make_shared<rotate_y>(make_shared<bvh_node>(boxes2, 0.0, 1.0), 15),
-      vec3(-100, 270, 395)));
+  world.add(
+      make_shared<translate>(make_shared<rotate_y>(make_shared<bvh_node>(boxes2, 0.0, 1.0), 15), vec3(-100, 270, 395)));
 
   Scene scene;
   scene.world = world;
@@ -372,39 +330,27 @@ Scene material_showcase() {
   hittable_list objects;
 
   // diffuse
-  objects.add(make_shared<sphere>(
-      point3(-4, 2, -4), 2, make_shared<lambertian>(color(0.5, 0.8, 0.7))));
-  objects.add(make_shared<sphere>(
-      point3(2, 2, -6), 2,
-      make_shared<lambertian>(make_shared<noise_texture>(4))));
+  objects.add(make_shared<sphere>(point3(-4, 2, -4), 2, make_shared<lambertian>(color(0.5, 0.8, 0.7))));
+  objects.add(make_shared<sphere>(point3(2, 2, -6), 2, make_shared<lambertian>(make_shared<noise_texture>(4))));
 
   // metal
-  objects.add(make_shared<sphere>(
-      point3(5, 2, -3), 2, make_shared<metal>(color(0.6, 0.2, 0.8), 0.2)));
-  objects.add(make_shared<sphere>(
-      point3(-8, 2, -4), 2, make_shared<metal>(color(0.3, 0.5, 0.8), 0.01)));
+  objects.add(make_shared<sphere>(point3(5, 2, -3), 2, make_shared<metal>(color(0.6, 0.2, 0.8), 0.2)));
+  objects.add(make_shared<sphere>(point3(-8, 2, -4), 2, make_shared<metal>(color(0.3, 0.5, 0.8), 0.01)));
 
   // // "air bubble"
-  objects.add(
-      make_shared<sphere>(point3(0, 2, 0), 2, make_shared<dielectric>(1.5)));
-  objects.add(make_shared<sphere>(point3(0, 2, 0), 1.95,
-                                  make_shared<dielectric>(1.0 / 1.5)));
+  objects.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<dielectric>(1.5)));
+  objects.add(make_shared<sphere>(point3(0, 2, 0), 1.95, make_shared<dielectric>(1.0 / 1.5)));
 
   // glass sphere
-  objects.add(
-      make_shared<sphere>(point3(-4, 2, 0), 2, make_shared<dielectric>(1.33)));
-  objects.add(make_shared<sphere>(point3(-4, 2, 0), 1.4,
-                                  make_shared<dielectric>(1.0 / 1.33)));
+  objects.add(make_shared<sphere>(point3(-4, 2, 0), 2, make_shared<dielectric>(1.33)));
+  objects.add(make_shared<sphere>(point3(-4, 2, 0), 1.4, make_shared<dielectric>(1.0 / 1.33)));
 
   // bouncing balls
-  objects.add(make_shared<moving_sphere>(
-      point3(-8, 2, 2), point3(-8, 2.2, 2), 2,
-      make_shared<metal>(color(0.6, 0.2, 0.8), 0.04)));
+  objects.add(make_shared<moving_sphere>(point3(-8, 2, 2), point3(-8, 2.2, 2), 2,
+                                         make_shared<metal>(color(0.6, 0.2, 0.8), 0.04)));
 
   // ground
-  objects.add(
-      make_shared<sphere>(point3(0, -1000, 0), 1000,
-                          make_shared<lambertian>(color(0.8, 0.0, 0.8))));
+  objects.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(color(0.8, 0.0, 0.8))));
 
   Scene scene;
   scene.world = objects;
@@ -427,16 +373,11 @@ Scene quads() {
   auto lower_teal = make_shared<lambertian>(color(0.2, 0.8, 0.8));
 
   // Quads
-  world.add(make_shared<quad>(point3(-3, -2, 5), vec3(0, 0, -4), vec3(0, 4, 0),
-                              left_red));
-  world.add(make_shared<quad>(point3(-2, -2, 0), vec3(4, 0, 0), vec3(0, 4, 0),
-                              back_green));
-  world.add(make_shared<quad>(point3(3, -2, 1), vec3(0, 0, 4), vec3(0, 4, 0),
-                              right_blue));
-  world.add(make_shared<quad>(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4),
-                              upper_orange));
-  world.add(make_shared<quad>(point3(-2, -3, 5), vec3(4, 0, 0), vec3(0, 0, -4),
-                              lower_teal));
+  world.add(make_shared<quad>(point3(-3, -2, 5), vec3(0, 0, -4), vec3(0, 4, 0), left_red));
+  world.add(make_shared<quad>(point3(-2, -2, 0), vec3(4, 0, 0), vec3(0, 4, 0), back_green));
+  world.add(make_shared<quad>(point3(3, -2, 1), vec3(0, 0, 4), vec3(0, 4, 0), right_blue));
+  world.add(make_shared<quad>(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), upper_orange));
+  world.add(make_shared<quad>(point3(-2, -3, 5), vec3(4, 0, 0), vec3(0, 0, -4), lower_teal));
 
   Scene scene;
   scene.world = world;

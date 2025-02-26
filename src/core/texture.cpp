@@ -3,8 +3,7 @@
 #include "interval.h"
 #include "rtw_stb_image.h"
 
-image_texture::image_texture(const char *filename)
-    : image(std::make_shared<rtw_image>(filename)) {}
+image_texture::image_texture(const char *filename) : image(std::make_shared<rtw_image>(filename)) {}
 
 color image_texture::value(double u, double v, const vec3 &p) const {
   // If we have no texture data, then return solid cyan as a debugging aid.
@@ -20,6 +19,5 @@ color image_texture::value(double u, double v, const vec3 &p) const {
   auto pixel = image->pixel_data(i, j);
 
   const auto color_scale = 1.0 / 255.0;
-  return color(color_scale * pixel[0], color_scale * pixel[1],
-               color_scale * pixel[2]);
+  return color(color_scale * pixel[0], color_scale * pixel[1], color_scale * pixel[2]);
 }

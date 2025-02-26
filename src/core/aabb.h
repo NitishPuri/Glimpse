@@ -7,10 +7,7 @@ class aabb {
  public:
   aabb() {}  // The default AABB is empty, since intervals are empty by default.
 
-  aabb(const interval& x, const interval& y, const interval& z)
-      : x(x), y(y), z(z) {
-    pad_to_minimums();
-  }
+  aabb(const interval& x, const interval& y, const interval& z) : x(x), y(y), z(z) { pad_to_minimums(); }
 
   aabb(const point3& a, const point3& b) {
     // Treat the two points a and b as extrema for the bounding box, so we don't
@@ -68,6 +65,4 @@ inline aabb operator+(const aabb& bbox, const vec3& offset) {
   return aabb(bbox.x + offset.x(), bbox.y + offset.y(), bbox.z + offset.z());
 }
 
-inline aabb operator+(const vec3& offset, const aabb& bbox) {
-  return bbox + offset;
-}
+inline aabb operator+(const vec3& offset, const aabb& bbox) { return bbox + offset; }

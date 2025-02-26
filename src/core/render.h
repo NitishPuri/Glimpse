@@ -5,6 +5,5 @@
 
 class Renderer {
  public:
-  static void render_scene(const Scene &scene, Image &image,
-                           std::atomic<int> *progress = nullptr);
+  static void render_scene(const Scene &scene, Image &image, std::atomic<int> *progress = nullptr);
 };

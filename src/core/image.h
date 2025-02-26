@@ -27,8 +27,7 @@ class Image {
       return;
     }
 
-    memcpy(data.data() + (x + y * width) * num_components, color.rgb,
-           num_components);
+    memcpy(data.data() + (x + y * width) * num_components, color.rgb, num_components);
   }
 
   int write(const std::string &filename, bool flip = true);

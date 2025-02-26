@@ -51,8 +51,7 @@ class rtw_image {
     // if (load("../../../../../images/" + filename)) return;
     // if (load("../../../../../../images/" + filename)) return;
 
-    std::cerr << "ERROR: Could not load image file '" << image_filename
-              << "'.\n";
+    std::cerr << "ERROR: Could not load image file '" << image_filename << "'.\n";
   }
 
   ~rtw_image() {
@@ -68,10 +67,8 @@ class rtw_image {
     // the image, followed by the next row below, for the full height of the
     // image.
 
-    auto n =
-        bytes_per_pixel;  // Dummy out parameter: original components per pixel
-    fdata = stbi_loadf(filename.c_str(), &image_width, &image_height, &n,
-                       bytes_per_pixel);
+    auto n = bytes_per_pixel;  // Dummy out parameter: original components per pixel
+    fdata = stbi_loadf(filename.c_str(), &image_width, &image_height, &n, bytes_per_pixel);
     if (fdata == nullptr) return false;
 
     bytes_per_scanline = image_width * bytes_per_pixel;
@@ -127,8 +124,7 @@ class rtw_image {
 
     auto *bptr = bdata;
     auto *fptr = fdata;
-    for (auto i = 0; i < total_bytes; i++, fptr++, bptr++)
-      *bptr = float_to_byte(*fptr);
+    for (auto i = 0; i < total_bytes; i++, fptr++, bptr++) *bptr = float_to_byte(*fptr);
   }
 };
 

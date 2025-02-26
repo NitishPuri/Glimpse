@@ -19,8 +19,7 @@ struct RayTracer {
   void renderSceneAsync(Logger& logger, GLResources& GLResources) {
     trace_future = std::async(std::launch::async, [&]() {
       image.clear();
-      logger.log("Rendering... ", GLResources.renderWidth, "x",
-                 GLResources.renderHeight, " with ",
+      logger.log("Rendering... ", GLResources.renderWidth, "x", GLResources.renderHeight, " with ",
                  scene.cam.samples_per_pixel, " samples per pixel");
       auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -29,30 +28,24 @@ struct RayTracer {
       status = DONE;
 
       auto endTime = std::chrono::high_resolution_clock::now();
-      auto duration =
-          std::chrono::duration<float, std::chrono::seconds::period>(endTime -
-                                                                     startTime)
-              .count();
+      auto duration = std::chrono::duration<float, std::chrono::seconds::period>(endTime - startTime).count();
 
       logger.log("Image generated in ", duration, " seconds");
     });
   }
 
-  void setupScene(Logger& logger, GLResources& GLResources, int current_scene,
-                  float lookFrom[3], float lookAt[3]) {
+  void setupScene(Logger& logger, GLResources& GLResources, int current_scene, float lookFrom[3], float lookAt[3]) {
     // Ensure current_scene is within valid range
     if (current_scene < 0 || current_scene >= Scene::SceneNames.size()) {
       logger.log("Invalid scene index: ", current_scene);
       return;
     }
 
-    logger.log("Setting up scene ... ", current_scene, " ",
-               Scene::SceneNames[current_scene]);
+    logger.log("Setting up scene ... ", current_scene, " ", Scene::SceneNames[current_scene]);
     scene = Scene::SceneMap[Scene::SceneNames[current_scene]]();
 
     GLResources.renderWidth = scene.cam.image_width;
-    GLResources.renderHeight =
-        static_cast<int>(scene.cam.image_width / scene.cam.aspect_ratio);
+    GLResources.renderHeight = static_cast<int>(scene.cam.image_width / scene.cam.aspect_ratio);
     image.initialize(GLResources.renderWidth, GLResources.renderHeight);
 
     auto vec3tofloat = [](const vec3& v, float f[3]) {

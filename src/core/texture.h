@@ -14,12 +14,9 @@ class solid_color : public texture {
   solid_color() {}
   solid_color(const color &c) : albedo(c) {}
 
-  solid_color(double red, double green, double blue)
-      : solid_color(color(red, green, blue)) {}
+  solid_color(double red, double green, double blue) : solid_color(color(red, green, blue)) {}
 
-  color value(double u, double v, const point3 &p) const override {
-    return albedo;
-  }
+  color value(double u, double v, const point3 &p) const override { return albedo; }
 
  private:
   color albedo;
@@ -28,12 +25,10 @@ class solid_color : public texture {
 class checker_texture : public texture {
  public:
   checker_texture() {}
-  checker_texture(double scale, shared_ptr<texture> _even,
-                  shared_ptr<texture> _odd)
+  checker_texture(double scale, shared_ptr<texture> _even, shared_ptr<texture> _odd)
       : inv_scale(1.0 / scale), even(_even), odd(_odd) {}
   checker_texture(double scale, color c1, color c2)
-      : checker_texture(scale, make_shared<solid_color>(c1),
-                        (make_shared<solid_color>(c2))) {}
+      : checker_texture(scale, make_shared<solid_color>(c1), (make_shared<solid_color>(c2))) {}
 
   color value(double u, double v, const point3 &p) const override {
     auto xInteger = int(std::floor(inv_scale * p.x()));
