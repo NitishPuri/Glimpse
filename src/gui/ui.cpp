@@ -32,6 +32,45 @@ void cameraUI(RayTracer& raytracer, ImGuiParams& gui_params, Logger& logger, GLR
   }
 }
 
+void renderControl(ImGuiParams& gui_params, RayTracer& raytracer, GLResources& gl_res, Logger& logger) {
+  if (ImGui::Button("Render")) {
+    raytracer.renderSceneAsync(logger, gl_res);
+  }
+
+  if (ImGui::Button("Save Image")) {
+    auto now = std::chrono::system_clock::now();
+    auto now_time = std::chrono::system_clock::to_time_t(now);
+
+    std::ostringstream ss;
+    ss << "./results/" << std::put_time(std::localtime(&now_time), "%Y%m%d%H%M%S") << "_"
+       << Scene::SceneNames[gui_params.current_scene] << ".jpg";
+    auto outfile_path = ss.str();
+
+    if (raytracer.image.write(outfile_path) != 0) {
+      logger.log("Image written to ", outfile_path);
+    } else {
+      logger.log("Failed to write image to ", outfile_path);
+    }
+  }
+
+  if (raytracer.status == RayTracer::RENDERING) {
+    int totalPixels = gl_res.renderWidth * gl_res.renderHeight * raytracer.scene.cam.samples_per_pixel;
+    ImGui::Text("Rendering...%d/%d", raytracer.progress.load(), totalPixels);
+    float progress = float(raytracer.progress.load()) / float(totalPixels);
+    ImGui::ProgressBar(progress, ImVec2(-1, 0), "Progress");
+    // TODO: Should we conmtrol how frequent this happens?
+    gl_res.updateFramebuffer(raytracer.image.data, logger);
+
+  } else if (raytracer.status == RayTracer::DONE) {
+    gl_res.updateFramebuffer(raytracer.image.data, logger);
+    ImGui::Text("Done");
+    raytracer.status = RayTracer::IDLE;
+    raytracer.progress = 0;
+  } else {
+    ImGui::Text("Idle");
+  }
+}
+
 void UIRenderer::renderUI(ImGuiParams& gui_params, RayTracer& raytracer, GLResources& gl_res, Logger& logger) {
   ImGui::Begin("Control Panel");
 
@@ -47,10 +86,6 @@ void UIRenderer::renderUI(ImGuiParams& gui_params, RayTracer& raytracer, GLResou
     }
     ImGui::EndCombo();
   }
-
-  // Camera parameters
-  cameraUI(raytracer, gui_params, logger, gl_res);
-
   // Scene parameters
   if (ImGui::ColorEdit3("Background Color", gui_params.backgroundColor)) {
     raytracer.scene.background =
@@ -58,46 +93,10 @@ void UIRenderer::renderUI(ImGuiParams& gui_params, RayTracer& raytracer, GLResou
     raytracer.renderSceneAsync(logger, gl_res);
   }
 
-  if (ImGui::Button("Render")) {
-    // Call renderSceneAsync from AppWindow
-    raytracer.renderSceneAsync(logger, gl_res);
-  }
+  // Camera parameters
+  cameraUI(raytracer, gui_params, logger, gl_res);
 
-  if (ImGui::Button("Save Image")) {
-    auto now = std::chrono::system_clock::now();
-    auto now_time = std::chrono::system_clock::to_time_t(now);
-
-    std::ostringstream ss;
-    ss << "./results/" << std::put_time(std::localtime(&now_time), "%Y%m%d%H%M%S") << "_"
-       << Scene::SceneNames[gui_params.current_scene] << ".jpg";
-    auto outfile_path = ss.str();
-
-    // raytracer.image.write(ss.str(), true);
-
-    if (raytracer.image.write(outfile_path) != 0) {
-      logger.log("Image written to ", outfile_path);
-    } else {
-      logger.log("Failed to write image to ", outfile_path);
-    }
-  }
-
-  if (raytracer.status == RayTracer::RENDERING) {
-    int totalPixels = gl_res.renderWidth * gl_res.renderHeight * raytracer.scene.cam.samples_per_pixel;
-    ImGui::Text("Rendering...%d/%d", raytracer.progress.load(), totalPixels);
-    float progress = float(raytracer.progress.load()) / float(totalPixels);
-    ImGui::ProgressBar(progress, ImVec2(-1, 0), "Progress");
-    // Call updateFramebuffer from AppWindow
-    gl_res.updateFramebuffer(raytracer.image.data, logger);
-
-  } else if (raytracer.status == RayTracer::DONE) {
-    // Call updateFramebuffer from AppWindow
-    gl_res.updateFramebuffer(raytracer.image.data, logger);
-    ImGui::Text("Done");
-    raytracer.status = RayTracer::IDLE;
-    raytracer.progress = 0;
-  } else {
-    ImGui::Text("Idle");
-  }
+  renderControl(gui_params, raytracer, gl_res, logger);
 
   ImGui::End();
 }
