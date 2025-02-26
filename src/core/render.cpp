@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "hittables/bvh_node.h"
 #include "material.h"
+#include "pdf.h"
 #include "render.h"
 
 #define USE_STRATIFIED 1
@@ -25,13 +26,36 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
   if (world.hit(r, {0.001, infinity}, rec)) {
     ray scattered;
     color attenuation;
-    color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+    // color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+    color emitted = rec.mat_ptr->emitted(r, rec, rec.u, rec.v, rec.p);
 
     double pdf_value = 1.0;
     // Scattered reflectance
     if (rec.mat_ptr->scatter(r, rec, attenuation, scattered, pdf_value)) {
+      // auto on_light = point3(random_double(213, 343), 554, random_double(227, 332));
+      // auto to_light = on_light - rec.p;
+      // auto distance_squared = to_light.length_squared();
+      // to_light = unit_vector(to_light);
+
+      // if (dot(to_light, rec.normal) < 0) {
+      //   return emitted;
+      // }
+
+      // auto light_area = 130 * 130;
+      // auto light_cosine = fabs(to_light.y());
+      // if (light_cosine < 0.000001) {
+      //   return emitted;
+      // }
+
+      cosine_pdf surface_pdf(rec.normal);
+      scattered = ray(rec.p, surface_pdf.generate(), r.time());
+      pdf_value = surface_pdf.value(scattered.direction());
+
+      // pdf_value = distance_squared / (light_cosine * light_area);
+      // scattered = ray(rec.p, to_light, r.time());
+
       double scattering_pdf = rec.mat_ptr->scattering_pdf(r, rec, scattered);
-      pdf_value = scattering_pdf;
+      // pdf_value = scattering_pdf;
 
       color color_from_scatter =
           (attenuation * scattering_pdf * ray_color(scattered, background, world, depth - 1)) / pdf_value;

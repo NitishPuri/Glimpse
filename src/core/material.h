@@ -14,7 +14,10 @@ class material {
   }
 
   // Emitted light - zero by default
-  virtual color emitted(double u, double v, const point3 &p) const { return color(0, 0, 0); }
+  // virtual color emitted(double u, double v, const point3 &p) const { return color(0, 0, 0); }
+  virtual color emitted(const ray &r_in, const hit_record &rec, double u, double v, const point3 &p) const {
+    return color(0, 0, 0);
+  }
 
   virtual double scattering_pdf(const ray &r_in, const hit_record &rec, const ray &scattered) const { return 0; }
 };
@@ -130,7 +133,11 @@ class diffuse_light : public material {
     return false;
   }
 
-  color emitted(double u, double v, const point3 &p) const override { return emit->value(u, v, p); }
+  // color emitted(double u, double v, const point3 &p) const override { return emit->value(u, v, p); }
+  color emitted(const ray &r_in, const hit_record &rec, double u, double v, const point3 &p) const override {
+    if(!rec.front_face) return color(0, 0, 0);
+    return emit->value(u, v, p);
+  }
 
  private:
   shared_ptr<texture> emit;
