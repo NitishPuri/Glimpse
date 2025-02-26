@@ -7,8 +7,8 @@
 #include "raytracer.h"
 
 struct ImGuiParams {
-  int current_scene = 8;
-  std::string startScene = "two_diffuse_spheres";
+  int current_scene = 1;
+  std::string startScene = "cornell_box";
   float backgroundColor[3] = {0.1f, 0.1f, 0.1f};
   float lookFrom[3] = {13.0f, 2.0f, 3.0f};
   float lookAt[3] = {0.0f, 0.0f, 0.0f};
@@ -19,8 +19,7 @@ class AppWindow;
 class UIRenderer {
  public:
   void setApp(AppWindow* window) { this->window = window; }
-  void renderUI(ImGuiParams& ImGuiParams, RayTracer& RayTracer,
-                GLResources& GLResources, Logger& logger);
+  void renderUI(ImGuiParams& ImGuiParams, RayTracer& RayTracer, GLResources& GLResources, Logger& logger);
   void renderOutput(GLResources& GLResources);
   ImVec2 calculatePanelSize(GLResources& GLResources);
 

@@ -22,8 +22,7 @@ class AppWindow {
       return -1;
     }
 
-    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Glimpse", nullptr,
-                              nullptr);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Glimpse", nullptr, nullptr);
     if (!window) {
       const char* description;
       int code = glfwGetError(&description);
@@ -47,8 +46,12 @@ class AppWindow {
 
     // Setup Raytracer
     if (glfwGetCurrentContext() == window) {
-      raytracer.setupScene(logger, gl_res, ui_params.current_scene,
-                           ui_params.lookFrom, ui_params.lookAt);
+      if (!ui_params.startScene.empty()) {
+        ui_params.current_scene =
+            static_cast<int>(std::find(Scene::SceneNames.begin(), Scene::SceneNames.end(), ui_params.startScene) -
+                             Scene::SceneNames.begin());
+      }
+      raytracer.setupScene(logger, gl_res, ui_params.current_scene, ui_params.lookFrom, ui_params.lookAt);
     } else {
       logger.log("Failed to initialize OpenGL context");
       return -1;
