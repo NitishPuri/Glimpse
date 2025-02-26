@@ -98,7 +98,16 @@ void UIRenderer::renderUI(ImGuiParams& gui_params, RayTracer& raytracer, GLResou
 
   renderControl(gui_params, raytracer, gl_res, logger);
 
+  //   static bool plot_pdf = true;
+  //   if (ImGui::Button("Plot PDF")) {
+  //     plot_pdf = true;
+  //   }
   ImGui::End();
+
+  // if (plot_pdf) {
+  //   plotPdf();
+  //   //estimatePi();
+  // }
 }
 
 void UIRenderer::renderOutput(GLResources& GLResources) {
