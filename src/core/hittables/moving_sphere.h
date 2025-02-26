@@ -19,8 +19,8 @@ class moving_sphere : public hittable {
 
  public:
   ray center;
-  double time0, time1;
-  double radius;
+  double time0{}, time1{};
+  double radius{};
   aabb bbox;
   shared_ptr<material> mat_ptr;
 };
