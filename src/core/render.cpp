@@ -8,6 +8,7 @@
 
 #include "camera.h"
 #include "hittables/bvh_node.h"
+#include "hittables/quad.h"
 #include "material.h"
 #include "pdf.h"
 #include "render.h"
@@ -15,7 +16,7 @@
 #define USE_STRATIFIED 1
 
 // Recursive ray tracing with depth limiting
-color ray_color(const ray &r, const color &background, const hittable &world, int depth) {
+color ray_color(const ray &r, const color &background, const hittable &world, int depth, const hittable &lights) {
   hit_record rec;
 
   // if we've exceeded the ray bounce limit, no more light is gathered
@@ -32,24 +33,20 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
     double pdf_value = 1.0;
     // Scattered reflectance
     if (rec.mat_ptr->scatter(r, rec, attenuation, scattered, pdf_value)) {
-      // auto on_light = point3(random_double(213, 343), 554, random_double(227, 332));
-      // auto to_light = on_light - rec.p;
-      // auto distance_squared = to_light.length_squared();
-      // to_light = unit_vector(to_light);
+      auto p0 = make_shared<hittable_pdf>(lights, rec.p);
+      auto p1 = make_shared<cosine_pdf>(rec.normal);
+      mixturee_pdf mixed_pdf(p0, p1);
 
-      // if (dot(to_light, rec.normal) < 0) {
-      //   return emitted;
-      // }
+      scattered = ray(rec.p, mixed_pdf.generate(), r.time());
+      pdf_value = mixed_pdf.value(scattered.direction());
 
-      // auto light_area = 130 * 130;
-      // auto light_cosine = fabs(to_light.y());
-      // if (light_cosine < 0.000001) {
-      //   return emitted;
-      // }
+      hittable_pdf light_pdf(lights, rec.p);
+      scattered = ray(rec.p, light_pdf.generate(), r.time());
+      pdf_value = light_pdf.value(scattered.direction());
 
-      cosine_pdf surface_pdf(rec.normal);
-      scattered = ray(rec.p, surface_pdf.generate(), r.time());
-      pdf_value = surface_pdf.value(scattered.direction());
+      // cosine_pdf surface_pdf(rec.normal);
+      // scattered = ray(rec.p, surface_pdf.generate(), r.time());
+      // pdf_value = surface_pdf.value(scattered.direction());
 
       // pdf_value = distance_squared / (light_cosine * light_area);
       // scattered = ray(rec.p, to_light, r.time());
@@ -57,8 +54,9 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
       double scattering_pdf = rec.mat_ptr->scattering_pdf(r, rec, scattered);
       // pdf_value = scattering_pdf;
 
-      color color_from_scatter =
-          (attenuation * scattering_pdf * ray_color(scattered, background, world, depth - 1)) / pdf_value;
+      color sample_color = ray_color(scattered, background, world, depth - 1, lights);
+
+      color color_from_scatter = (attenuation * scattering_pdf * sample_color) / pdf_value;
 
       return emitted + color_from_scatter;
       // return emitted + attenuation * ray_color(scattered, background, world, depth - 1);
@@ -84,7 +82,8 @@ vec3 sample_square_stratified(int s_i, int s_j, double recip_sqrt_spp) {
 }
 
 void render_section(Image &image, int start_row, int end_row, const camera &cam, const color &background,
-                    const bvh_node &world_bvh, std::atomic<int> *progress = nullptr) {
+                    const bvh_node &world_bvh, const hittable &lights, std::atomic<int> *progress = nullptr) {
+  std::cout << "Rendering section :: " << start_row << " to " << end_row << std::endl;
   for (int j = end_row - 1; j >= start_row; --j) {
     for (int i = 0; i < cam.image_width; ++i) {
       color pixel_color(0, 0, 0);
@@ -104,7 +103,7 @@ void render_section(Image &image, int start_row, int end_row, const camera &cam,
           auto u = (i + offset.x()) / (cam.image_width - 1);
           auto v = (j + offset.y()) / (cam.image_height - 1);
           ray r = cam.get_ray(u, v);
-          pixel_color += ray_color(r, background, world_bvh, cam.max_depth);
+          pixel_color += ray_color(r, background, world_bvh, cam.max_depth, lights);
           if (progress) (*progress)++;
 
           int samples_computed = (s_j * cam.sqrt_spp) + s_i + 1;
@@ -124,11 +123,8 @@ void render_section(Image &image, int start_row, int end_row, const camera &cam,
   }
 }
 
-void Renderer::render_scene(const Scene &scene, Image &image, std::atomic<int> *progress) {
-  auto aspect_ratio = scene.cam.aspect_ratio;
-  auto samples_per_pixel = scene.cam.samples_per_pixel;
+void Renderer::render_scene(const Scene &scene, Image &image, const hittable &lights, std::atomic<int> *progress) {
   auto background = scene.background;
-  auto max_depth = scene.cam.max_depth;
 
   camera cam = scene.cam;
   cam.initialize();
@@ -142,11 +138,16 @@ void Renderer::render_scene(const Scene &scene, Image &image, std::atomic<int> *
   int rows_per_thread = cam.image_height / num_threads;
 
   for (int t = 0; t < num_threads; ++t) {
+    std::cout << "Thread :: " << t << std::endl;
     int start_row = t * rows_per_thread;
     int end_row = (t == num_threads - 1) ? cam.image_height : start_row + rows_per_thread;
 
+    // Light Sources
+    // auto empty_material = shared_ptr<material>();
+    // quad lights(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), empty_material);
+
     futures.push_back(std::async(std::launch::async, render_section, std::ref(image), start_row, end_row, std::ref(cam),
-                                 std::ref(background), std::ref(world_bvh), progress));
+                                 std::ref(background), std::ref(world_bvh), std::ref(lights), progress));
   }
 
   for (auto &f : futures) {

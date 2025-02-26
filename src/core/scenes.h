@@ -10,6 +10,8 @@ struct Scene {
   // world
   hittable_list world;
 
+  // hittable* lights;
+
   // env
   color background = color(0.7, 0.8, 1.0);
 

@@ -24,21 +24,22 @@ struct hit_record {
 class hittable {
  public:
   virtual ~hittable() = default;
-  virtual bool hit(const ray& r, const interval& ray_t,
-                   hit_record& rec) const = 0;
+  virtual bool hit(const ray& r, const interval& ray_t, hit_record& rec) const = 0;
 
   virtual aabb bounding_box() const = 0;
+
+  virtual double pdf_value(const point3& origin, const vec3& direction) const { return 0.0; }
+
+  virtual vec3 random(const point3& origin) const { return vec3(1, 0, 0); }
 };
 
 class translate : public hittable {
  public:
-  translate(shared_ptr<hittable> p, const vec3& displacement)
-      : ptr(p), offset(displacement) {
+  translate(shared_ptr<hittable> p, const vec3& displacement) : ptr(p), offset(displacement) {
     bbox = ptr->bounding_box() + offset;
   }
 
-  virtual bool hit(const ray& r, const interval& ray_t,
-                   hit_record& rec) const override;
+  virtual bool hit(const ray& r, const interval& ray_t, hit_record& rec) const override;
 
   aabb bounding_box() const override { return bbox; }
 
@@ -52,8 +53,7 @@ class rotate_y : public hittable {
  public:
   rotate_y(shared_ptr<hittable> p, double angle);
 
-  virtual bool hit(const ray& r, const interval& ray_t,
-                   hit_record& rec) const override;
+  virtual bool hit(const ray& r, const interval& ray_t, hit_record& rec) const override;
 
   aabb bounding_box() const override { return bbox; }
 

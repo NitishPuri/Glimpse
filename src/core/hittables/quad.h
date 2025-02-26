@@ -5,12 +5,13 @@
 
 class quad : public hittable {
  public:
-  quad(const point3& Q, const vec3& u, const vec3& v, shared_ptr<material> mat)
-      : Q(Q), u(u), v(v), mat(mat) {
+  quad(const point3& Q, const vec3& u, const vec3& v, shared_ptr<material> mat) : Q(Q), u(u), v(v), mat(mat) {
     auto n = cross(u, v);
     normal = unit_vector(n);
     D = dot(normal, Q);
     w = n / dot(n, n);
+
+    area = n.length();
 
     set_bounding_box();
   }
@@ -24,8 +25,7 @@ class quad : public hittable {
 
   aabb bounding_box() const override { return bbox; }
 
-  bool hit(const ray& r, const interval& ray_t,
-           hit_record& rec) const override {
+  bool hit(const ray& r, const interval& ray_t, hit_record& rec) const override {
     auto denom = dot(normal, r.direction());
 
     // No hit if the ray is parallel to the plane.
@@ -66,6 +66,24 @@ class quad : public hittable {
     return true;
   }
 
+  double pdf_value(const point3& origin, const vec3& direction) const override {
+    hit_record rec;
+    if (!hit(ray(origin, direction), interval(0.001, infinity), rec)) return 0;
+
+    auto distance_squared = rec.t * rec.t * direction.length_squared();
+    auto cosine = std::fabs(dot(unit_vector(direction), rec.normal) / direction.length());
+
+    // Return the probability density function value for the hit point.
+    return distance_squared / (cosine * area);
+  }
+
+  vec3 random(const point3& origin) const override {
+    auto p = Q + (random_double() * u + random_double() * v);
+    return p - origin;
+    // Return a random point on the quad.
+    // return Q + u * random_double() + v * random_double();
+  }
+
  private:
   point3 Q;
   vec3 u, v;
@@ -74,10 +92,10 @@ class quad : public hittable {
   aabb bbox;
   vec3 normal;
   double D;
+  double area;
 };
 
-inline shared_ptr<hittable_list> box(const point3& a, const point3& b,
-                                     shared_ptr<material> mat) {
+inline shared_ptr<hittable_list> box(const point3& a, const point3& b, shared_ptr<material> mat) {
   // Returns the 3D box (six sides) that contains the two opposite vertices a &
   // b.
 
@@ -85,10 +103,8 @@ inline shared_ptr<hittable_list> box(const point3& a, const point3& b,
 
   // Construct the two opposite vertices with the minimum and maximum
   // coordinates.
-  auto min = point3(std::fmin(a.x(), b.x()), std::fmin(a.y(), b.y()),
-                    std::fmin(a.z(), b.z()));
-  auto max = point3(std::fmax(a.x(), b.x()), std::fmax(a.y(), b.y()),
-                    std::fmax(a.z(), b.z()));
+  auto min = point3(std::fmin(a.x(), b.x()), std::fmin(a.y(), b.y()), std::fmin(a.z(), b.z()));
+  auto max = point3(std::fmax(a.x(), b.x()), std::fmax(a.y(), b.y()), std::fmax(a.z(), b.z()));
 
   auto dx = vec3(max.x() - min.x(), 0, 0);
   auto dy = vec3(0, max.y() - min.y(), 0);

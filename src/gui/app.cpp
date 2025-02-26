@@ -38,10 +38,10 @@ void AppWindow::run() {
 
     ui.renderUI(ui_params, raytracer, gl_res, logger);
 
-    // if (firstFrame) {
-    //   firstFrame = false;
-    //   raytracer.renderSceneAsync(logger, gl_res);
-    // }
+    if (firstFrame) {
+      firstFrame = false;
+      raytracer.renderSceneAsync(logger, gl_res);
+    }
 
     glClearColor(.1f, .1f, .1f, 1.0f);  // Set background color to dark gray
     glClear(GL_COLOR_BUFFER_BIT);
