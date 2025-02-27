@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vec3.h"
 #include "perlin.h"
+#include "vec3.h"
 
 class rtw_image;
 
@@ -48,46 +48,15 @@ class checker_texture : public texture {
   shared_ptr<texture> odd;
 };
 
-//class image_texture : public texture {
-// public:
-//  const static int bytes_per_pixel = 3;
-//
-//  image_texture(const char *filename);
-//
-//  color value(double u, double v, const vec3 &p) const override;
-//
-// private:
-//  std::shared_ptr<rtw_image> image;
-//};
-
-
 class image_texture : public texture {
  public:
-  //image_texture(const char *filename) : image(make_shared<rtw_image>(filename)) {}
-  image_texture(const char *filename);
+    image_texture(const char *filename);
 
   color value(double u, double v, const point3 &p) const override;
-  
-  //{
-  //  // If we have no texture data, then return solid cyan as a debugging aid.
-  //  if (image->height() <= 0) return color(0, 1, 1);
-
-  //  // Clamp input texture coordinates to [0,1] x [1,0]
-  //  u = interval(0, 1).clamp(u);
-  //  v = 1.0 - interval(0, 1).clamp(v);  // Flip V to image coordinates
-
-  //  auto i = int(u * image.width());
-  //  auto j = int(v * image.height());
-  //  auto pixel = image.pixel_data(i, j);
-
-  //  auto color_scale = 1.0 / 255.0;
-  //  return color(color_scale * pixel[0], color_scale * pixel[1], color_scale * pixel[2]);
-  //}
 
  private:
   std::shared_ptr<rtw_image> image;
 };
-
 
 class noise_texture : public texture {
  public:

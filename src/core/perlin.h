@@ -1,5 +1,7 @@
 #pragma once
 
+#include "vec3.h"
+
 class perlin {
  public:
   perlin() {
