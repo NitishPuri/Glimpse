@@ -9,9 +9,11 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - [x] [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 - [x] [Ray Tracing Next Week](https://raytracing.github.io/books/RayTracingNextWeek.html)
 - [x] [Ray Tracing the Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
+
 - [ ] [pbrt](https://github.com/mmp/pbrt-v4)
 - [ ] Smallpaints
 - [ ] [nanort](https://github.com/lighttransport/nanort?tab=readme-ov-file)
+- [ ] https://github.com/lighttransport/nanogi
 - [ ] [LuxCore](https://github.com/LuxCoreRender/LuxCore)
 
 ## OpenGL Compute shaders
@@ -31,7 +33,7 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - [x] **GLFW + ImGui GUI** *(Windowing & Controls)*
 - [x] **Refactor into CLI and GUI Apps**
 - [x] **Async Ray Tracing in GUI**
-- [ ] **Expose All Config Options in GUI** 
+- [x] **Expose All Config Options in GUI** 
   - [x] Scene selection
   - [x] Samples per pixel (SPP)
   - [x] Max depth
@@ -41,54 +43,39 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
   - Scene object params like position, material
   - Use SPP=1 to show as close to real time updates as possible while user is manipulating a control, 
     maybe make this togglable ( in cases even spp = 1 might be too much? ), 
-- [ ] **Namespace & Modular Code Cleanup**
-- Make core into a shared lib
+- [x] Make core into a shared lib
 - [ ] **Camera Improvements**
-  - Positioning & Re-rendering  
-  - Depth of field (Aperture, Focus Distance)
-  - Motion blur
-  - Exposure & tone mapping
-- [ ] use glm for vector stuff.
-- [ ] Use something like Conan for package management when trying to add a new package next time.
-- [ ] improve project structure. automate, build, test scripts.
+  - [x] Positioning & Re-rendering  
+  - [x] Depth of field (Aperture, Focus Distance)
+  - [x] Motion blur
+- [x] use glm for vector stuff.
 - [ ] hook with a unit testing framework 
   - use a header only framework and hook with ctest, much simpler.
   - also, find simple header only lib for image comparison.
-  hook with github actions!
-- [ ] add unit tests
-- Glass, mirrors
+  - hook with github actions!
+- [x] Glass, mirrors
 - dispersion, rainbows, scattering
 - spectral emission/radiance - ??
-- add loaders for ply - find ready made solutions ?
-- add loaders for lux and pbrt scenes - port their loaders ?
+- Interactive rendering and uncapped SPP with accumulation buffers
     
 
 #### **2. Scene Management & Experimentation**
 - [ ] **Custom Scene Support**
   - Scene import/export as JSON (or other lightweight formats)
   - UI controls to tweak & reload scenes live  
+  - add loaders for ply - find ready made solutions ?
 - Mesh rendering
-- [ ] **Prebuilt Test Scenes**
-  - Cornell Box, Spheres, etc. for comparisons
-  - Configurable lighting setups  
 - [ ] **Scene Format Loaders**
   - Load scenes from **PBRT, LuxRender, RenderMan**
-  - Find open example datasets
-  - Benchmark against other renderers!
 
 #### **3. Performance & Algorithmic Enhancements**
 - [ ] **Acceleration Structures**
   - [x]  BVH (Bounding Volume Hierarchy)
-  - SAH BVH (Surface Area Heuristic)
-  - Experiment with alternative structures (KD-Trees, Grids, etc.)  
 - Performance profiling
-  - Visual Studio, ? what other options?
 - [ ] **Parallelization Improvements**
   - Thread pools (C++ standard or custom)  
   - [x] Tiling techniques (Divide image into patches for better caching)  
   - SIMD (AVX, SSE)  
-  - OpenMP & Task-based parallelism
-    - do i need to setup any infra for this? like for cuda?
 - **Raymarching**
     - procedural terrains, SDFs, metaballs for terrain, geometr, clouds, fogs
     - Volumetric effects like fog, haze?
@@ -96,15 +83,18 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - Non photorealistic rendering
     - Toon shading, hatching, stylized effects in ray tracer?
 - [ ] **Better Sampling & Noise Reduction**
-  - Importance Sampling
+  - [x] Importance Sampling
   - Adaptive Sampling  
+    - Instead of blindly shooting the same number of rays per pixel, focus more samples on noisy areas.
+    - Compute variance per pixel and sample more in high-variance regions.
+    - Use a pre-pass (low spp) to estimate variance, then adaptively refine pixels.
   - Denoising techniques (ML-based, OpenImageDenoise, etc.)  
 - [ ] **Lighting & Global Illumination**
-  - Soft Shadows  
-  - Refraction / Dielectrics  
-  - Specular Reflections & Fresnel Effects  
-  - Path Tracing / Global Illumination  
-  - Multiple Importance Sampling (MIS)  
+  - [x] Soft Shadows  
+  - [x] Refraction / Dielectrics  
+  - [x] Specular Reflections & Fresnel Effects  
+  - [x] Path Tracing / Global Illumination  
+  - [x] Multiple Importance Sampling (MIS)  
   - Photon Mapping (if curious)  
 
 #### **4. Compute-Based & Advanced Features**
