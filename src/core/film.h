@@ -4,10 +4,10 @@
 
 #include "vec3.h"
 
-class film {
+class Film {
  public:
-  film() : width(0), height(0) {}
-  film(int width, int height)
+  Film() : width(0), height(0) {}
+  Film(int width, int height)
       : width(width),
         height(height),
         sample_count(width * height, 0),
@@ -30,10 +30,11 @@ class film {
     int index = get_index(x, y);
     sample_count[index]++;
 
-    vec3 delta = sample - mean[index];
-    mean[index] += delta / sample_count[index];
-    vec3 delta2 = sample - mean[index];
-    m2[index] += delta * delta2;
+    // TODO: Enable variance calcualtion after initial setup.
+    //  vec3 delta = sample - mean[index];
+    //  mean[index] += delta / sample_count[index];
+    //  vec3 delta2 = sample - mean[index];
+    //  m2[index] += delta * delta2;
 
     accumulated_samples[index] += sample;
   }
