@@ -15,7 +15,7 @@
 #include "render.h"
 #include "vec3.h"
 
-#define USE_STRATIFIED 1
+std::atomic<bool> Renderer::stop_rendering(false);
 
 // Recursive ray tracing with depth limiting
 color ray_color(const ray &r, const color &background, const hittable &world, int depth, const hittable &lights,
@@ -77,24 +77,33 @@ vec3 sample_square_stratified(int s_i, int s_j, double recip_sqrt_spp) {
   return vec3(px, py, 0);
 }
 
-void render_section(Image &image, int start_row, int end_row, const Scene &scene, const bvh_node &world_bvh,
-                    std::atomic<int> *progress) {
-  auto &cam = scene.cam;
-  for (int j = end_row - 1; j >= start_row; --j) {
-    for (int i = 0; i < cam.image_width; ++i) {
-      color pixel_color(0, 0, 0);
-#if USE_STRATIFIED == 0
-      for (int s = 0; s < cam.samples_per_pixel; ++s) {
-        // sample pixels with random offset for anti-aliasing
-        auto u = (i + random_double(-0.5, 0.5)) / (cam.image_width - 1);
-        auto v = (j + random_double(-0.5, 0.5)) / (cam.image_height - 1);
-        ray r = cam.get_ray(u, v);
-        pixel_color += ray_color(r, background, world_bvh, cam.max_depth);
-        if (progress) (*progress)++;
-      }
-#elif USE_STRATIFIED == 1
-      for (int s_j = 0; s_j < cam.sqrt_spp; ++s_j) {
-        for (int s_i = 0; s_i < cam.sqrt_spp; ++s_i) {
+struct RenderSectionArgs {
+  Image &image;
+  Film &film;
+  int start_row;
+  int end_row;
+  const Scene &scene;
+  const bvh_node &world_bvh;
+  std::atomic<int> *progress;
+};
+
+void render_section(RenderSectionArgs &args) {
+  auto &image = args.image;
+  auto &cam = args.scene.cam;
+  auto &start_row = args.start_row;
+  auto &end_row = args.end_row;
+  auto &world_bvh = args.world_bvh;
+  auto &scene = args.scene;
+  auto progress = args.progress;
+  auto &film = args.film;
+
+  for (int s_j = 0; s_j < cam.sqrt_spp; ++s_j) {
+    for (int s_i = 0; s_i < cam.sqrt_spp; ++s_i) {
+      for (int j = end_row - 1; j >= start_row; --j) {
+        for (int i = 0; i < cam.image_width; ++i) {
+          // color pixel_color(0, 0, 0);
+          color pixel_color(0, 0, 0);
+
           auto offset = sample_square_stratified(s_i, s_j, cam.recip_sqrt_spp);
           auto u = (i + offset.x()) / (cam.image_width - 1);
           auto v = (j + offset.y()) / (cam.image_height - 1);
@@ -102,25 +111,56 @@ void render_section(Image &image, int start_row, int end_row, const Scene &scene
           pixel_color +=
               ray_color(r, scene.background, world_bvh, cam.max_depth, scene.lights, !scene.lights.objects.empty());
           if (progress) (*progress)++;
+
+          film.add_sample(i, j, pixel_color);
+          image.set(i, j, film.get_sample(i, j));
         }
       }
-#endif
-
-      pixel_color = (pixel_color * cam.pixel_samples_scale);
-      image.set(i, j, pixel_color);
     }
   }
 }
 
-void Renderer::render_scene(const Scene &scene, Image &image, std::atomic<int> *progress) {
-  auto background = scene.background;
+void render_section2(RenderSectionArgs &args) {
+  auto &image = args.image;
+  auto &cam = args.scene.cam;
+  auto &start_row = args.start_row;
+  auto &end_row = args.end_row;
+  auto &world_bvh = args.world_bvh;
+  auto &scene = args.scene;
+  auto progress = args.progress;
+  auto &film = args.film;
 
-  // camera cam = scene.cam;
-  // cam.initialize();
-  // scene.cam.initialize();
+  while (!Renderer::stop_rendering.load()) {
+    for (int s_j = 0; s_j < cam.sqrt_spp; ++s_j) {
+      for (int s_i = 0; s_i < cam.sqrt_spp; ++s_i) {
+        for (int j = end_row - 1; j >= start_row; --j) {
+          for (int i = 0; i < cam.image_width; ++i) {
+            // color pixel_color(0, 0, 0);
+            color pixel_color(0, 0, 0);
+
+            auto offset = sample_square_stratified(s_i, s_j, cam.recip_sqrt_spp);
+            auto u = (i + offset.x()) / (cam.image_width - 1);
+            auto v = (j + offset.y()) / (cam.image_height - 1);
+            ray r = cam.get_ray(u, v);
+            pixel_color +=
+                ray_color(r, scene.background, world_bvh, cam.max_depth, scene.lights, !scene.lights.objects.empty());
+            if (progress) (*progress)++;
+
+            film.add_sample(i, j, pixel_color);
+            image.set(i, j, film.get_sample(i, j));
+          }
+        }
+      }
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+  std::cout << "Stopping rendering thread..." << std::this_thread::get_id() << std::endl;
+}
+
+void Renderer::render_scene(const Scene &scene, Image &image, std::atomic<int> *progress) {
   auto world_bvh = bvh_node(scene.world);
 
-  // Image
+  film.initialize(scene.cam.image_width, scene.cam.image_height);
 
 #ifdef MULTITHREADED
   const int num_threads = std::thread::hardware_concurrency();
@@ -131,13 +171,22 @@ void Renderer::render_scene(const Scene &scene, Image &image, std::atomic<int> *
     int start_row = t * rows_per_thread;
     int end_row = (t == num_threads - 1) ? scene.cam.image_height : start_row + rows_per_thread;
 
-    futures.push_back(std::async(std::launch::async, render_section, std::ref(image), start_row, end_row,
-                                 std::ref(scene), std::ref(world_bvh), progress));
+    RenderSectionArgs args{image, film, start_row, end_row, scene, world_bvh, progress};
+    // futures.push_back(std::async(std::launch::async, render_section, args));
+    futures.push_back(std::async(std::launch::async, render_section2, args));
+  }
+
+  // Wait for a signal to stop rendering before waiting for threaads to finish.
+  while (!stop_rendering.load()) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   for (auto &f : futures) {
     f.get();
   }
+
+  std::cout << "All threads finished rendering..." << std::endl;
+  Renderer::stop_rendering = false;
 #else  // SINGLETHREADED
 
   // Image image(image_width, image_height);
