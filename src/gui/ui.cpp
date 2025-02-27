@@ -61,10 +61,19 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
   }
 
   if (raytracer.status == RayTracer::RENDERING) {
-    int totalPixels = gl_res.renderWidth * gl_res.renderHeight * raytracer.scene.cam.samples_per_pixel;
-    ImGui::Text("Rendering...%d/%d", raytracer.progress.load(), totalPixels);
-    float progress = float(raytracer.progress.load()) / float(totalPixels);
-    ImGui::ProgressBar(progress, ImVec2(-1, 0), "Progress");
+    if (raytracer.scene.cam.uncapped_spp) {
+      // TODO: Implement this, add more stats
+      ImGui::Text("Average SPP ... %d", 0);
+      ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(0.0f, 0.0f), "Progress..");
+    } else {
+      int totalPixels = gl_res.renderWidth * gl_res.renderHeight * raytracer.scene.cam.samples_per_pixel;
+      int samples_done = raytracer.progress.load();
+      ImGui::Text("Rendering...%d/%d", samples_done / (gl_res.renderWidth * gl_res.renderHeight),
+                  raytracer.scene.cam.samples_per_pixel);
+      float progress = float(samples_done) / float(totalPixels);
+      ImGui::ProgressBar(progress, ImVec2(-1, 0), "Progress");
+    }
+
     // TODO: Should we conmtrol how frequent this happens?
     gl_res.updateFramebuffer(raytracer.image.data);
 
@@ -111,8 +120,10 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
   if (!controlsEnabled) {
     ImGui::EndDisabled();
 
-    if (ImGui::Button("Stop Rendering")) {
-      raytracer.stopRendering();
+    if (raytracer.scene.cam.uncapped_spp) {
+      if (ImGui::Button("Stop Rendering")) {
+        raytracer.stopRendering();
+      }
     }
   }
 
