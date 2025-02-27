@@ -78,13 +78,6 @@ inline vec3 unit_vector(const vec3& v) { return v / v.length(); }
 
 inline vec3 sqrt(vec3 v) { return vec3(sqrt(v.e[0]), sqrt(v.e[1]), sqrt(v.e[2])); }
 
-inline vec3 random_in_unit_disk() {
-  while (true) {
-    auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0);
-    if (p.length_squared() < 1) return p;
-  }
-}
-
 inline vec3 random_unit_vector() {
   while (true) {
     auto p = vec3::random(-1, 1);
@@ -99,6 +92,13 @@ inline vec3 random_on_hemisphere(const vec3& normal) {
     return on_unit_sphere;
   else
     return -on_unit_sphere;
+}
+
+inline vec3 random_in_unit_disk() {
+  while (true) {
+    auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0);
+    if (p.length_squared() < 1) return p;
+  }
 }
 
 // Generates a random point within a unit square centered at the origin
