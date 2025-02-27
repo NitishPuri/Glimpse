@@ -50,7 +50,7 @@ class camera {
     lens_radius = aperture / 2;
 #else
     // Calculate the camera defocus disk basis vectors.
-    defocus_angle = aperture;
+    // defocus_angle = aperture;
     auto defocus_radius = focus_distance * std::tan(degrees_to_radians(defocus_angle / 2));
     defocus_disk_u = u * defocus_radius;
     defocus_disk_v = v * defocus_radius;
@@ -73,7 +73,7 @@ class camera {
     auto ray_direction = lower_left_corner + s * horizontal + t * vertical - ray_origin;
 
     // Random time for motion blur?
-    return ray(ray_origin, ray_direction, random_double(time0, time1));
+    return ray(ray_origin, ray_direction, random_double());
   }
 
 #if DEFOCUS_IMPL == 1
@@ -98,11 +98,11 @@ class camera {
   point3 lookat = point3(0, 0, -1);   // point camera is looking at
   point3 vup = vec3(0, 1, 0);         // camera realtive "up" direction
 
-  float aperture = 0.1f;         //
-  float defocus_angle = 0;       // variation angle of rays through each pixel
+  // float aperture = 0.1f;         //
+  float defocus_angle = 0.1f;    // variation angle of rays through each pixel
   float focus_distance = 10.0f;  // distance from camera lookfrom point to plane of perfect focus
 
-  double time0 = 0.0, time1 = 1.0;  // default shutter open/close times
+  // double time0 = 0.0, time1 = 1.0;  // default shutter open/close times
 
   int image_height = 0;
 

@@ -26,15 +26,15 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
 
   // If the ray hits nothing, return the background color.
   // Use eps = 0.001 to avoid self-intersections
-  if (world.hit(r, {0.001, infinity}, rec)) {
+  if (world.hit(r, interval{0.001, infinity}, rec)) {
     scatter_record srec;
+    color color_from_emission = rec.mat->emitted(r, rec, rec.u, rec.v, rec.p);
 
     // ray scattered;
     // color attenuation;
     // color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
-    color color_from_emission = rec.mat->emitted(r, rec, rec.u, rec.v, rec.p);
 
-    double pdf_value = 1.0;
+    // double pdf_value = 1.0;
     // Scattered reflectance
     if (rec.mat->scatter(r, rec, srec)) {
       if (srec.skip_pdf) {
@@ -46,11 +46,13 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
       mixture_pdf mixed_pdf(light_ptr, srec.pdf_ptr);
 
       ray scattered = ray(rec.p, mixed_pdf.generate(), r.time());
-      pdf_value = mixed_pdf.value(scattered.direction());
+      auto pdf_value = mixed_pdf.value(scattered.direction());
 
-      hittable_pdf light_pdf(lights, rec.p);
-      scattered = ray(rec.p, light_pdf.generate(), r.time());
-      pdf_value = light_pdf.value(scattered.direction());
+      double scattering_pdf = rec.mat->scattering_pdf(r, rec, scattered);
+
+      // hittable_pdf light_pdf(lights, rec.p);
+      // scattered = ray(rec.p, light_pdf.generate(), r.time());
+      // pdf_value = light_pdf.value(scattered.direction());
 
       // cosine_pdf surface_pdf(rec.normal);
       // scattered = ray(rec.p, surface_pdf.generate(), r.time());
@@ -59,7 +61,6 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
       // pdf_value = distance_squared / (light_cosine * light_area);
       // scattered = ray(rec.p, to_light, r.time());
 
-      double scattering_pdf = rec.mat->scattering_pdf(r, rec, scattered);
       // pdf_value = scattering_pdf;
 
       color sample_color = ray_color(scattered, background, world, depth - 1, lights);
@@ -91,7 +92,7 @@ vec3 sample_square_stratified(int s_i, int s_j, double recip_sqrt_spp) {
 
 void render_section(Image &image, int start_row, int end_row, const camera &cam, const color &background,
                     const bvh_node &world_bvh, const hittable &lights, std::atomic<int> *progress = nullptr) {
-  std::cout << "Rendering section :: " << start_row << " to " << end_row << std::endl;
+  // std::cout << "Rendering section :: " << start_row << " to " << end_row << std::endl;
   for (int j = end_row - 1; j >= start_row; --j) {
     for (int i = 0; i < cam.image_width; ++i) {
       color pixel_color(0, 0, 0);
@@ -147,7 +148,7 @@ void Renderer::render_scene(const Scene &scene, Image &image, const hittable &li
   int rows_per_thread = cam.image_height / num_threads;
 
   for (int t = 0; t < num_threads; ++t) {
-    std::cout << "Thread :: " << t << std::endl;
+    // std::cout << "Thread :: " << t << std::endl;
     int start_row = t * rows_per_thread;
     int end_row = (t == num_threads - 1) ? cam.image_height : start_row + rows_per_thread;
 
