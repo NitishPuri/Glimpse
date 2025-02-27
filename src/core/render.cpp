@@ -7,14 +7,18 @@
 #endif
 
 #include "camera.h"
+#include "common.h"
 #include "hittables/bvh_node.h"
+#include "hittables/quad.h"
 #include "material.h"
+#include "pdf.h"
 #include "render.h"
+#include "vec3.h"
 
 #define USE_STRATIFIED 1
 
 // Recursive ray tracing with depth limiting
-color ray_color(const ray &r, const color &background, const hittable &world, int depth) {
+color ray_color(const ray &r, const color &background, const hittable &world, int depth, const hittable &lights) {
   hit_record rec;
 
   // if we've exceeded the ray bounce limit, no more light is gathered
@@ -22,17 +26,32 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
 
   // If the ray hits nothing, return the background color.
   // Use eps = 0.001 to avoid self-intersections
-  if (world.hit(r, {0.001, infinity}, rec)) {
-    ray scattered;
-    color attenuation;
-    color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+  if (world.hit(r, interval{0.001, infinity}, rec)) {
+    scatter_record srec;
+    color color_from_emission = rec.mat->emitted(r, rec, rec.u, rec.v, rec.p);
 
     // Scattered reflectance
-    if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-      return emitted + attenuation * ray_color(scattered, background, world, depth - 1);
+    if (rec.mat->scatter(r, rec, srec)) {
+      if (srec.skip_pdf) {
+        return srec.attenuation * ray_color(srec.skip_pdf_ray, background, world, depth - 1, lights);
+      }
+
+      auto light_ptr = make_shared<hittable_pdf>(lights, rec.p);
+      mixture_pdf mixed_pdf(light_ptr, srec.pdf_ptr);
+
+      ray scattered = ray(rec.p, mixed_pdf.generate(), r.time());
+      auto pdf_value = mixed_pdf.value(scattered.direction());
+
+      double scattering_pdf = rec.mat->scattering_pdf(r, rec, scattered);
+
+      color sample_color = ray_color(scattered, background, world, depth - 1, lights);
+
+      color color_from_scatter = (srec.attenuation * scattering_pdf * sample_color) / pdf_value;
+
+      return color_from_emission + color_from_scatter;
     }
 
-    return emitted;
+    return color_from_emission;
   }
 
   return background;
@@ -52,7 +71,7 @@ vec3 sample_square_stratified(int s_i, int s_j, double recip_sqrt_spp) {
 }
 
 void render_section(Image &image, int start_row, int end_row, const camera &cam, const color &background,
-                    const bvh_node &world_bvh, std::atomic<int> *progress = nullptr) {
+                    const bvh_node &world_bvh, const hittable &lights, std::atomic<int> *progress = nullptr) {
   for (int j = end_row - 1; j >= start_row; --j) {
     for (int i = 0; i < cam.image_width; ++i) {
       color pixel_color(0, 0, 0);
@@ -72,29 +91,24 @@ void render_section(Image &image, int start_row, int end_row, const camera &cam,
           auto u = (i + offset.x()) / (cam.image_width - 1);
           auto v = (j + offset.y()) / (cam.image_height - 1);
           ray r = cam.get_ray(u, v);
-          pixel_color += ray_color(r, background, world_bvh, cam.max_depth);
+          pixel_color += ray_color(r, background, world_bvh, cam.max_depth, lights);
           if (progress) (*progress)++;
         }
       }
 #endif
 
-      // gamma correction
-      pixel_color = sqrt(pixel_color * cam.pixel_samples_scale);
-
+      pixel_color = (pixel_color * cam.pixel_samples_scale);
       image.set(i, j, pixel_color);
     }
   }
 }
 
-void Renderer::render_scene(const Scene &scene, Image &image, std::atomic<int> *progress) {
-  auto aspect_ratio = scene.cam.aspect_ratio;
-  auto samples_per_pixel = scene.cam.samples_per_pixel;
+void Renderer::render_scene(const Scene &scene, Image &image, const hittable &lights, std::atomic<int> *progress) {
   auto background = scene.background;
-  auto max_depth = scene.cam.max_depth;
 
   camera cam = scene.cam;
   cam.initialize();
-  auto world_bvh = bvh_node(scene.world, 0, 1);
+  auto world_bvh = bvh_node(scene.world);
 
   // Image
 
@@ -108,7 +122,7 @@ void Renderer::render_scene(const Scene &scene, Image &image, std::atomic<int> *
     int end_row = (t == num_threads - 1) ? cam.image_height : start_row + rows_per_thread;
 
     futures.push_back(std::async(std::launch::async, render_section, std::ref(image), start_row, end_row, std::ref(cam),
-                                 std::ref(background), std::ref(world_bvh), progress));
+                                 std::ref(background), std::ref(world_bvh), std::ref(lights), progress));
   }
 
   for (auto &f : futures) {

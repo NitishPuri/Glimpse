@@ -13,7 +13,7 @@ class moving_sphere : public hittable {
     bbox = aabb(box1, box2);
   }
 
-  bool hit(const ray &r, const interval &ray_t, hit_record &rec) const override;
+  bool hit(const ray &r, interval ray_t, hit_record &rec) const override;
 
   aabb bounding_box() const override { return bbox; }
 

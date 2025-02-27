@@ -4,6 +4,7 @@
 #include <future>
 #include <optional>
 
+#include "core/hittables/quad.h"
 #include "core/image.h"
 #include "core/render.h"
 #include "core/scenes.h"
@@ -24,7 +25,14 @@ struct RayTracer {
       auto startTime = std::chrono::high_resolution_clock::now();
 
       status = RENDERING;
-      Renderer::render_scene(scene, image, &progress);
+
+      // Light Sources
+      auto empty_material = shared_ptr<material>();
+      quad light(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), empty_material);
+      hittable_list lights_list;
+      lights_list.add(make_shared<quad>(light));
+
+      Renderer::render_scene(scene, image, lights_list, &progress);
       status = DONE;
 
       auto endTime = std::chrono::high_resolution_clock::now();

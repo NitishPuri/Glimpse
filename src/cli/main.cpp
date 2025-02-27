@@ -33,16 +33,17 @@ int main(int argc, char **argv) {
   Image image(image_width, image_height);
 
   // Render
-  logger.log("Rendering... ", image_width, "x", image_height, " with ",
-             samples_per_pixel, " samples per pixel");
+  logger.log("Rendering... ", image_width, "x", image_height, " with ", samples_per_pixel, " samples per pixel");
   auto startTime = std::chrono::high_resolution_clock::now();
 
-  Renderer::render_scene(scene, image);
+  // Light Sources
+  auto empty_material = shared_ptr<material>();
+  quad lights(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), empty_material);
+
+  Renderer::render_scene(scene, image, lights, nullptr);
 
   auto endTime = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration<float, std::chrono::seconds::period>(
-                      endTime - startTime)
-                      .count();
+  auto duration = std::chrono::duration<float, std::chrono::seconds::period>(endTime - startTime).count();
 
   logger.log("Image generated in ", duration, " seconds");
 
