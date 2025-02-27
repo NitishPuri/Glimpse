@@ -12,6 +12,8 @@ struct ImGuiParams {
   // std::string startScene = "material_showcase";
   std::string startScene = "cornell_box";
 
+  bool auto_render = true;
+
   float backgroundColor[3] = {0.1f, 0.1f, 0.1f};
   float lookFrom[3] = {13.0f, 2.0f, 3.0f};
   float lookAt[3] = {0.0f, 0.0f, 0.0f};
@@ -21,11 +23,18 @@ class AppWindow;
 
 class UIRenderer {
  public:
+  UIRenderer(Logger& logger) : logger(logger) {}
   void setApp(AppWindow* window) { this->window = window; }
-  void renderUI(ImGuiParams& ImGuiParams, RayTracer& RayTracer, GLResources& GLResources, Logger& logger);
+  void renderUI(ImGuiParams& ImGuiParams, RayTracer& RayTracer, GLResources& GLResources);
   void renderOutput(GLResources& GLResources);
   ImVec2 calculatePanelSize(GLResources& GLResources);
 
  private:
+  void maybeRenderOnParamChange(ImGuiParams& gui_params, RayTracer& raytracer, GLResources& gl_res) {
+    if (gui_params.auto_render) {
+      raytracer.renderSceneAsync(gl_res);
+    }
+  }
   AppWindow* window = nullptr;
+  Logger& logger;
 };

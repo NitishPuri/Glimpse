@@ -13,11 +13,14 @@ struct RayTracer {
   Scene scene;
   Image image;
   enum Status { IDLE, RENDERING, DONE };
-  std::atomic<Status> status;
-  std::optional<std::future<void>> trace_future;
-  std::atomic<int> progress;
+  std::atomic<Status> status{IDLE};
+  std::optional<std::future<void>> trace_future{};
+  std::atomic<int> progress{0};
 
-  void renderSceneAsync(Logger& logger, GLResources& GLResources) {
+  Logger& logger;
+  RayTracer(Logger& logger) : logger(logger) {}
+
+  void renderSceneAsync(GLResources& GLResources) {
     trace_future = std::async(std::launch::async, [&]() {
       image.clear();
       logger.log("Rendering... ", GLResources.renderWidth, "x", GLResources.renderHeight, " with ",
@@ -46,7 +49,7 @@ struct RayTracer {
     });
   }
 
-  void setupScene(Logger& logger, GLResources& GLResources, int current_scene, float lookFrom[3], float lookAt[3]) {
+  void setupScene(GLResources& GLResources, int current_scene, float lookFrom[3], float lookAt[3]) {
     // Ensure current_scene is within valid range
     if (current_scene < 0 || current_scene >= Scene::SceneNames.size()) {
       logger.log("Invalid scene index: ", current_scene);
@@ -68,6 +71,14 @@ struct RayTracer {
     vec3tofloat(scene.cam.lookfrom, lookFrom);
     vec3tofloat(scene.cam.lookat, lookAt);
 
-    GLResources.setupFramebuffer(logger);
+    GLResources.setupFramebuffer();
+  }
+
+  void stopRendering() {
+    if (trace_future.has_value()) {
+      Renderer::stop_rendering = true;
+      // trace_future->wait();
+      // trace_future.reset();
+    }
   }
 };
