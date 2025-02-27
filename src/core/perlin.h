@@ -1,11 +1,20 @@
-#pragma once
-
-#include "vec3.h"
+#ifndef PERLIN_H
+#define PERLIN_H
+//==============================================================================================
+// Originally written in 2016 by Peter Shirley <ptrshrl@gmail.com>
+//
+// To the extent possible under law, the author(s) have dedicated all copyright and related and
+// neighboring rights to this software to the public domain worldwide. This software is
+// distributed without any warranty.
+//
+// You should have received a copy (see file COPYING.txt) of the CC0 Public Domain Dedication
+// along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+//==============================================================================================
 
 class perlin {
  public:
   perlin() {
-    for (int i = 0; i < point_count; ++i) {
+    for (int i = 0; i < point_count; i++) {
       randvec[i] = unit_vector(vec3::random(-1, 1));
     }
 
@@ -14,17 +23,14 @@ class perlin {
     perlin_generate_perm(perm_z);
   }
 
-  double noise(const point3 &p) const {
-    auto u = p.x() - floor(p.x());
-    auto v = p.y() - floor(p.y());
-    auto w = p.z() - floor(p.z());
-    u = u * u * (3 - 2 * u);
-    v = v * v * (3 - 2 * v);
-    w = w * w * (3 - 2 * w);
+  double noise(const point3& p) const {
+    auto u = p.x() - std::floor(p.x());
+    auto v = p.y() - std::floor(p.y());
+    auto w = p.z() - std::floor(p.z());
 
-    auto i = static_cast<int>(floor(p.x()));
-    auto j = static_cast<int>(floor(p.y()));
-    auto k = static_cast<int>(floor(p.z()));
+    auto i = int(std::floor(p.x()));
+    auto j = int(std::floor(p.y()));
+    auto k = int(std::floor(p.z()));
     vec3 c[2][2][2];
 
     for (int di = 0; di < 2; di++)
@@ -35,7 +41,7 @@ class perlin {
     return perlin_interp(c, u, v, w);
   }
 
-  double turb(const point3 &p, int depth = 7) const {
+  double turb(const point3& p, int depth) const {
     auto accum = 0.0;
     auto temp_p = p;
     auto weight = 1.0;
@@ -46,7 +52,7 @@ class perlin {
       temp_p *= 2;
     }
 
-    return fabs(accum);
+    return std::fabs(accum);
   }
 
  private:
@@ -56,17 +62,22 @@ class perlin {
   int perm_y[point_count];
   int perm_z[point_count];
 
-  static double trilinear_interp(double c[2][2][2], double u, double v, double w) {
-    auto accum = 0.0;
-    for (int i = 0; i < 2; i++)
-      for (int j = 0; j < 2; j++)
-        for (int k = 0; k < 2; k++)
-          accum += (i * u + (1 - i) * (1 - u)) * (j * v + (1 - j) * (1 - v)) * (k * w + (1 - k) * (1 - w)) * c[i][j][k];
+  static void perlin_generate_perm(int* p) {
+    for (int i = 0; i < point_count; i++) p[i] = i;
 
-    return accum;
+    permute(p, point_count);
   }
 
-  static double perlin_interp(vec3 c[2][2][2], double u, double v, double w) {
+  static void permute(int* p, int n) {
+    for (int i = n - 1; i > 0; i--) {
+      int target = random_int(0, i);
+      int tmp = p[i];
+      p[i] = p[target];
+      p[target] = tmp;
+    }
+  }
+
+  static double perlin_interp(const vec3 c[2][2][2], double u, double v, double w) {
     auto uu = u * u * (3 - 2 * u);
     auto vv = v * v * (3 - 2 * v);
     auto ww = w * w * (3 - 2 * w);
@@ -82,35 +93,6 @@ class perlin {
 
     return accum;
   }
-
-  static void perlin_generate_perm(int *p) {
-    for (int i = 0; i < point_count; i++) {
-      p[i] = i;
-    }
-
-    permute(p, point_count);
-  }
-
-  static void permute(int *p, int n) {
-    for (int i = n - 1; i > 0; i--) {
-      int target = random_int(0, i);
-      std::swap(p[i], p[target]);
-    }
-  }
 };
 
-class noise_texture : public texture {
- public:
-  noise_texture() : scale(1) {}
-  noise_texture(double sc) : scale{sc} {}
-
-  virtual color value(double u, double v, const point3 &p) const override {
-    // return color(1, 1, 1) * 0.5 * (1.0 + noise.noise(scale * p));
-    // return color(1, 1, 1) * noise.turb(scale * p);
-    return color(.5, .5, .5) * (1 + std::sin(scale * p.z() + 10 * noise.turb(p, 7)));
-  }
-
- private:
-  perlin noise;
-  double scale{};
-};
+#endif

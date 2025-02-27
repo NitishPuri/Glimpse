@@ -1,4 +1,15 @@
-#pragma once
+#ifndef PDF_H
+#define PDF_H
+//==============================================================================================
+// Originally written in 2016 by Peter Shirley <ptrshrl@gmail.com>
+//
+// To the extent possible under law, the author(s) have dedicated all copyright and related and
+// neighboring rights to this software to the public domain worldwide. This software is
+// distributed without any warranty.
+//
+// You should have received a copy (see file COPYING.txt) of the CC0 Public Domain Dedication
+// along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+//==============================================================================================
 
 #include "hittables/hittable_list.h"
 #include "onb.h"
@@ -15,7 +26,7 @@ class sphere_pdf : public pdf {
  public:
   sphere_pdf() {}
 
-  double value(const vec3& direction) const override { return 1.0 / (4 * pi); }
+  double value(const vec3& direction) const override { return 1 / (4 * pi); }
 
   vec3 generate() const override { return random_unit_vector(); }
 };
@@ -25,8 +36,8 @@ class cosine_pdf : public pdf {
   cosine_pdf(const vec3& w) : uvw(w) {}
 
   double value(const vec3& direction) const override {
-    auto cosine = dot(unit_vector(direction), uvw.w());
-    return std::fmax(0, cosine) / pi;
+    auto cosine_theta = dot(unit_vector(direction), uvw.w());
+    return std::fmax(0, cosine_theta / pi);
   }
 
   vec3 generate() const override { return uvw.transform(random_cosine_direction()); }
@@ -48,21 +59,26 @@ class hittable_pdf : public pdf {
   point3 origin;
 };
 
-class mixturee_pdf : public pdf {
+class mixture_pdf : public pdf {
  public:
-  mixturee_pdf(std::shared_ptr<pdf> p0, std::shared_ptr<pdf> p1) : p0(p0), p1(p1) {}
+  mixture_pdf(shared_ptr<pdf> p0, shared_ptr<pdf> p1) {
+    p[0] = p0;
+    p[1] = p1;
+  }
 
-  double value(const vec3& direction) const override { return 0.5 * p0->value(direction) + 0.5 * p1->value(direction); }
+  double value(const vec3& direction) const override {
+    return 0.5 * p[0]->value(direction) + 0.5 * p[1]->value(direction);
+  }
 
   vec3 generate() const override {
-    if (random_double() < 0.5) {
-      return p0->generate();
-    } else {
-      return p1->generate();
-    }
+    if (random_double() < 0.5)
+      return p[0]->generate();
+    else
+      return p[1]->generate();
   }
 
  private:
-  std::shared_ptr<pdf> p0;
-  std::shared_ptr<pdf> p1;
+  shared_ptr<pdf> p[2];
 };
+
+#endif

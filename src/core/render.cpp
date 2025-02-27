@@ -7,11 +7,13 @@
 #endif
 
 #include "camera.h"
+#include "common.h"
 #include "hittables/bvh_node.h"
 #include "hittables/quad.h"
 #include "material.h"
 #include "pdf.h"
 #include "render.h"
+#include "vec3.h"
 
 #define USE_STRATIFIED 1
 
@@ -25,19 +27,25 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
   // If the ray hits nothing, return the background color.
   // Use eps = 0.001 to avoid self-intersections
   if (world.hit(r, {0.001, infinity}, rec)) {
-    ray scattered;
-    color attenuation;
+    scatter_record srec;
+
+    // ray scattered;
+    // color attenuation;
     // color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
-    color emitted = rec.mat_ptr->emitted(r, rec, rec.u, rec.v, rec.p);
+    color color_from_emission = rec.mat->emitted(r, rec, rec.u, rec.v, rec.p);
 
     double pdf_value = 1.0;
     // Scattered reflectance
-    if (rec.mat_ptr->scatter(r, rec, attenuation, scattered, pdf_value)) {
-      auto p0 = make_shared<hittable_pdf>(lights, rec.p);
-      auto p1 = make_shared<cosine_pdf>(rec.normal);
-      mixturee_pdf mixed_pdf(p0, p1);
+    if (rec.mat->scatter(r, rec, srec)) {
+      if (srec.skip_pdf) {
+        return srec.attenuation * ray_color(srec.skip_pdf_ray, background, world, depth - 1, lights);
+      }
 
-      scattered = ray(rec.p, mixed_pdf.generate(), r.time());
+      auto light_ptr = make_shared<hittable_pdf>(lights, rec.p);
+      // auto p1 = make_shared<cosine_pdf>(rec.normal);
+      mixture_pdf mixed_pdf(light_ptr, srec.pdf_ptr);
+
+      ray scattered = ray(rec.p, mixed_pdf.generate(), r.time());
       pdf_value = mixed_pdf.value(scattered.direction());
 
       hittable_pdf light_pdf(lights, rec.p);
@@ -51,18 +59,18 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
       // pdf_value = distance_squared / (light_cosine * light_area);
       // scattered = ray(rec.p, to_light, r.time());
 
-      double scattering_pdf = rec.mat_ptr->scattering_pdf(r, rec, scattered);
+      double scattering_pdf = rec.mat->scattering_pdf(r, rec, scattered);
       // pdf_value = scattering_pdf;
 
       color sample_color = ray_color(scattered, background, world, depth - 1, lights);
 
-      color color_from_scatter = (attenuation * scattering_pdf * sample_color) / pdf_value;
+      color color_from_scatter = (srec.attenuation * scattering_pdf * sample_color) / pdf_value;
 
-      return emitted + color_from_scatter;
+      return color_from_emission + color_from_scatter;
       // return emitted + attenuation * ray_color(scattered, background, world, depth - 1);
     }
 
-    return emitted;
+    return color_from_emission;
   }
 
   return background;
@@ -106,7 +114,7 @@ void render_section(Image &image, int start_row, int end_row, const camera &cam,
           pixel_color += ray_color(r, background, world_bvh, cam.max_depth, lights);
           if (progress) (*progress)++;
 
-          int samples_computed = (s_j * cam.sqrt_spp) + s_i + 1;
+          // int samples_computed = (s_j * cam.sqrt_spp) + s_i + 1;
           // if (samples_computed % 100 == 0) {
           //   std::cout << "Samples computed :: " << samples_computed << std::endl;
           // }
@@ -116,7 +124,8 @@ void render_section(Image &image, int start_row, int end_row, const camera &cam,
 #endif
 
       // gamma correction
-      pixel_color = sqrt(pixel_color * cam.pixel_samples_scale);
+      // pixel_color = sqrt(pixel_color * cam.pixel_samples_scale);
+      pixel_color = (pixel_color * cam.pixel_samples_scale);
 
       image.set(i, j, pixel_color);
     }
@@ -128,7 +137,7 @@ void Renderer::render_scene(const Scene &scene, Image &image, const hittable &li
 
   camera cam = scene.cam;
   cam.initialize();
-  auto world_bvh = bvh_node(scene.world, 0, 1);
+  auto world_bvh = bvh_node(scene.world);
 
   // Image
 

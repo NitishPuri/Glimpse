@@ -54,7 +54,7 @@ Scene random_scene() {
   scene.cam.lookfrom = point3(13, 2, 3);
   scene.cam.lookat = point3(0, 0, 0);
   scene.cam.vfov = 20.0f;
-  scene.cam.aperture = 0.1f;
+  scene.cam.defocus_angle = 0.1f;
 
   return scene;
 }
@@ -191,10 +191,16 @@ Scene cornell_box() {
   world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
   world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
-  shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), white);
+  shared_ptr<material> aluminium = make_shared<metal>(color(0.8, 0.85, 0.88), 0.0);
+  shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), aluminium);
+  // shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), white);
   box1 = make_shared<rotate_y>(box1, 15);
   box1 = make_shared<translate>(box1, vec3(265, 0, 295));
   world.add(box1);
+
+  // Glass Sphere
+  // auto glass = make_shared<dielectric>(1.5);
+  // world.add(make_shared<sphere>(point3(190,90,190), 90, glass));
 
   shared_ptr<hittable> box2 = box(point3(0, 0, 0), point3(165, 165, 165), white);
   box2 = make_shared<rotate_y>(box2, -18);
@@ -278,7 +284,7 @@ Scene final_scene() {
 
   hittable_list world;
 
-  world.add(make_shared<bvh_node>(boxes1, 0, 1));
+  world.add(make_shared<bvh_node>(boxes1));
 
   auto light = make_shared<diffuse_light>(color(7, 7, 7));
   world.add(make_shared<quad>(point3(123, 554, 147), vec3(300, 0, 0), vec3(0, 0, 265), light));
@@ -310,8 +316,7 @@ Scene final_scene() {
     boxes2.add(make_shared<sphere>(point3::random(0, 165), 10, white));
   }
 
-  world.add(
-      make_shared<translate>(make_shared<rotate_y>(make_shared<bvh_node>(boxes2, 0.0, 1.0), 15), vec3(-100, 270, 395)));
+  world.add(make_shared<translate>(make_shared<rotate_y>(make_shared<bvh_node>(boxes2), 15), vec3(-100, 270, 395)));
 
   Scene scene;
   scene.world = world;

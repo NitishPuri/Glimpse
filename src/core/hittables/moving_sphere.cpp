@@ -1,7 +1,6 @@
 #include "moving_sphere.h"
 
-bool moving_sphere::hit(const ray &r, const interval &ray_t,
-                        hit_record &rec) const {
+bool moving_sphere::hit(const ray &r, interval ray_t, hit_record &rec) const {
   auto current_center = center.at(r.time());
   vec3 oc = current_center - r.origin();
   auto a = r.direction().length_squared();
@@ -25,7 +24,7 @@ bool moving_sphere::hit(const ray &r, const interval &ray_t,
   rec.p = r.at(rec.t);
   auto outward_normal = (rec.p - current_center) / radius;
   rec.set_face_normal(r, outward_normal);
-  rec.mat_ptr = mat_ptr;
+  rec.mat = mat_ptr;
 
   return true;
 }

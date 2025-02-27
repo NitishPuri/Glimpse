@@ -15,7 +15,7 @@ void cameraUI(RayTracer& raytracer, ImGuiParams& gui_params, Logger& logger, GLR
   if (ImGui::SliderFloat("Field of View", &raytracer.scene.cam.vfov, 1.0f, 180.0f)) {
     raytracer.renderSceneAsync(logger, gl_res);
   }
-  if (ImGui::SliderFloat("Aperture", &raytracer.scene.cam.aperture, 0.0f, 10.0f)) {
+  if (ImGui::SliderFloat("Defocus Angle", &raytracer.scene.cam.defocus_angle, 0.0f, 10.0f)) {
     raytracer.renderSceneAsync(logger, gl_res);
   }
   if (ImGui::SliderFloat("Focus Distance", &raytracer.scene.cam.focus_distance, 0.0f, 50.0f)) {
