@@ -160,11 +160,18 @@ Scene simple_light() {
   objects.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(pertext)));
 
   auto difflight = make_shared<diffuse_light>(color(4, 4, 4));
-  objects.add(make_shared<sphere>(point3(0, 7, 0), 2, difflight));
-  objects.add(make_shared<quad>(point3{3, 1, -2}, vec3{2, 0, 0}, vec3{0, 2, 0}, difflight));
+  auto sphere_light = make_shared<sphere>(point3(0, 7, 0), 2, difflight);
+  auto quad_light = make_shared<quad>(point3{3, 1, -2}, vec3{2, 0, 0}, vec3{0, 2, 0}, difflight);
+  objects.add(sphere_light);
+  objects.add(quad_light);
+
+  hittable_list lights_list;
+  lights_list.add(sphere_light);
+  lights_list.add(quad_light);
 
   Scene scene;
   scene.world = objects;
+  scene.lights = lights_list;
   scene.cam.samples_per_pixel = 400;
   scene.background = color(0, 0, 0);
   scene.cam.lookfrom = point3(26, 3, 6);
@@ -191,27 +198,34 @@ Scene cornell_box() {
   world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
   world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
-  shared_ptr<material> aluminium = make_shared<metal>(color(0.8, 0.85, 0.88), 0.0);
-  shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), aluminium);
-  // shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), white);
+  // shared_ptr<material> aluminium = make_shared<metal>(color(0.8, 0.85, 0.88), 0.0);
+  // shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), aluminium);
+  shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), white);
   box1 = make_shared<rotate_y>(box1, 15);
   box1 = make_shared<translate>(box1, vec3(265, 0, 295));
   world.add(box1);
 
   // Glass Sphere
   // auto glass = make_shared<dielectric>(1.5);
-  // world.add(make_shared<sphere>(point3(190,90,190), 90, glass));
+  // world.add(make_shared<sphere>(point3(190, 90, 190), 90, glass));
 
   shared_ptr<hittable> box2 = box(point3(0, 0, 0), point3(165, 165, 165), white);
   box2 = make_shared<rotate_y>(box2, -18);
   box2 = make_shared<translate>(box2, vec3(130, 0, 65));
   world.add(box2);
 
+  // lights
+  auto empty_material = shared_ptr<material>();
+  quad light_quad(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), empty_material);
+  hittable_list lights_list;
+  lights_list.add(make_shared<quad>(light_quad));
+
   Scene scene;
   scene.world = world;
+  scene.lights = lights_list;
   scene.cam.aspect_ratio = 1.0;
   scene.cam.image_width = 600;
-  scene.cam.samples_per_pixel = 10;
+  scene.cam.samples_per_pixel = 1000;
   scene.background = color(0, 0, 0);
   scene.cam.lookfrom = point3(278, 278, -800);
   scene.cam.lookat = point3(278, 278, 0);
@@ -248,8 +262,15 @@ Scene cornell_smoke() {
   objects.add(make_shared<constant_medium>(box1, 0.01, color(0, 0, 0)));
   objects.add(make_shared<constant_medium>(box2, 0.01, color(1, 1, 1)));
 
+  // lights
+  auto empty_material = shared_ptr<material>();
+  quad light_quad(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), empty_material);
+  hittable_list lights_list;
+  lights_list.add(make_shared<quad>(light_quad));
+
   Scene scene;
   scene.world = objects;
+  scene.lights = lights_list;
   scene.cam.aspect_ratio = 1.0;
   scene.cam.image_width = 600;
   scene.cam.samples_per_pixel = 100;
@@ -318,6 +339,11 @@ Scene final_scene() {
 
   world.add(make_shared<translate>(make_shared<rotate_y>(make_shared<bvh_node>(boxes2), 15), vec3(-100, 270, 395)));
 
+  // lights
+  auto empty_material = shared_ptr<material>();
+  hittable_list lights_list;
+  lights_list.add(make_shared<quad>(point3(123, 554, 147), vec3(300, 0, 0), vec3(0, 0, 265), empty_material));
+
   Scene scene;
   scene.world = world;
   scene.cam.aspect_ratio = 1.0;
@@ -353,6 +379,8 @@ Scene material_showcase() {
   // bouncing balls
   objects.add(make_shared<moving_sphere>(point3(-8, 2, 2), point3(-8, 2.2, 2), 2,
                                          make_shared<metal>(color(0.6, 0.2, 0.8), 0.04)));
+
+  // TODO: add light
 
   // ground
   objects.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(color(0.8, 0.0, 0.8))));

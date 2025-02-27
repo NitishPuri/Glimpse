@@ -18,7 +18,8 @@
 #define USE_STRATIFIED 1
 
 // Recursive ray tracing with depth limiting
-color ray_color(const ray &r, const color &background, const hittable &world, int depth, const hittable &lights) {
+color ray_color(const ray &r, const color &background, const hittable &world, int depth, const hittable &lights,
+                bool has_lights) {
   hit_record rec;
 
   // if we've exceeded the ray bounce limit, no more light is gathered
@@ -33,18 +34,24 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
     // Scattered reflectance
     if (rec.mat->scatter(r, rec, srec)) {
       if (srec.skip_pdf) {
-        return srec.attenuation * ray_color(srec.skip_pdf_ray, background, world, depth - 1, lights);
+        return srec.attenuation * ray_color(srec.skip_pdf_ray, background, world, depth - 1, lights, has_lights);
       }
 
-      auto light_ptr = make_shared<hittable_pdf>(lights, rec.p);
-      mixture_pdf mixed_pdf(light_ptr, srec.pdf_ptr);
-
-      ray scattered = ray(rec.p, mixed_pdf.generate(), r.time());
-      auto pdf_value = mixed_pdf.value(scattered.direction());
+      ray scattered;
+      double pdf_value;
+      if (has_lights) {
+        auto light_ptr = make_shared<hittable_pdf>(lights, rec.p);
+        mixture_pdf mixed_pdf(light_ptr, srec.pdf_ptr);
+        scattered = ray(rec.p, mixed_pdf.generate(), r.time());
+        pdf_value = mixed_pdf.value(scattered.direction());
+      } else {
+        scattered = ray(rec.p, srec.pdf_ptr->generate(), r.time());
+        pdf_value = srec.pdf_ptr->value(scattered.direction());
+      }
 
       double scattering_pdf = rec.mat->scattering_pdf(r, rec, scattered);
 
-      color sample_color = ray_color(scattered, background, world, depth - 1, lights);
+      color sample_color = ray_color(scattered, background, world, depth - 1, lights, has_lights);
 
       color color_from_scatter = (srec.attenuation * scattering_pdf * sample_color) / pdf_value;
 
@@ -70,8 +77,9 @@ vec3 sample_square_stratified(int s_i, int s_j, double recip_sqrt_spp) {
   return vec3(px, py, 0);
 }
 
-void render_section(Image &image, int start_row, int end_row, const camera &cam, const color &background,
-                    const bvh_node &world_bvh, const hittable &lights, std::atomic<int> *progress = nullptr) {
+void render_section(Image &image, int start_row, int end_row, const Scene &scene, const bvh_node &world_bvh,
+                    std::atomic<int> *progress = nullptr) {
+  auto &cam = scene.cam;
   for (int j = end_row - 1; j >= start_row; --j) {
     for (int i = 0; i < cam.image_width; ++i) {
       color pixel_color(0, 0, 0);
@@ -91,7 +99,8 @@ void render_section(Image &image, int start_row, int end_row, const camera &cam,
           auto u = (i + offset.x()) / (cam.image_width - 1);
           auto v = (j + offset.y()) / (cam.image_height - 1);
           ray r = cam.get_ray(u, v);
-          pixel_color += ray_color(r, background, world_bvh, cam.max_depth, lights);
+          pixel_color +=
+              ray_color(r, scene.background, world_bvh, cam.max_depth, scene.lights, !scene.lights.objects.empty());
           if (progress) (*progress)++;
         }
       }
@@ -103,11 +112,12 @@ void render_section(Image &image, int start_row, int end_row, const camera &cam,
   }
 }
 
-void Renderer::render_scene(const Scene &scene, Image &image, const hittable &lights, std::atomic<int> *progress) {
+void Renderer::render_scene(const Scene &scene, Image &image, std::atomic<int> *progress) {
   auto background = scene.background;
 
-  camera cam = scene.cam;
-  cam.initialize();
+  // camera cam = scene.cam;
+  // cam.initialize();
+  // scene.cam.initialize();
   auto world_bvh = bvh_node(scene.world);
 
   // Image
@@ -115,14 +125,14 @@ void Renderer::render_scene(const Scene &scene, Image &image, const hittable &li
 #ifdef MULTITHREADED
   const int num_threads = std::thread::hardware_concurrency();
   std::vector<std::future<void>> futures;
-  int rows_per_thread = cam.image_height / num_threads;
+  int rows_per_thread = scene.cam.image_height / num_threads;
 
   for (int t = 0; t < num_threads; ++t) {
     int start_row = t * rows_per_thread;
-    int end_row = (t == num_threads - 1) ? cam.image_height : start_row + rows_per_thread;
+    int end_row = (t == num_threads - 1) ? scene.cam.image_height : start_row + rows_per_thread;
 
-    futures.push_back(std::async(std::launch::async, render_section, std::ref(image), start_row, end_row, std::ref(cam),
-                                 std::ref(background), std::ref(world_bvh), std::ref(lights), progress));
+    futures.push_back(std::async(std::launch::async, render_section, std::ref(image), start_row, end_row,
+                                 std::ref(scene), std::ref(world_bvh), progress));
   }
 
   for (auto &f : futures) {
