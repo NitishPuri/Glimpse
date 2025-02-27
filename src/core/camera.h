@@ -13,9 +13,6 @@
 // 6. The camera fires rays from random points on the lens
 //    through the current image sample.
 
-#define DEFOCUS_IMPL 1
-// Options :: 0 = isotropic blur, 1 = anisotropic defocus blur
-
 class camera {
  public:
   void initialize() {
@@ -46,29 +43,18 @@ class camera {
 
     lower_left_corner = origin - horizontal / 2 - vertical / 2 - focus_distance * w;
 
-#if DEFOCUS_IMPL == 0
-    lens_radius = aperture / 2;
-#else
     // Calculate the camera defocus disk basis vectors.
     // defocus_angle = aperture;
     auto defocus_radius = focus_distance * std::tan(degrees_to_radians(defocus_angle / 2));
     defocus_disk_u = u * defocus_radius;
     defocus_disk_v = v * defocus_radius;
-#endif
   }
 
   // normalised coordinates!
   ray get_ray(double s, double t) const {
     // without defocus blur, all rays pass through the origin
 
-#if DEFOCUS_IMPL == 0
-    vec3 rd = lens_radius * random_in_unit_disk();
-    vec3 offset = u * rd.x() + v * rd.y();
-
-    auto ray_origin = origin + offset;
-#else
     auto ray_origin = (defocus_angle <= 0) ? origin : defocus_disk_sample();
-#endif
 
     auto ray_direction = lower_left_corner + s * horizontal + t * vertical - ray_origin;
 
@@ -76,13 +62,11 @@ class camera {
     return ray(ray_origin, ray_direction, random_double());
   }
 
-#if DEFOCUS_IMPL == 1
   point3 defocus_disk_sample() const {
     // Returns a random point in the camera defocus disk.
     auto p = random_in_unit_disk();
     return origin + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
   }
-#endif
 
  public:
   double aspect_ratio = 16.0 / 9.0;  // Ratio of image width over height
@@ -98,11 +82,8 @@ class camera {
   point3 lookat = point3(0, 0, -1);   // point camera is looking at
   point3 vup = vec3(0, 1, 0);         // camera realtive "up" direction
 
-  // float aperture = 0.1f;         //
   float defocus_angle = 0.1f;    // variation angle of rays through each pixel
   float focus_distance = 10.0f;  // distance from camera lookfrom point to plane of perfect focus
-
-  // double time0 = 0.0, time1 = 1.0;  // default shutter open/close times
 
   int image_height = 0;
 
@@ -114,10 +95,5 @@ class camera {
   vec3 vertical;
 
   vec3 u, v, w;
-
-#if DEFOCUS_IMPL == 0
-  double lens_radius;
-#elif DEFOCUS_IMPL == 1
   vec3 defocus_disk_u, defocus_disk_v;
-#endif
 };
