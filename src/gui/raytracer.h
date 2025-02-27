@@ -32,9 +32,11 @@ struct RayTracer {
       // hittable_list lights_list;
       // lights_list.add(make_shared<quad>(light));
 
+      Renderer renderer;
+
       scene.cam.initialize();
 
-      Renderer::render_scene(scene, image, &progress);
+      renderer.render_scene(scene, image, &progress);
       status = DONE;
 
       auto endTime = std::chrono::high_resolution_clock::now();

@@ -78,7 +78,7 @@ vec3 sample_square_stratified(int s_i, int s_j, double recip_sqrt_spp) {
 }
 
 void render_section(Image &image, int start_row, int end_row, const Scene &scene, const bvh_node &world_bvh,
-                    std::atomic<int> *progress = nullptr) {
+                    std::atomic<int> *progress) {
   auto &cam = scene.cam;
   for (int j = end_row - 1; j >= start_row; --j) {
     for (int i = 0; i < cam.image_width; ++i) {
