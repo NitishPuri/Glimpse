@@ -24,7 +24,15 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - https://github.com/nvpro-samples/vk_raytracing_tutorial_KHR?tab=readme-ov-file
 - https://github.com/grigoryoskin/vulkan-compute-ray-tracing/tree/master
 
+## Next Steps
+- Add uncapped SPP and interactive rendering.
+  - Accumulate sample outputs and per sample count in a buffer and update from buffer as fast as possible!. 
+  - No double buffering for now.
+- Calculate per sample variances while doing this, and show averages to the user, maybe plot graphs!
+- Adaptive sampling
+  - Throw more samples wher variance is more!
 
+# Detailed Roadmap (Made with gpt)
 
 ### **Refined Roadmap: A Learning-Focused Ray Tracer**  
 
