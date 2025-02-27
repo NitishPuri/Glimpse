@@ -43,6 +43,8 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
   if (ImGui::Button("Save Image")) {
     auto now = std::chrono::system_clock::now();
     auto now_time = std::chrono::system_clock::to_time_t(now);
+    auto spp = raytracer.scene.cam.uncapped_spp ? raytracer.renderer->film.get_average_sample_count()
+                                                : raytracer.scene.cam.samples_per_pixel;
 
     // Ensure the results directory exists
     std::string dir = "./glimpse_results";
@@ -50,7 +52,7 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
 
     std::ostringstream ss;
     ss << dir << "/" << std::put_time(std::localtime(&now_time), "%Y%m%d%H%M%S") << "_"
-       << Scene::SceneNames[params.current_scene] << "_samples_" << raytracer.scene.cam.samples_per_pixel << ".jpg";
+       << Scene::SceneNames[params.current_scene] << "_samples_" << spp << ".jpg";
     auto outfile_path = ss.str();
 
     if (raytracer.image.write(outfile_path) != 0) {
@@ -63,7 +65,8 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
   if (raytracer.status == RayTracer::RENDERING) {
     if (raytracer.scene.cam.uncapped_spp) {
       // TODO: Implement this, add more stats
-      ImGui::Text("Average SPP ... %d", 0);
+      auto avg_spp = raytracer.renderer->film.get_average_sample_count();
+      ImGui::Text("Average SPP ... %d", avg_spp);
       ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(0.0f, 0.0f), "Progress..");
     } else {
       int totalPixels = gl_res.renderWidth * gl_res.renderHeight * raytracer.scene.cam.samples_per_pixel;
@@ -80,8 +83,7 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
   } else if (raytracer.status == RayTracer::DONE) {
     gl_res.updateFramebuffer(raytracer.image.data);
     ImGui::Text("Done");
-    raytracer.status = RayTracer::IDLE;
-    raytracer.progress = 0;
+    raytracer.reset();
   } else {
     ImGui::Text("Idle");
   }

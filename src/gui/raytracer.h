@@ -17,10 +17,13 @@ struct RayTracer {
   std::optional<std::future<void>> trace_future{};
   std::atomic<int> progress{0};
 
+  std::shared_ptr<Renderer> renderer;
+
   Logger& logger;
   RayTracer(Logger& logger) : logger(logger) {}
 
   void renderSceneAsync() {
+    renderer = std::make_shared<Renderer>();
     trace_future = std::async(std::launch::async, [&]() {
       image.clear();
       scene.cam.initialize();
@@ -29,16 +32,7 @@ struct RayTracer {
       auto startTime = std::chrono::high_resolution_clock::now();
 
       status = RENDERING;
-
-      // Light Sources
-      // auto empty_material = shared_ptr<material>();
-      // quad light(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), empty_material);
-      // hittable_list lights_list;
-      // lights_list.add(make_shared<quad>(light));
-
-      Renderer renderer;
-
-      renderer.render_scene(scene, image, &progress);
+      renderer->render_scene(scene, image, &progress);
       status = DONE;
 
       auto endTime = std::chrono::high_resolution_clock::now();
@@ -46,6 +40,12 @@ struct RayTracer {
 
       logger.log("Image generated in ", duration, " seconds");
     });
+  }
+
+  void reset() {
+    status = IDLE;
+    progress = 0;
+    renderer.reset();
   }
 
   void setupScene(GLResources& GLResources, int current_scene, float lookFrom[3], float lookAt[3]) {

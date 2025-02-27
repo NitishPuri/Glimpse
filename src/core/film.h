@@ -62,6 +62,14 @@ class Film {
     return sample_count[index];
   }
 
+  int get_average_sample_count() const {
+    int total = 0;
+    for (int i = 0; i < sample_count.size(); i++) {
+      total += sample_count[i];
+    }
+    return int(total / sample_count.size());
+  }
+
   vec3 get_sample(int x, int y) const {
     int index = get_index(x, y);
     if (sample_count[index] == 0) {
