@@ -71,11 +71,16 @@ class camera {
  public:
   double aspect_ratio = 16.0 / 9.0;  // Ratio of image width over height
   int image_width = 800;             // rendered image width in pixels
-  double pixel_samples_scale{};      // Color scale factor for a sum of pixel samples
-  int samples_per_pixel = 100;       // count of random samples for each pixel
-  int sqrt_spp{};                    // Square root of number of samples per pixel
-  double recip_sqrt_spp{};           // 1/sqrt_spp
-  int max_depth = 50;                // maximum number of ray bounces into scene
+
+  // SPP
+  bool uncapped_spp = false;     // If true, the number of samples per pixel is
+                                 // not capped at sqrt_spp
+  double pixel_samples_scale{};  // Color scale factor for a sum of pixel samples
+  int samples_per_pixel = 100;   // count of random samples for each pixel
+  int sqrt_spp{};                // Square root of number of samples per pixel
+  double recip_sqrt_spp{};       // 1/sqrt_spp
+
+  int max_depth = 50;  // maximum number of ray bounces into scene
 
   float vfov = 60.0f;                 // vertical field of view
   point3 lookfrom = point3(0, 0, 0);  // point camera is looking from

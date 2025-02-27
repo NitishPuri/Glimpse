@@ -118,9 +118,11 @@ void render_section(RenderSectionArgs &args) {
       }
     }
   }
+  std::cout << "Section done ... rows[" << start_row << ", " << end_row << "] thread " << std::this_thread::get_id()
+            << std::endl;
 }
 
-void render_section2(RenderSectionArgs &args) {
+void render_section_uncap(RenderSectionArgs &args) {
   auto &image = args.image;
   auto &cam = args.scene.cam;
   auto &start_row = args.start_row;
@@ -154,7 +156,8 @@ void render_section2(RenderSectionArgs &args) {
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
-  std::cout << "Stopping rendering thread..." << std::this_thread::get_id() << std::endl;
+  std::cout << "Stopping section ... rows[" << start_row << ", " << end_row << "] thread " << std::this_thread::get_id()
+            << std::endl;
 }
 
 void Renderer::render_scene(const Scene &scene, Image &image, std::atomic<int> *progress) {
@@ -172,14 +175,17 @@ void Renderer::render_scene(const Scene &scene, Image &image, std::atomic<int> *
     int end_row = (t == num_threads - 1) ? scene.cam.image_height : start_row + rows_per_thread;
 
     RenderSectionArgs args{image, film, start_row, end_row, scene, world_bvh, progress};
-    // futures.push_back(std::async(std::launch::async, render_section, args));
-    futures.push_back(std::async(std::launch::async, render_section2, args));
+    if (scene.cam.uncapped_spp) {
+      futures.push_back(std::async(std::launch::async, render_section_uncap, args));
+    } else {
+      futures.push_back(std::async(std::launch::async, render_section, args));
+    }
   }
 
   // Wait for a signal to stop rendering before waiting for threaads to finish.
-  while (!stop_rendering.load()) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  }
+  // while (!stop_rendering.load()) {
+  //   std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  // }
 
   for (auto &f : futures) {
     f.get();

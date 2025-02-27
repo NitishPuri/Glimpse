@@ -36,7 +36,7 @@ void AppWindow::run() {
 
     ui.renderUI(raytracer, gl_res);
 
-    if (firstFrame) {
+    if (firstFrame && ui.params.auto_render) {
       firstFrame = false;
       raytracer.renderSceneAsync();
     }

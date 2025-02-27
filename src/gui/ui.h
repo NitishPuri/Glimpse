@@ -12,7 +12,7 @@ struct ImGuiParams {
   // std::string startScene = "material_showcase";
   std::string startScene = "cornell_box";
 
-  bool auto_render = true;
+  bool auto_render = false;
 
   float backgroundColor[3] = {0.1f, 0.1f, 0.1f};
   float lookFrom[3] = {13.0f, 2.0f, 3.0f};
@@ -28,16 +28,13 @@ class UIRenderer {
 
   void renderUI(RayTracer& RayTracer, GLResources& GLResources);
   void renderOutput(GLResources& GLResources);
-  ImVec2 calculatePanelSize(GLResources& GLResources);
 
  private:
-  void maybeRenderOnParamChange(RayTracer& raytracer) {
-    if (params.auto_render) {
-      raytracer.renderSceneAsync();
-    }
-  }
+  void maybeRenderOnParamChange(RayTracer& raytracer);
   void cameraUI(RayTracer& raytracer, GLResources& gl_res);
   void renderControl(RayTracer& raytracer, GLResources& gl_res);
+
+  ImVec2 calculatePanelSize(GLResources& GLResources);
 
   Logger& logger;
 };

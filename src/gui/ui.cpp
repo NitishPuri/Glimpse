@@ -1,9 +1,12 @@
 #include "ui.h"
 
+#include <filesystem>
+
 #include "app.h"
 
 void UIRenderer::cameraUI(RayTracer& raytracer, GLResources& gl_res) {
   // Render parameters
+  ImGui::Checkbox("Uncap SPP", &raytracer.scene.cam.uncapped_spp);
   if (ImGui::SliderInt("Samples per Pixel", &raytracer.scene.cam.samples_per_pixel, 1, 1000)) {
     maybeRenderOnParamChange(raytracer);
   }
@@ -41,8 +44,12 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
     auto now = std::chrono::system_clock::now();
     auto now_time = std::chrono::system_clock::to_time_t(now);
 
+    // Ensure the results directory exists
+    std::string dir = "./glimpse_results";
+    std::filesystem::create_directory(dir);
+
     std::ostringstream ss;
-    ss << "./results/" << std::put_time(std::localtime(&now_time), "%Y%m%d%H%M%S") << "_"
+    ss << dir << "/" << std::put_time(std::localtime(&now_time), "%Y%m%d%H%M%S") << "_"
        << Scene::SceneNames[params.current_scene] << "_samples_" << raytracer.scene.cam.samples_per_pixel << ".jpg";
     auto outfile_path = ss.str();
 
@@ -124,17 +131,16 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
   // }
 }
 
-void UIRenderer::renderOutput(GLResources& GLResources) {
+void UIRenderer::renderOutput(GLResources& gl_res) {
   ImGui::Begin("Render Output");
   // flip vertically
-  ImGui::Image(ImTextureID(GLResources.framebufferTexture), calculatePanelSize(GLResources), ImVec2(0, 1),
-               ImVec2(1, 0));
+  ImGui::Image(ImTextureID(gl_res.framebufferTexture), calculatePanelSize(gl_res), ImVec2(0, 1), ImVec2(1, 0));
   ImGui::End();
 }
 
-ImVec2 UIRenderer::calculatePanelSize(GLResources& GLResources) {
+ImVec2 UIRenderer::calculatePanelSize(GLResources& gl_res) {
   ImVec2 available_size = ImGui::GetContentRegionAvail();
-  float aspect_ratio = static_cast<float>(GLResources.renderWidth) / GLResources.renderHeight;
+  float aspect_ratio = static_cast<float>(gl_res.renderWidth) / gl_res.renderHeight;
   ImVec2 image_size;
 
   if (available_size.x / aspect_ratio <= available_size.y) {
@@ -146,4 +152,10 @@ ImVec2 UIRenderer::calculatePanelSize(GLResources& GLResources) {
   }
 
   return image_size;
+}
+
+void UIRenderer::maybeRenderOnParamChange(RayTracer& raytracer) {
+  if (params.auto_render) {
+    raytracer.renderSceneAsync();
+  }
 }
