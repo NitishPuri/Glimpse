@@ -1,13 +1,4 @@
-#ifndef QUAD_H
-#define QUAD_H
-//==============================================================================================
-// To the extent possible under law, the author(s) have dedicated all copyright and related and
-// neighboring rights to this software to the public domain worldwide. This software is
-// distributed without any warranty.
-//
-// You should have received a copy (see file COPYING.txt) of the CC0 Public Domain Dedication
-// along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
-//==============================================================================================
+#pragma once
 
 #include "hittable.h"
 #include "hittable_list.h"
@@ -121,5 +112,3 @@ inline shared_ptr<hittable_list> box(const point3& a, const point3& b, shared_pt
 
   return sides;
 }
-
-#endif
