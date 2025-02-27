@@ -20,10 +20,11 @@ struct RayTracer {
   Logger& logger;
   RayTracer(Logger& logger) : logger(logger) {}
 
-  void renderSceneAsync(GLResources& GLResources) {
+  void renderSceneAsync() {
     trace_future = std::async(std::launch::async, [&]() {
       image.clear();
-      logger.log("Rendering... ", GLResources.renderWidth, "x", GLResources.renderHeight, " with ",
+      scene.cam.initialize();
+      logger.log("Rendering... ", scene.cam.image_width, "x", scene.cam.image_height, " with ",
                  scene.cam.samples_per_pixel, " samples per pixel");
       auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -36,8 +37,6 @@ struct RayTracer {
       // lights_list.add(make_shared<quad>(light));
 
       Renderer renderer;
-
-      scene.cam.initialize();
 
       renderer.render_scene(scene, image, &progress);
       status = DONE;

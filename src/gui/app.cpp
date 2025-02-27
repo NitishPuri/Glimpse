@@ -11,18 +11,16 @@ int AppWindow::initApp() {
 
   // Setup Raytracer
   if (glfwGetCurrentContext() == gl_res.window) {
-    if (!ui_params.startScene.empty()) {
-      ui_params.current_scene =
-          static_cast<int>(std::find(Scene::SceneNames.begin(), Scene::SceneNames.end(), ui_params.startScene) -
+    if (!ui.params.startScene.empty()) {
+      ui.params.current_scene =
+          static_cast<int>(std::find(Scene::SceneNames.begin(), Scene::SceneNames.end(), ui.params.startScene) -
                            Scene::SceneNames.begin());
     }
-    raytracer.setupScene(gl_res, ui_params.current_scene, ui_params.lookFrom, ui_params.lookAt);
+    raytracer.setupScene(gl_res, ui.params.current_scene, ui.params.lookFrom, ui.params.lookAt);
   } else {
     logger.log("Failed to initialize OpenGL context");
     return -1;
   }
-
-  ui.setApp(this);
 
   return 0;
 }
@@ -36,11 +34,11 @@ void AppWindow::run() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ui.renderUI(ui_params, raytracer, gl_res);
+    ui.renderUI(raytracer, gl_res);
 
     if (firstFrame) {
       firstFrame = false;
-      raytracer.renderSceneAsync(gl_res);
+      raytracer.renderSceneAsync();
     }
 
     glClearColor(.1f, .1f, .1f, 1.0f);  // Set background color to dark gray

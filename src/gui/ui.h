@@ -23,18 +23,21 @@ class AppWindow;
 
 class UIRenderer {
  public:
+  ImGuiParams params;
   UIRenderer(Logger& logger) : logger(logger) {}
-  void setApp(AppWindow* window) { this->window = window; }
-  void renderUI(ImGuiParams& ImGuiParams, RayTracer& RayTracer, GLResources& GLResources);
+
+  void renderUI(RayTracer& RayTracer, GLResources& GLResources);
   void renderOutput(GLResources& GLResources);
   ImVec2 calculatePanelSize(GLResources& GLResources);
 
  private:
-  void maybeRenderOnParamChange(ImGuiParams& gui_params, RayTracer& raytracer, GLResources& gl_res) {
-    if (gui_params.auto_render) {
-      raytracer.renderSceneAsync(gl_res);
+  void maybeRenderOnParamChange(RayTracer& raytracer) {
+    if (params.auto_render) {
+      raytracer.renderSceneAsync();
     }
   }
-  AppWindow* window = nullptr;
+  void cameraUI(RayTracer& raytracer, GLResources& gl_res);
+  void renderControl(RayTracer& raytracer, GLResources& gl_res);
+
   Logger& logger;
 };

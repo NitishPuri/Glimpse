@@ -15,8 +15,8 @@ class AppWindow {
 
  private:
   Logger& logger;
+
   RayTracer raytracer;
   GLResources gl_res;
-  ImGuiParams ui_params;
   UIRenderer ui;
 };

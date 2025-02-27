@@ -38,9 +38,11 @@ int main(int argc, char **argv) {
 
   // Light Sources
   auto empty_material = shared_ptr<material>();
-  quad lights(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), empty_material);
+  // quad lights;
+  scene.lights.add(make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), empty_material));
 
-  Renderer::render_scene(scene, image, lights, nullptr);
+  Renderer renderer;
+  renderer.render_scene(scene, image, nullptr);
 
   auto endTime = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration<float, std::chrono::seconds::period>(endTime - startTime).count();
