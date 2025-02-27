@@ -8,14 +8,17 @@
 #include "core/logger.h"
 
 struct GLResources {
-  GLuint framebufferTexture;
-  int renderWidth;
-  int renderHeight;
-  GLFWwindow* window;
+  GLResources(Logger& logger) : logger(logger) {}
+  GLuint framebufferTexture{};
+  int renderWidth{};
+  int renderHeight{};
+  GLFWwindow* window = nullptr;
 
-  int initGL(Logger& logger);
+  Logger& logger;
 
-  void setupFramebuffer(Logger& logger);
-  bool checkGLError(const std::string& functionName, Logger& logger);
-  void updateFramebuffer(const std::vector<uint8_t>& imageData, Logger& logger);
+  int initGL();
+
+  void setupFramebuffer();
+  bool checkGLError(const std::string& functionName);
+  void updateFramebuffer(const std::vector<uint8_t>& imageData);
 };

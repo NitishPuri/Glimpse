@@ -1,4 +1,3 @@
-
 ## Roadmap
 
 This roadmap prioritizes a **progressive learning experience** while keeping it **modular and experimental**.
@@ -19,12 +18,20 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 ## OpenGL Compute shaders
 - https://github.com/wsandst/gpu-raytracer/tree/master/src
 
-### Vilkan / RTX integrations
+### Vulkan / RTX integrations
 - https://github.com/nvpro-samples/vk_mini_path_tracer?tab=readme-ov-file
 - https://github.com/nvpro-samples/vk_raytracing_tutorial_KHR?tab=readme-ov-file
 - https://github.com/grigoryoskin/vulkan-compute-ray-tracing/tree/master
 
+## Next Steps
+- [x] Add uncapped SPP and interactive rendering.
+  - Accumulate sample outputs and per sample count in a buffer and update from buffer as fast as possible!. 
+  - No double buffering for now.
+- [x] Calculate per sample variances while doing this, and show averages to the user, maybe plot graphs!
+- [ ] Adaptive sampling
+  - Throw more samples where variance is more!
 
+# Detailed Roadmap
 
 ### **Refined Roadmap: A Learning-Focused Ray Tracer**  
 
@@ -38,56 +45,54 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
   - [x] Samples per pixel (SPP)
   - [x] Max depth
   - [x] Camera controls (lookat, vfov, aspect ratio)
-  - add mouse controls for camera, something like lux does where rendering restarts on camera move
-  - also, make the workload distribution smarter for async ray tracing to get a wave of ray tracing going at once
-  - Scene object params like position, material
-  - Use SPP=1 to show as close to real time updates as possible while user is manipulating a control, 
-    maybe make this togglable ( in cases even spp = 1 might be too much? ), 
+  - [ ] Add mouse controls for camera, something like LuxCore does where rendering restarts on camera move
+  - [ ] Make the workload distribution smarter for async ray tracing to get a wave of ray tracing going at once
+  - [ ] Scene object params like position, material
+  - [ ] Use SPP=1 to show as close to real-time updates as possible while user is manipulating a control, maybe make this togglable (in cases even SPP=1 might be too much)
 - [x] Make core into a shared lib
 - [ ] **Camera Improvements**
   - [x] Positioning & Re-rendering  
   - [x] Depth of field (Aperture, Focus Distance)
   - [x] Motion blur
-- [x] use glm for vector stuff.
-- [ ] hook with a unit testing framework 
-  - use a header only framework and hook with ctest, much simpler.
-  - also, find simple header only lib for image comparison.
-  - hook with github actions!
+- [x] Use glm for vector math.
+- [ ] Hook with a unit testing framework 
+  - Use a header-only framework and hook with ctest, much simpler.
+  - Find a simple header-only lib for image comparison.
+  - Hook with GitHub Actions!
 - [x] Glass, mirrors
-- dispersion, rainbows, scattering
-- spectral emission/radiance - ??
-- Interactive rendering and uncapped SPP with accumulation buffers
-    
+- [ ] Dispersion, rainbows, scattering
+- [ ] Spectral emission/radiance
+- [x] Interactive rendering and uncapped SPP with accumulation buffers
 
 #### **2. Scene Management & Experimentation**
 - [ ] **Custom Scene Support**
   - Scene import/export as JSON (or other lightweight formats)
   - UI controls to tweak & reload scenes live  
-  - add loaders for ply - find ready made solutions ?
-- Mesh rendering
+  - Add loaders for PLY - find ready-made solutions
+- [ ] Mesh rendering
 - [ ] **Scene Format Loaders**
   - Load scenes from **PBRT, LuxRender, RenderMan**
 
 #### **3. Performance & Algorithmic Enhancements**
 - [ ] **Acceleration Structures**
-  - [x]  BVH (Bounding Volume Hierarchy)
-- Performance profiling
+  - [x] BVH (Bounding Volume Hierarchy)
+- [ ] Performance profiling
 - [ ] **Parallelization Improvements**
   - Thread pools (C++ standard or custom)  
   - [x] Tiling techniques (Divide image into patches for better caching)  
   - SIMD (AVX, SSE)  
-- **Raymarching**
-    - procedural terrains, SDFs, metaballs for terrain, geometr, clouds, fogs
-    - Volumetric effects like fog, haze?
-    - Look at perlin noise, marble
-- Non photorealistic rendering
-    - Toon shading, hatching, stylized effects in ray tracer?
+- [ ] **Raymarching**
+  - Procedural terrains, SDFs, metaballs for terrain, geometry, clouds, fogs
+  - Volumetric effects like fog, haze
+  - Look at Perlin noise, marble
+- [ ] **Non-Photorealistic Rendering**
+  - Toon shading, hatching, stylized effects in ray tracer
 - [ ] **Better Sampling & Noise Reduction**
   - [x] Importance Sampling
   - Adaptive Sampling  
     - Instead of blindly shooting the same number of rays per pixel, focus more samples on noisy areas.
     - Compute variance per pixel and sample more in high-variance regions.
-    - Use a pre-pass (low spp) to estimate variance, then adaptively refine pixels.
+    - Use a pre-pass (low SPP) to estimate variance, then adaptively refine pixels.
   - Denoising techniques (ML-based, OpenImageDenoise, etc.)  
 - [ ] **Lighting & Global Illumination**
   - [x] Soft Shadows  
@@ -122,5 +127,5 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
   - Stylized Reflections / Shadows  
 - **AI-Assisted Rendering**
   - ML-Based Denoising  
-  - Neural Path Tracing (Check NVIDIA papers)  
+  - Neural Path Tracing (Check NVIDIA papers)
 

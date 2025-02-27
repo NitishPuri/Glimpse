@@ -8,16 +8,15 @@
 
 class AppWindow {
  public:
-  AppWindow() : logger(log_file_path) {}
+  AppWindow(Logger& logger_) : logger(logger_), ui(logger_), gl_res(logger_), raytracer(logger_) {}
 
   int initApp();
   void run();
 
  private:
+  Logger& logger;
+
   RayTracer raytracer;
   GLResources gl_res;
-  ImGuiParams ui_params;
   UIRenderer ui;
-
-  Logger logger;
 };
