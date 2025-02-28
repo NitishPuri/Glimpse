@@ -77,9 +77,6 @@ class camera {
     lookfrom += forward * dy + right * dx;
     lookat += forward * dy + right * dx;
 
-    std::cout << "lookfrom: " << lookfrom << std::endl;
-    std::cout << "lookat: " << lookat << std::endl;
-
     initialize();
   }
 
