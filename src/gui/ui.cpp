@@ -33,6 +33,20 @@ void UIRenderer::cameraUI(RayTracer& raytracer, GLResources& gl_res) {
     raytracer.scene.cam.lookat = point3(params.lookAt[0], params.lookAt[1], params.lookAt[2]);
     maybeRenderOnParamChange(raytracer);
   }
+
+  ImGui::Text("Camera Manip :: ");
+  ImGui::SameLine();
+  if (ImGui::RadioButton("None", params.camera_mode == NONE)) {
+    params.camera_mode = CameraMode::NONE;
+  }
+  ImGui::SameLine();
+  if (ImGui::RadioButton("Fly Mode", params.camera_mode == FLY)) {
+    params.camera_mode = CameraMode::FLY;
+  }
+  ImGui::SameLine();
+  if (ImGui::RadioButton("Orbit Mode", params.camera_mode == ORBIT)) {
+    params.camera_mode = CameraMode::ORBIT;
+  }
 }
 
 void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
@@ -144,10 +158,40 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
   // }
 }
 
-void UIRenderer::renderOutput(GLResources& gl_res) {
+void UIRenderer::renderOutput(GLResources& gl_res, RayTracer& raytracer) {
+  ImGui::ShowDemoWindow();
   ImGui::Begin("Render Output");
   // flip vertically
   ImGui::Image(ImTextureID(gl_res.framebufferTexture), calculatePanelSize(gl_res), ImVec2(0, 1), ImVec2(1, 0));
+
+  // Check if the Rener Output window is hovered
+  if (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
+    //  camera mode
+
+    ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+    ImGui::SetWindowFocus();
+    ImGui::SetWindowPos(ImGui::GetWindowPos(), ImGuiCond_Always);
+
+    ImVec2 mouse_delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
+    ImGui::ResetMouseDragDelta(ImGuiMouseButton_Right);
+
+    float dx = mouse_delta.x * 0.005f;
+    float dy = mouse_delta.y * 0.005f;
+
+    if (params.camera_mode == FLY) {
+      raytracer.scene.cam.fly(dx, dy);
+      //
+      raytracer.scene.cam.samples_per_pixel = 2;
+      raytracer.scene.cam.max_depth = 2;
+      maybeRenderOnParamChange(raytracer);
+    } else if (params.camera_mode == ORBIT) {
+      raytracer.scene.cam.orbit(dx, dy);
+      raytracer.scene.cam.samples_per_pixel = 2;
+      raytracer.scene.cam.max_depth = 2;
+      maybeRenderOnParamChange(raytracer);
+    }
+  }
+
   ImGui::End();
 }
 

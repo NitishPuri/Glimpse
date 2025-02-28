@@ -1,23 +1,11 @@
 #pragma once
 
+#include "config.h"
 #include "gl_res.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include "raytracer.h"
-
-struct ImGuiParams {
-  int current_scene = 1;
-
-  // std::string startScene = "material_showcase";
-  std::string startScene = "cornell_box";
-
-  bool auto_render = false;
-
-  float backgroundColor[3] = {0.1f, 0.1f, 0.1f};
-  float lookFrom[3] = {13.0f, 2.0f, 3.0f};
-  float lookAt[3] = {0.0f, 0.0f, 0.0f};
-};
 
 class AppWindow;
 
@@ -27,7 +15,7 @@ class UIRenderer {
   UIRenderer(Logger& logger) : logger(logger) {}
 
   void renderUI(RayTracer& RayTracer, GLResources& GLResources);
-  void renderOutput(GLResources& GLResources);
+  void renderOutput(GLResources& GLResources, RayTracer& raytracer);
 
  private:
   void maybeRenderOnParamChange(RayTracer& raytracer);
