@@ -50,7 +50,7 @@ class checker_texture : public texture {
 
 class image_texture : public texture {
  public:
-    image_texture(const char *filename);
+  image_texture(const char *filename);
 
   color value(double u, double v, const point3 &p) const override;
 
@@ -60,13 +60,23 @@ class image_texture : public texture {
 
 class noise_texture : public texture {
  public:
-  noise_texture(double scale) : scale(scale) {}
+  noise_texture(double scale, color color = color(.5, .5, .5)) : scale(scale), base_color(color) {}
 
   color value(double u, double v, const point3 &p) const override {
-    return color(.5, .5, .5) * (1 + std::sin(scale * p.z() + 10 * noise.turb(p, 7)));
+    // return base_color * (1 + std::sin(scale * p.z() + 10 * noise.turb(p, 7)));
+
+    double dynamic_scale = scale * (1.2 * std::sin(1 * pi * u) + 0.3 * std::cos(3 * pi * v));
+    return base_color * (1 + std::sin(dynamic_scale * p.z() + 10 * noise.turb(p, 7)));
+
+    // double combined = scale * (p.x() * u + p.y() * v + p.z());
+    // return base_color * (1 + std::sin(combined * p.z() + 10 * noise.turb(p, 7)));
+
+    // double ripple = scale * std::sqrt(u * u + v * v);
+    // return base_color * (1 + std::sin(ripple * p.z() + 10 * noise.turb(p, 7)));
   }
 
  private:
   perlin noise;
   double scale;
+  color base_color;
 };

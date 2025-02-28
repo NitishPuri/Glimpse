@@ -23,6 +23,11 @@ struct RayTracer {
   RayTracer(Logger& logger) : logger(logger) {}
 
   void renderSceneAsync() {
+    // check if we are already rendering, if yes, then lets do nothing for now.
+    if (renderer.get() != nullptr) {
+      return;
+    }
+
     renderer = std::make_shared<Renderer>();
     trace_future = std::async(std::launch::async, [&]() {
       image.clear();

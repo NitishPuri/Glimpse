@@ -48,7 +48,14 @@ class vec3 {
   static vec3 random(double min, double max) {
     return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
   }
+
+  friend std::ostream& operator<<(std::ostream& out, const vec3& v);
 };
+
+// Define the ostream operator
+inline std::ostream& operator<<(std::ostream& out, const vec3& v) {
+  return out << '(' << v.e[0] << ", " << v.e[1] << ", " << v.e[2] << ')';
+}
 
 // point3 is just an alias for vec3, but useful for geometric clarity in the code.
 using point3 = vec3;

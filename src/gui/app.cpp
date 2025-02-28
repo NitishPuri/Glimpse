@@ -44,7 +44,7 @@ void AppWindow::run() {
     glClearColor(.1f, .1f, .1f, 1.0f);  // Set background color to dark gray
     glClear(GL_COLOR_BUFFER_BIT);
 
-    ui.renderOutput(gl_res);
+    ui.renderOutput(gl_res, raytracer);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

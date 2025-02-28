@@ -68,6 +68,39 @@ class camera {
     return origin + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
   }
 
+  // TODO: Move manipulator out of base camera!
+  void fly(float dx, float dy) {
+    vec3 forward = unit_vector(lookat - lookfrom);
+    vec3 right = unit_vector(cross(forward, vup));
+    vec3 up = cross(right, forward);
+
+    lookfrom += forward * dy + right * dx;
+    lookat += forward * dy + right * dx;
+
+    std::cout << "lookfrom: " << lookfrom << std::endl;
+    std::cout << "lookat: " << lookat << std::endl;
+
+    initialize();
+  }
+
+  void orbit(float dx, float dy) {
+    vec3 direction = lookfrom - lookat;
+    auto radius = direction.length();
+
+    auto theta = atan2(direction.z(), direction.x());
+    auto phi = acos(direction.y() / radius);
+
+    theta += dx;
+    phi = std::clamp(phi + dy, 0.1, 3.1);
+
+    direction[0] = radius * sin(phi) * cos(theta);
+    direction[1] = radius * cos(phi);
+    direction[2] = radius * sin(phi) * sin(theta);
+
+    lookfrom = lookat + direction;
+    initialize();
+  }
+
  public:
   double aspect_ratio = 16.0 / 9.0;  // Ratio of image width over height
   int image_width = 800;             // rendered image width in pixels
