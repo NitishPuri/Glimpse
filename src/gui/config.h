@@ -16,7 +16,7 @@ struct ImGuiParams {
   // std::string startScene = "cornell_box";
   std::string startScene = "untitled_1";
 
-  bool auto_render = false;
+  bool auto_render = true;
 
   CameraMode camera_mode = NONE;
 

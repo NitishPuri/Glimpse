@@ -160,7 +160,7 @@ void render_section_uncap(RenderSectionArgs &args) {
             << std::endl;
 }
 
-void Renderer::render_scene(const Scene &scene, Image &image, std::atomic<int> *progress) {
+void Renderer::render_scene(Scene scene, Image &image, std::atomic<int> *progress) {
   auto world_bvh = bvh_node(scene.world);
 
   film.initialize(scene.cam.image_width, scene.cam.image_height);

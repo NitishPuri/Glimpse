@@ -159,8 +159,7 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
 }
 
 void UIRenderer::renderOutput(GLResources& gl_res, RayTracer& raytracer) {
-  ImGui::ShowDemoWindow();
-  ImGui::Begin("Render Output");
+    ImGui::Begin("Render Output");
   // flip vertically
   ImGui::Image(ImTextureID(gl_res.framebufferTexture), calculatePanelSize(gl_res), ImVec2(0, 1), ImVec2(1, 0));
 

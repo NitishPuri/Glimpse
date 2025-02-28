@@ -430,6 +430,63 @@ Scene quads() {
   return scene;
 }
 
+Scene untitled_1() {
+  hittable_list objects;
+  hittable_list lights_list;
+
+  // // diffuse
+  objects.add(make_shared<sphere>(point3(-4, 2, -4), 2, make_shared<lambertian>(color(0.5, 0.8, 0.7))));
+  objects.add(make_shared<sphere>(point3(2, 2, -6), 2, make_shared<lambertian>(make_shared<noise_texture>(4))));
+
+  // // metal
+  // objects.add(make_shared<sphere>(point3(5, 2, -3), 2, make_shared<metal>(color(0.6, 0.2, 0.8), 0.2)));
+  // objects.add(make_shared<sphere>(point3(-8, 2, -4), 2, make_shared<metal>(color(0.3, 0.5, 0.8), 0.01)));
+
+  // // // "air bubble"
+  // objects.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<dielectric>(1.5)));
+  // objects.add(make_shared<sphere>(point3(0, 2, 0), 1.95, make_shared<dielectric>(1.0 / 1.5)));
+
+  // // glass sphere
+  // objects.add(make_shared<sphere>(point3(-4, 2, 0), 2, make_shared<dielectric>(1.33)));
+  // objects.add(make_shared<sphere>(point3(-4, 2, 0), 1.4, make_shared<dielectric>(1.0 / 1.33)));
+
+  // // bouncing balls
+  // objects.add(make_shared<moving_sphere>(point3(-8, 2, 2), point3(-8, 2.2, 2), 2,
+  //                                        make_shared<metal>(color(0.6, 0.2, 0.8), 0.04)));
+
+  // Giant Mirrors!
+  shared_ptr<material> aluminium = make_shared<metal>(color(0.8, 0.85, 0.88), 0.0);
+  auto giant_mirror = make_shared<quad>(point3{-20, 1, -14}, vec3{200, 0, -100}, vec3{0, 20, 0}, aluminium);
+  objects.add(giant_mirror);
+
+  for (int i = 0; i < 13; ++i) {
+    color c = color::random();
+    // TODO: add light
+    // auto light_1 = make_shared<sphere>(point3(5 * (i + 1), 2, -4), 2, make_shared<diffuse_light>(color(0.1, 0.9,
+    // 0.4)));
+    auto light_1 = make_shared<sphere>(point3(5 * (i + 1), 2, -4), 2, make_shared<diffuse_light>(c));
+    objects.add(light_1);
+    lights_list.add(light_1);
+  }
+
+  // ground
+  auto pertext = make_shared<noise_texture>(10, color(.8, .4, .2));
+  const auto ground_size = 10000;
+  objects.add(make_shared<sphere>(point3(0, -ground_size, 0), ground_size, make_shared<lambertian>(pertext)));
+  // objects.add(make_shared<sphere>(point3(0, 0, 0), ground_size, make_shared<lambertian>(pertext)));
+
+  Scene scene;
+  scene.world = objects;
+  // scene.background = color(0.3, 0.03, 0.4);
+  scene.background = color(0.3, 0.03, 0.4);
+  scene.cam.samples_per_pixel = 5;
+  scene.cam.lookfrom = point3(0, 7, 25);
+  scene.cam.lookat = point3(0, 0, 0);
+  scene.cam.vfov = 40.0;
+
+  return scene;
+}
+
 std::unordered_map<std::string, std::function<Scene()>> Scene::SceneMap = {
     {"random_scene", []() { return random_scene(); }},
     {"two_diffuse_spheres", []() { return two_diffuse_spheres(); }},
@@ -443,17 +500,13 @@ std::unordered_map<std::string, std::function<Scene()>> Scene::SceneMap = {
     {"directions_test", []() { return directions_test(); }},
     {"material_showcase", []() { return material_showcase(); }},
     {"quads", []() { return quads(); }},
+    {"untitled_1", []() { return untitled_1(); }},
 };
 
-std::vector<std::string> Scene::SceneNames = {"directions_test",
-                                              "two_diffuse_spheres",
-                                              "two_spheres_check",
-                                              "material_showcase",
-                                              "earth",
-                                              "two_perlin_spheres",
-                                              "quads",
-                                              "simple_light",
-                                              "cornell_box",
-                                              "random_scene",
-                                              "cornell_smoke",
+std::vector<std::string> Scene::SceneNames = {"directions_test",    "two_diffuse_spheres",
+                                              "two_spheres_check",  "material_showcase",
+                                              "untitled_1",         "earth",
+                                              "two_perlin_spheres", "quads",
+                                              "simple_light",       "cornell_box",
+                                              "random_scene",       "cornell_smoke",
                                               "final_scene"};
