@@ -27,9 +27,18 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - [x] Add uncapped SPP and interactive rendering.
   - Accumulate sample outputs and per sample count in a buffer and update from buffer as fast as possible!. 
   - No double buffering for now.
-- [x] Calculate per sample variances while doing this, and show averages to the user, maybe plot graphs!
+- [x] Calculate per sample variances while doing this,
+- [ ] and show averages to the user, maybe plot graphs!
 - [ ] Adaptive sampling
   - Throw more samples where variance is more!
+- Add material editors and play with textures!
+- [x] Camera Controls
+
+  // TODO:
+  //  Add simple denoising using gaussian blur
+  //  Adaptive sampling based on pixel variance
+  //  (if variance > thres && spp > min_spp) increase spp for this pixel
+
 
 # Detailed Roadmap
 
