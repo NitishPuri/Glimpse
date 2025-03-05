@@ -456,17 +456,20 @@ Scene untitled_1() {
 
   // Giant Mirrors!
   shared_ptr<material> aluminium = make_shared<metal>(color(0.8, 0.85, 0.88), 0.0);
+  shared_ptr<noise_texture> nt = make_shared<noise_texture>(4);
   auto giant_mirror = make_shared<quad>(point3{-20, 1, -14}, vec3{200, 0, -100}, vec3{0, 20, 0}, aluminium);
   objects.add(giant_mirror);
 
   for (int i = 0; i < 13; ++i) {
     color c = color::random();
+    // noise_texture nt(4);
     // TODO: add light
     // auto light_1 = make_shared<sphere>(point3(5 * (i + 1), 2, -4), 2, make_shared<diffuse_light>(color(0.1, 0.9,
     // 0.4)));
-    auto light_1 = make_shared<sphere>(point3(5 * (i + 1), 2, -4), 2, make_shared<diffuse_light>(c));
+    auto light_1 = make_shared<sphere>(point3(5 * (i + 1), 2 + 2 * std::sin(i * 0.01), -4 + +10 * std::sin(i * 0.01)),
+                                       2, make_shared<diffuse_light>(nt));
     objects.add(light_1);
-    lights_list.add(light_1);
+    // lights_list.add(light_1);
   }
 
   // ground
