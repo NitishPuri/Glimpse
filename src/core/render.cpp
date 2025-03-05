@@ -176,9 +176,17 @@ void Renderer::render_scene(Scene scene, Image &image, std::atomic<int> *progres
 
     RenderSectionArgs args{image, film, start_row, end_row, scene, world_bvh, progress};
     if (scene.cam.uncapped_spp) {
-      futures.push_back(std::async(std::launch::async, render_section_uncap, args));
+      futures.push_back(                  //
+          std::async(std::launch::async,  //
+                     [args]() mutable {   //
+                       render_section_uncap(args);
+                     }));
     } else {
-      futures.push_back(std::async(std::launch::async, render_section, args));
+      futures.push_back(                  //
+          std::async(std::launch::async,  //
+                     [args]() mutable {   //
+                       render_section(args);
+                     }));
     }
   }
 

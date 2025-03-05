@@ -72,7 +72,6 @@ class camera {
   void fly(float dx, float dy) {
     vec3 forward = unit_vector(lookat - lookfrom);
     vec3 right = unit_vector(cross(forward, vup));
-    vec3 up = cross(right, forward);
 
     lookfrom += forward * dy + right * dx;
     lookat += forward * dy + right * dx;

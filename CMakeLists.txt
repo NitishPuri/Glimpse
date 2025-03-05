@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 set(NAME Glimpse)
 
 message(STATUS "Using ${CMAKE_GENERATOR}")
-
 project(${NAME} VERSION 0.0.1)
+set(CMAKE_CXX_STANDARD 20)
 
 
 # Core library
@@ -89,4 +89,27 @@ if(BUILD_TESTS)
     target_include_directories(vectest PUBLIC ${PROJECT_SOURCE_DIR}/src)
     include(GoogleTest)
     gtest_discover_tests(vectest)
+endif()
+
+# Enable warnings
+if (MSVC)
+    target_compile_options(${NAME} PRIVATE 
+        /W4 
+        /permissive- 
+        /wd4100  # Disable unreferenced formal parameter warning
+    )
+    target_compile_options(${NAME}_cli PRIVATE 
+        /W4 
+        /permissive- 
+        /wd4100  # Disable unreferenced formal parameter warning
+    )
+    target_compile_options(${NAME}_gui PRIVATE 
+        /W4 
+        /permissive- 
+        /wd4100  # Disable unreferenced formal parameter warning
+    )
+else()
+    target_compile_options(${NAME} PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(${NAME}_cli PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(${NAME}_gui PRIVATE -Wall -Wextra -pedantic)
 endif()

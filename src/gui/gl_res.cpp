@@ -14,7 +14,7 @@ int GLResources::initGL() {
   if (!window) {
     const char* description;
     int code = glfwGetError(&description);
-    logger.log("Failed to create GLFW window: ", description);
+    logger.log("Failed to create GLFW window: ", description, code);
     glfwTerminate();
     return -1;
   }

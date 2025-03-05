@@ -6,18 +6,18 @@
 
 class Film {
  public:
-  Film() : width(0), height(0) {}
+  Film() : m_Width(0), m_Height(0) {}
   Film(int width, int height)
-      : width(width),
-        height(height),
+      : m_Width(width),
+        m_Height(height),
         sample_count(width * height, 0),
         accumulated_samples(width * height, vec3(0, 0, 0)),
         mean(width * height, vec3(0, 0, 0)),
         m2(width * height, vec3(0, 0, 0)) {}
 
   void initialize(int width, int height) {
-    this->width = width;
-    this->height = height;
+    this->m_Width = width;
+    this->m_Height = height;
     sample_count.resize(width * height, 0);
     accumulated_samples.resize(width * height, vec3(0, 0, 0));
     mean.resize(width * height, vec3(0, 0, 0));
@@ -78,10 +78,10 @@ class Film {
     return accumulated_samples[index] / sample_count[index];
   }
 
-  inline int get_index(int x, int y) const { return y * width + x; }
+  inline int get_index(int x, int y) const { return y * m_Width + x; }
 
  private:
-  int width, height;
+  int m_Width, m_Height;
   std::vector<int> sample_count;
   std::vector<vec3> accumulated_samples;
   std::vector<vec3> mean;
