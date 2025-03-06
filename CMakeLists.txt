@@ -89,7 +89,10 @@ if(BUILD_TESTS)
         tests/color_test.cpp
         tests/aabb_test.cpp
         tests/texture_test.cpp
+        tests/texture_test.cpp
+        tests/image_test.cpp
         tests/film_test.cpp
+        tests/interval_test.cpp
     )
     target_link_libraries(Glimpse_tests 
         PRIVATE

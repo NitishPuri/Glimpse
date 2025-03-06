@@ -10,7 +10,8 @@ void color_test();
 void film_test();
 void aabb_test();
 void texture_test();
-// void
+void image_test();
+void interval_test();
 
 int main(int argc, char** argv) {
   // setup filter
@@ -31,6 +32,8 @@ int main(int argc, char** argv) {
   film_test();
   aabb_test();
   texture_test();
+  image_test();
+  interval_test();
 
   return 0;
 }
