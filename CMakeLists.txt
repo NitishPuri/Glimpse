@@ -88,6 +88,7 @@ if(BUILD_TESTS)
         tests/ray_test.cpp
         tests/color_test.cpp
         tests/aabb_test.cpp
+        tests/texture_test.cpp
         tests/film_test.cpp
     )
     target_link_libraries(Glimpse_tests 

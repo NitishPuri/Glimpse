@@ -25,6 +25,7 @@ class Film {
   }
 
   void add_sample(int x, int y, const vec3& sample) {
+    if (!isValid(x, y)) return;
     // look for and remove NaNs
 
     int index = get_index(x, y);
@@ -40,11 +41,13 @@ class Film {
   }
 
   vec3 get_mean(int x, int y) const {
+    if (!isValid(x, y)) return {};
     int index = get_index(x, y);
     return mean[index];
   }
 
   vec3 get_variance(int x, int y) const {
+    if (!isValid(x, y)) return {};
     int index = get_index(x, y);
     if (sample_count[index] < 2) {
       return vec3(0, 0, 0);
@@ -53,11 +56,13 @@ class Film {
   }
 
   vec3 get_accumulated_sample(int x, int y) const {
+    if (!isValid(x, y)) return {};
     int index = get_index(x, y);
     return accumulated_samples[index];
   }
 
   int get_sample_count(int x, int y) const {
+    if (!isValid(x, y)) return {};
     int index = get_index(x, y);
     return sample_count[index];
   }
@@ -70,7 +75,10 @@ class Film {
     return int(total / sample_count.size());
   }
 
+  bool isValid(int x, int y) const { return x >= 0 && x < m_Width && y >= 0 && y < m_Height; }
+
   vec3 get_sample(int x, int y) const {
+    if (!isValid(x, y)) return {};
     int index = get_index(x, y);
     if (sample_count[index] == 0) {
       return vec3(0, 0, 0);
