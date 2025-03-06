@@ -32,6 +32,7 @@ class Film {
     sample_count[index]++;
 
     // TODO: Enable variance calcualtion after initial setup.
+    // TODO: Actually use variance map to do adaptive sampling!
     //  vec3 delta = sample - mean[index];
     //  mean[index] += delta / sample_count[index];
     //  vec3 delta2 = sample - mean[index];

@@ -112,3 +112,34 @@ Scene create_reflective_sphere_scene() {
 
   return scene;
 }
+
+// Create a tiny scene with solid colors for simple testing
+Scene create_debug_scene() {
+  Scene scene;
+
+  // Setup simple camera
+  scene.cam.lookfrom = point3(0, 0, 2);
+  scene.cam.lookat = point3(0, 0, 0);
+  scene.cam.vup = vec3(0, 1, 0);
+  scene.cam.vfov = 60.0;
+  scene.cam.aspect_ratio = 1.0;  // Square image
+
+  // Set very small dimensions for quick testing
+  scene.cam.image_width = 4;
+  scene.cam.image_height = 4;
+
+  // Set parameters for deterministic output
+  scene.cam.samples_per_pixel = 1;  // Single sample per pixel
+  scene.cam.max_depth = 1;          // Single bounce
+
+  // Solid blue background
+  scene.background = color(0.5, 0.7, 1.0);
+
+  // Add a red sphere that takes up most of the image
+  auto red_material = make_shared<lambertian>(color(1.0, 0, 0));
+  scene.world.add(make_shared<sphere>(point3(0, 0, 0), 0.9, red_material));
+
+  scene.cam.initialize();
+
+  return scene;
+}

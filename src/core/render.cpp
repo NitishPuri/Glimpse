@@ -78,8 +78,8 @@ vec3 sample_square_stratified(int s_i, int s_j, double recip_sqrt_spp) {
 }
 
 struct RenderSectionArgs {
-  Image &image;
-  Film &film;
+  Image &image;  // Image output, filled with rgb values
+  Film &film;    // Intermediate buffer, accumulates samples and computes variance.
   int start_row;
   int end_row;
   const Scene &scene;
@@ -199,7 +199,8 @@ void Renderer::render_scene(Scene scene, Image &image, std::atomic<int> *progres
     f.get();
   }
 
-  std::cout << "All threads finished rendering..." << std::endl;
+  // TODO: Implement __FUNCTION__ logging with logger!?..
+  std::cout << __FUNCTION__ << " : All threads finished rendering..." << std::endl;
   Renderer::stop_rendering = false;
 #else  // SINGLETHREADED
 
