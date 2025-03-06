@@ -17,6 +17,7 @@ void pdf_test();
 void perlin_test();
 void camera_test();
 void render_test();
+void sphere_test();
 
 int main(int argc, char** argv) {
   // setup filter
@@ -44,6 +45,7 @@ int main(int argc, char** argv) {
   perlin_test();
   camera_test();
   render_test();
+  sphere_test();
 
   return 0;
 }
