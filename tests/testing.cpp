@@ -6,8 +6,13 @@ constexpr auto sum(auto... values) { return (values + ...); }
 
 void tests_vec3();
 
-int main() {
+int main(int argc, char** argv) {
   using namespace boost::ut;
+
+  // setup filter
+  const auto filter = argc > 1 ? argv[1] : "";
+
+  cfg<override> = {.filter = filter};
 
   "sum"_test = [] {
     expect(sum(0) == 0_i);

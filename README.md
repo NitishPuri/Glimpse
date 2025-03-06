@@ -51,6 +51,12 @@ Reference implementations
 - [nanort](https://github.com/lighttransport/nanort?tab=readme-ov-file)
 
 
+### Tests
 
+```
+test.bat -> run all tests
+test.bat vec3* -> run all tests matching vec3*
+
+```
 
 See [Roadmap](ROADMAP.md)

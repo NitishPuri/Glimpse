@@ -1,2 +1,2 @@
-call build.bat
-ctest --test-dir build -C Release --output-on-failure
+@REM call build.bat
+build\Release\Glimpse_tests.exe %1

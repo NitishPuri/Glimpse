@@ -68,4 +68,39 @@ void tests_vec3() {
     expect(reflected.y() == 1.0_d);
     expect(reflected.z() == 0.0_d);
   };
+
+  "vec3_additional_operations"_test = [] {
+    // Test negation operator
+    vec3 v1(1.0, -2.0, 3.0);
+    vec3 neg = -v1;
+    expect(neg.x() == -1.0_d);
+    expect(neg.y() == 2.0_d);
+    expect(neg.z() == -3.0_d);
+
+    // Test division
+    vec3 v2(2.0, 4.0, 6.0);
+    vec3 div = v2 / 2.0;
+    expect(div.x() == 1.0_d);
+    expect(div.y() == 2.0_d);
+    expect(div.z() == 3.0_d);
+
+    // Test near_zero
+    vec3 zero(1e-9, 1e-9, 1e-9);
+    expect(zero.near_zero());
+
+    // Test compound operators
+    vec3 v3(1.0, 2.0, 3.0);
+    v3 += vec3(2.0, 3.0, 4.0);
+    expect(v3.x() == 3.0_d);
+    expect(v3.y() == 5.0_d);
+    expect(v3.z() == 7.0_d);
+
+    // Test vector multiplication
+    vec3 v4(2.0, 3.0, 4.0);
+    vec3 v5(3.0, 4.0, 5.0);
+    vec3 mult = v4 * v5;
+    expect(mult.x() == 6.0_d);
+    expect(mult.y() == 12.0_d);
+    expect(mult.z() == 20.0_d);
+  };
 };
