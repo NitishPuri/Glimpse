@@ -29,6 +29,7 @@ class reporter : public ut::reporter<ut::printer> {
   // Add this operator to handle initializer list assignments
   template <class T>
   auto operator=(std::initializer_list<T> il) -> reporter& {
+    // ut::reporter<ut::printer>::operator=(il);
     return *this;
   }
 
@@ -38,10 +39,8 @@ class reporter : public ut::reporter<ut::printer> {
 template <class Reporter = reporter>
 class runner : public ut::runner<Reporter> {
  public:
-  using BaseRunner = ut::runner<Reporter>;
-
   auto& operator=(const ut::options& options) {
-    this->BaseRunner::operator=(options);
+    ut::runner<Reporter>::operator=(options);
     return *this;
   }
 };
