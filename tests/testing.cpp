@@ -18,6 +18,7 @@ void perlin_test();
 void camera_test();
 void render_test();
 void sphere_test();
+void bvh_test();
 
 int main(int argc, char** argv) {
   // setup filter
@@ -46,6 +47,7 @@ int main(int argc, char** argv) {
   camera_test();
   render_test();
   sphere_test();
+  bvh_test();
 
   return 0;
 }

@@ -99,6 +99,7 @@ if(BUILD_TESTS)
         tests/camera_test.cpp
         tests/render_test.cpp
         tests/sphere_test.cpp
+        tests/bvh_node_test.cpp
     )
     target_link_libraries(Glimpse_tests 
         PRIVATE
