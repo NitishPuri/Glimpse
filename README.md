@@ -38,6 +38,7 @@ Builds on top of my implementation of [ray-tracer-in-a-weekend](https://github.c
 Dependencies
 
 - https://github.com/nothings/stb
+- https://github.com/boost-ext/ut?tab=readme-ov-file#quick-start
 
 Should also use
 

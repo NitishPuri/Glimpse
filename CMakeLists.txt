@@ -72,24 +72,43 @@ endif()
 
 # Tests
 # Does not work!!
-option(BUILD_TESTS "Build the tests" OFF)
+option(BUILD_TESTS "Build the tests" ON)
+message(STATUS "Building tests????")
 if(BUILD_TESTS)    
-
-    set(GTEST_PATH ${PROJECT_SOURCE_DIR}/ext/gtest)
-    set(GL_INCLUDE ${GLFW_PATH}/include)
-    set(GLFW_LIB_DIR ${GLFW_PATH}/lib-vc2022)
+    message(STATUS "Building tests")
 
     enable_testing()    
 
-    find_package(GTest REQUIRED)
-    include_directories(${GTEST_INCLUDE_DIRS})
-    add_executable(vectest tests/Vec3.cpp)
-    target_link_libraries(vectest Gtest)
-    target_include_directories(vectest PUBLIC ${PROJECT_SOURCE_DIR}/ext)
-    target_include_directories(vectest PUBLIC ${PROJECT_SOURCE_DIR}/src)
-    include(GoogleTest)
-    gtest_discover_tests(vectest)
+    add_library(boost_ut INTERFACE)
+    target_include_directories(boost_ut INTERFACE ${PROJECT_SOURCE_DIR}/ext)
+
+    add_executable(Glimpse_tests tests/main.cpp)
+    target_link_libraries(Glimpse_tests 
+        PRIVATE
+        Glimpse
+        boost_ut
+    )
+    target_include_directories(Glimpse_tests 
+        PRIVATE 
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/ext
+    )
+
+    add_test(
+        NAME GlimpseTests 
+        COMMAND Glimpse_tests
+        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    )
+
+    # Add test properties to show output
+    set_tests_properties(GlimpseTests PROPERTIES
+       FAIL_REGULAR_EXPRESSION "FAILED"
+       PASS_REGULAR_EXPRESSION "Suite.*\\| 0 failed"
+    )
 endif()
+
+
+
 
 # Enable warnings
 if (MSVC)
