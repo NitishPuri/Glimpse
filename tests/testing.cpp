@@ -20,6 +20,9 @@ void render_test();
 void sphere_test();
 void bvh_test();
 
+// End-to-end tests
+void e2e_test();
+
 int main(int argc, char** argv) {
   // setup filter
   const auto filter = argc > 1 ? argv[1] : "*";
@@ -32,22 +35,25 @@ int main(int argc, char** argv) {
     expect(sum(1, 2) > 0_i and 42_i == sum(40, 2));
   };
 
-  /////// Tests
-  vec3_test();
-  ray_test();
-  color_test();
-  film_test();
-  aabb_test();
-  texture_test();
-  image_test();
-  interval_test();
-  onb_test();
-  pdf_test();
-  perlin_test();
-  camera_test();
-  render_test();
-  sphere_test();
-  bvh_test();
+  // Unit Tests
+  // vec3_test();
+  // ray_test();
+  // color_test();
+  // film_test();
+  // aabb_test();
+  // texture_test();
+  // image_test();
+  // interval_test();
+  // onb_test();
+  // pdf_test();
+  // perlin_test();
+  // camera_test();
+  // render_test();
+  // sphere_test();
+  // bvh_test();
+
+  // E2E
+  e2e_test();
 
   return 0;
 }

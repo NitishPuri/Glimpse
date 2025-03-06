@@ -83,23 +83,28 @@ if(BUILD_TESTS)
     target_include_directories(boost_ut INTERFACE ${PROJECT_SOURCE_DIR}/ext)
 
     add_executable(Glimpse_tests 
+        tests/test_cfg.h
         tests/testing.cpp
-        tests/vec3_test.cpp
-        tests/ray_test.cpp
-        tests/color_test.cpp
-        tests/aabb_test.cpp
-        tests/texture_test.cpp
-        tests/texture_test.cpp
-        tests/image_test.cpp
-        tests/film_test.cpp
-        tests/interval_test.cpp
-        tests/onb_test.cpp
-        tests/pdf_test.cpp
-        tests/perlin_test.cpp
-        tests/camera_test.cpp
-        tests/render_test.cpp
-        tests/sphere_test.cpp
-        tests/bvh_node_test.cpp
+
+        tests/unit_tests/vec3_test.cpp
+        tests/unit_tests/ray_test.cpp
+        tests/unit_tests/color_test.cpp
+        tests/unit_tests/aabb_test.cpp
+        tests/unit_tests/texture_test.cpp
+        tests/unit_tests/texture_test.cpp
+        tests/unit_tests/image_test.cpp
+        tests/unit_tests/film_test.cpp
+        tests/unit_tests/interval_test.cpp
+        tests/unit_tests/onb_test.cpp
+        tests/unit_tests/pdf_test.cpp
+        tests/unit_tests/perlin_test.cpp
+        tests/unit_tests/camera_test.cpp
+        tests/unit_tests/render_test.cpp
+        tests/unit_tests/sphere_test.cpp
+        tests/unit_tests/bvh_node_test.cpp
+
+        tests/e2e/e2e_test.cpp
+        tests/e2e/test_scenes.h
     )
     target_link_libraries(Glimpse_tests 
         PRIVATE
