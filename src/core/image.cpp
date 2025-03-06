@@ -107,9 +107,11 @@ std::unique_ptr<StbImageData> Image::load_stb_image(const std::string& filename)
     return result;
   }
 
-  // Also load float data for precision
-  result->float_data =
-      stbi_loadf(filename.c_str(), &result->width, &result->height, &result->channels, bytes_per_pixel);
+  // TODO: Using float data causes differences in read write loopback tests
+  // Either remove float path or fix the issues.
+  //  Also load float data for precision
+  //  result->float_data =
+  //      stbi_loadf(filename.c_str(), &result->width, &result->height, &result->channels, bytes_per_pixel);
 
   return result;
 }

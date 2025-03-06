@@ -80,6 +80,23 @@ class Image {
   std::vector<unsigned char>& dataVec() { return pixel_data; }
 
  private:
+  // Convert linear RGB [0,1] to sRGB [0,1]
+  static float linear_to_srgb(float linear) {
+    if (linear <= 0.0031308f) {
+      return linear * 12.92f;
+    } else {
+      return 1.055f * pow(linear, 1.0f / 2.4f) - 0.055f;
+    }
+  }
+
+  // Convert sRGB [0,1] to linear RGB [0,1]
+  static float srgb_to_linear(float srgb) {
+    if (srgb <= 0.04045f) {
+      return srgb / 12.92f;
+    } else {
+      return pow((srgb + 0.055f) / 1.055f, 2.4f);
+    }
+  }
   std::vector<unsigned char> pixel_data;
   const int bytes_per_pixel = 3;  // RGB format
 

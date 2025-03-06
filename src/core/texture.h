@@ -3,7 +3,7 @@
 #include "perlin.h"
 #include "vec3.h"
 
-class rtw_image;
+class Image;
 
 class texture {
  public:
@@ -55,7 +55,7 @@ class image_texture : public texture {
   color value(double u, double v, const point3 &p) const override;
 
  private:
-  std::shared_ptr<rtw_image> image;
+  std::shared_ptr<Image> m_image;
 };
 
 class noise_texture : public texture {
