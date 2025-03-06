@@ -93,6 +93,7 @@ if(BUILD_TESTS)
         tests/image_test.cpp
         tests/film_test.cpp
         tests/interval_test.cpp
+        tests/onb_test.cpp
     )
     target_link_libraries(Glimpse_tests 
         PRIVATE

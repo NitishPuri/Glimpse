@@ -12,6 +12,7 @@ void aabb_test();
 void texture_test();
 void image_test();
 void interval_test();
+void onb_test();
 
 int main(int argc, char** argv) {
   // setup filter
@@ -34,6 +35,7 @@ int main(int argc, char** argv) {
   texture_test();
   image_test();
   interval_test();
+  onb_test();
 
   return 0;
 }
