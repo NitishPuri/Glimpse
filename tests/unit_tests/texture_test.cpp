@@ -1,5 +1,7 @@
 #include "core/texture.h"
 
+#include "core/rtw_stb_image.h"
+
 #define BOOST_UT_DISABLE_MODULE
 #include "boost/ut.hpp"  // import boost.ut;
 
@@ -64,5 +66,31 @@ void texture_test() {
     expect(c1.x() <= 1.0_d);
     expect(c1.y() <= 1.0_d);
     expect(c1.z() <= 1.0_d);
+  };
+
+  "rtw_image"_test = [] {
+    rtw_image image;
+    expect(that % image.load("res/earthmap.jpg"));
+    expect(that % image.width() == 1024);
+    expect(that % image.height() == 512);
+
+    // Check a few pixels
+    const unsigned char *pixel = image.pixel_data(0, 0);
+    std::cout << int(pixel[0]) << " " << int(pixel[1]) << " " << int(pixel[2]) << std::endl;
+    expect(that % pixel[0] == 255);
+    expect(that % pixel[1] == 255);
+    expect(that % pixel[2] == 255);
+
+    pixel = image.pixel_data(512, 256);
+    std::cout << int(pixel[0]) << " " << int(pixel[1]) << " " << int(pixel[2]) << std::endl;
+    expect(that % pixel[0] == 0);
+    expect(that % pixel[1] == 0);
+    expect(that % pixel[2] == 8);
+
+    pixel = image.pixel_data(1023, 511);
+    std::cout << int(pixel[0]) << " " << int(pixel[1]) << " " << int(pixel[2]) << std::endl;
+    expect(that % pixel[0] == 213);
+    expect(that % pixel[1] == 221);
+    expect(that % pixel[2] == 228);
   };
 }

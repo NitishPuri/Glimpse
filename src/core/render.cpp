@@ -113,7 +113,11 @@ void render_section(RenderSectionArgs &args) {
           if (progress) (*progress)++;
 
           film.add_sample(i, j, pixel_color);
-          image.set(i, j, film.get_sample(i, j));
+          pixel_color = film.get_sample(i, j);
+          pixel_color = sqrt(pixel_color);  // gamma correction!
+          // image.set(i, j, ImageColor{float(pixel_color.x()), float(pixel_color.y()), float(pixel_color.z())});
+          image.set_float(i, j, static_cast<float>(pixel_color.x()), static_cast<float>(pixel_color.y()),
+                          static_cast<float>(pixel_color.z()));
         }
       }
     }
@@ -149,7 +153,11 @@ void render_section_uncap(RenderSectionArgs &args) {
             if (progress) (*progress)++;
 
             film.add_sample(i, j, pixel_color);
-            image.set(i, j, film.get_sample(i, j));
+            pixel_color = film.get_sample(i, j);
+            pixel_color = sqrt(pixel_color);  // gamma correction!
+            // image.set(i, j, ImageColor{float(pixel_color.x()), float(pixel_color.y()), float(pixel_color.z())});
+            image.set_float(i, j, static_cast<float>(pixel_color.x()), static_cast<float>(pixel_color.y()),
+                            static_cast<float>(pixel_color.z()));
           }
         }
       }

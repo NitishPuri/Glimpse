@@ -11,7 +11,6 @@
  */
 
 #include "vec3.h"
-#include "color.h"
 #include "interval.h"
 #include "ray.h"
 #include "aabb.h"

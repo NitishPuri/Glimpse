@@ -88,7 +88,6 @@ if(BUILD_TESTS)
 
         tests/unit_tests/vec3_test.cpp
         tests/unit_tests/ray_test.cpp
-        tests/unit_tests/color_test.cpp
         tests/unit_tests/aabb_test.cpp
         tests/unit_tests/texture_test.cpp
         tests/unit_tests/texture_test.cpp
