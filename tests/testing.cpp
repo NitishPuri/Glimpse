@@ -13,6 +13,7 @@ void texture_test();
 void image_test();
 void interval_test();
 void onb_test();
+void pdf_test();
 
 int main(int argc, char** argv) {
   // setup filter
@@ -36,6 +37,7 @@ int main(int argc, char** argv) {
   image_test();
   interval_test();
   onb_test();
+  pdf_test();
 
   return 0;
 }

@@ -12,6 +12,7 @@
 //==============================================================================================
 
 #include "hittables/hittable_list.h"
+#include "hittables/sphere.h"
 #include "onb.h"
 
 class pdf {
