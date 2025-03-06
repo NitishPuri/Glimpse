@@ -1,4 +1,4 @@
-#include "../src/core/vec3.h"
+#include "core/vec3.h"
 
 #define BOOST_UT_DISABLE_MODULE
 #include "boost/ut.hpp"

@@ -85,7 +85,10 @@ if(BUILD_TESTS)
     add_executable(Glimpse_tests 
         tests/testing.cpp
         tests/vec3_test.cpp
+        tests/ray_test.cpp
+        tests/color_test.cpp
         tests/aabb_test.cpp
+        tests/film_test.cpp
     )
     target_link_libraries(Glimpse_tests 
         PRIVATE

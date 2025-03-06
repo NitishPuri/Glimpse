@@ -1,7 +1,4 @@
-#include "../src/core/aabb.h"
-
-#include "../src/core/ray.h"
-#include "../src/core/vec3.h"
+#include "core/aabb.h"
 
 #define BOOST_UT_DISABLE_MODULE
 #include "boost/ut.hpp"
@@ -111,7 +108,7 @@ void aabb_test() {
       expect(box.hit(r, interval(4, 10)) == false);  // Starts too late
     };
 
-      // Test box combinations
+    // Test box combinations
     {
       aabb box1(point3(0, 0, 0), point3(2, 2, 2));
       aabb box2(point3(1, 1, 1), point3(3, 3, 3));
