@@ -38,6 +38,10 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
   //  Add simple denoising using gaussian blur
   //  Adaptive sampling based on pixel variance
   //  (if variance > thres && spp > min_spp) increase spp for this pixel
+- [ ] Add methods to visualize bounce paths of a single ray, or a selected region, mapped automatically based on scene geometry.
+- [ ] More instrumentation from the ray cast process to analyse what happened, correlating the "fitness" of the resulting sample with the paths it took, and how it can be improved.
+- Methods to simplify the process of debugging through a single ray.
+
 
 
 # Detailed Roadmap

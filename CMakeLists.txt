@@ -150,6 +150,10 @@ if (MSVC)
         /permissive- 
         /wd4100  # Disable unreferenced formal parameter warning
     )
+    target_compile_definitions(${NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(${NAME}_cli PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(${NAME}_gui PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(${NAME}_tests PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
     target_compile_options(${NAME} PRIVATE -Wall -Wextra -pedantic)
     target_compile_options(${NAME}_cli PRIVATE -Wall -Wextra -pedantic)

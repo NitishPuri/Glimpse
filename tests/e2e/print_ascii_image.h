@@ -341,7 +341,7 @@ void print_enhanced_ascii_image(const Image& img, int max_width = 80, int max_he
 
       // Apply contrast enhancement
       double enhanced_brightness = (brightness - min_brightness) / brightness_range;
-      enhanced_brightness = intMax(0.0, intMin(1.0, enhanced_brightness));  // Clamp to 0-1
+      enhanced_brightness = max(0.0, min(1.0, enhanced_brightness));  // Clamp to 0-1
 
       // Map brightness to character
       int char_index = static_cast<int>(enhanced_brightness * (chars.length() - 1));
@@ -729,13 +729,13 @@ void print_highres_image(const Image& img, int max_width = 120, int max_height =
       // Choose character based on brightness
       char displayChar;
       if (brightness > 0.80)
-        displayChar = 219;  // █ Full block
+        displayChar = static_cast<char>(219);  // █ Full block
       else if (brightness > 0.60)
-        displayChar = 178;  // ▓ Dark shade
+        displayChar = static_cast<char>(178);  // ▓ Dark shade
       else if (brightness > 0.40)
-        displayChar = 177;  // ▒ Medium shade
+        displayChar = static_cast<char>(177);  // ▒ Medium shade
       else if (brightness > 0.20)
-        displayChar = 176;  // ░ Light shade
+        displayChar = static_cast<char>(176);  // ░ Light shade
       else
         displayChar = ' ';  // Space
 
