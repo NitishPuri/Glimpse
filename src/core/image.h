@@ -3,6 +3,8 @@
 #include "color.h"
 #include "common.h"
 
+// TODO: This class is used for writing image, while rtw_image is used for reading.
+//  should merge them into one class that can do both
 class Image {
  public:
   void initialize(int w, int h) {

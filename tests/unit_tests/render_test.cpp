@@ -44,6 +44,7 @@ Scene create_test_scene() {
 void render_test() {
   using namespace boost::ut;
 
+  // TODO: Fix this test
   "renderer"_test = [] {
     skip / "render_scene"_test = [] {
       // Create renderer and image
@@ -56,6 +57,15 @@ void render_test() {
       // Test basic rendering
       std::atomic<int> progress = 0;
       renderer.render_scene(scene, image, &progress);
+
+      // here we need to wait for the rendering to finish
+      // and then check the image, or maybe let that be handled by e2e tests
+      // willl only check non image related stuff here, like progress and if the renderer launches stuff as expected,
+      // maybe also test if the renderer can stop rendering when trigegred
+      // and if the progress is updated correctly, or leave that to e2e as well?
+
+      // I think we should test the launch,  dispatch, progress and stopping logic here,
+      // and then test the rendering logic in e2e tests
 
       // Check that rendering produced some non-black pixels
       bool has_content = false;
@@ -75,6 +85,7 @@ void render_test() {
       expect(progress.load() > 0_i) << "Progress counter should be incremented during rendering";
     };
 
+    // TODO: Fix this test
     skip / "ray_color"_test = [] {
       // Test the ray_color function directly
       hittable_list world;

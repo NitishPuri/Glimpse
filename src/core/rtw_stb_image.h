@@ -23,6 +23,8 @@
 
 #include "stb/stb_image.h"
 
+// TODO: Hook this with another envvariable <GLIMPSE_DATA> to look for stuff?
+//  or maybe do that in another common place ( so that it works for models too)
 class rtw_image {
  public:
   rtw_image() {}
