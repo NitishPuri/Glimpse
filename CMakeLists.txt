@@ -97,6 +97,7 @@ if(BUILD_TESTS)
         tests/pdf_test.cpp
         tests/perlin_test.cpp
         tests/camera_test.cpp
+        tests/render_test.cpp
     )
     target_link_libraries(Glimpse_tests 
         PRIVATE
