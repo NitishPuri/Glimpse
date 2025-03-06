@@ -85,8 +85,7 @@ void render_test() {
       expect(progress.load() > 0_i) << "Progress counter should be incremented during rendering";
     };
 
-    // TODO: Fix this test
-    skip / "ray_color"_test = [] {
+    "ray_color"_test = [] {
       // Test the ray_color function directly
       hittable_list world;
       auto material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
@@ -94,7 +93,7 @@ void render_test() {
 
       auto bvh = bvh_node(world);
       hittable_list lights;
-      color background(0, 0, 0);
+      color background(0.1, 0.1, 0.1);
 
       // Ray that hits the sphere
       ray r(point3(0, 0, 0), vec3(0, 0, -1));

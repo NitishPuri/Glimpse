@@ -198,7 +198,6 @@ void test_debug_scene() {
     // Create a known reference image manually for comparison
     Image reference_image(scene.cam.image_width, scene.cam.image_height);
 
-    // Fill with expected values (this is a simplification - exact values would depend on your renderer)
     // Center pixels should be red from the sphere, outer pixels should be blue background
     // We'll estimate a basic pattern
     for (int y = 0; y < scene.cam.image_height; y++) {

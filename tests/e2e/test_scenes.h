@@ -8,13 +8,9 @@
 #include "core/material.h"
 #include "core/scenes.h"
 #include "core/vec3.h"
-// #include "materials/diffuse_light.h"
-// #include "materials/lambertian.h"
-// #include "materials/metal.h"
-// #include "textures/solid_color.h"
 
 // Simple scene with a single sphere
-Scene create_simple_sphere_scene() {
+inline Scene create_simple_sphere_scene() {
   Scene scene;
 
   // Setup camera
@@ -36,7 +32,7 @@ Scene create_simple_sphere_scene() {
 }
 
 // Cornell box-like scene
-Scene create_cornell_box_scene() {
+inline Scene create_cornell_box_scene() {
   Scene scene;
 
   // Setup camera for Cornell box
@@ -79,7 +75,7 @@ Scene create_cornell_box_scene() {
 }
 
 // Scene with reflective sphere
-Scene create_reflective_sphere_scene() {
+inline Scene create_reflective_sphere_scene() {
   Scene scene;
 
   // Setup camera
@@ -114,7 +110,7 @@ Scene create_reflective_sphere_scene() {
 }
 
 // Create a tiny scene with solid colors for simple testing
-Scene create_debug_scene() {
+inline Scene create_debug_scene() {
   Scene scene;
 
   // Setup simple camera
@@ -133,7 +129,7 @@ Scene create_debug_scene() {
   scene.cam.max_depth = 1;          // Single bounce
 
   // Solid blue background
-  scene.background = color(0.5, 0.7, 1.0);
+  scene.background = color(0.1, 0.0, 1.0);
 
   // Add a red sphere that takes up most of the image
   auto red_material = make_shared<lambertian>(color(1.0, 0, 0));
