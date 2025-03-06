@@ -82,7 +82,10 @@ if(BUILD_TESTS)
     add_library(boost_ut INTERFACE)
     target_include_directories(boost_ut INTERFACE ${PROJECT_SOURCE_DIR}/ext)
 
-    add_executable(Glimpse_tests tests/main.cpp)
+    add_executable(Glimpse_tests 
+        tests/testing.cpp
+        tests/test_vec3.cpp
+    )
     target_link_libraries(Glimpse_tests 
         PRIVATE
         Glimpse
