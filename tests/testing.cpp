@@ -4,7 +4,8 @@
 
 constexpr auto sum(auto... values) { return (values + ...); }
 
-void tests_vec3();
+void vec3_test();
+void aabb_test();
 
 int main(int argc, char** argv) {
   using namespace boost::ut;
@@ -21,7 +22,8 @@ int main(int argc, char** argv) {
   };
 
   /////// Tests
-  tests_vec3();
+  vec3_test();
+  aabb_test();
 
   return 0;
 }
