@@ -1,3 +1,4 @@
+#if 0
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
@@ -312,3 +313,5 @@ void RayAnalyzer::correlatePathsWithFitness(int x, int y, const Scene& scene, co
 
 }  // namespace debug
 }  // namespace glimpse
+
+#endif

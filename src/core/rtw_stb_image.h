@@ -16,12 +16,10 @@
 #pragma warning(push, 0)
 #endif
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_FAILURE_USERMSG
 #include <cstdlib>
 #include <iostream>
 
-#include "stb/stb_image.h"
+// #include "stb/stb_image.h"
 
 // TODO: Hook this with another envvariable <GLIMPSE_DATA> to look for stuff?
 //  or maybe do that in another common place ( so that it works for models too)
@@ -30,14 +28,6 @@ class rtw_image {
   rtw_image() {}
 
   rtw_image(const char *image_filename) {
-    // Loads image data from the specified file. If the RTW_IMAGES environment
-    // variable is defined, looks only in that directory for the image file. If
-    // the image was not found, searches for the specified image file first from
-    // the current directory, then in the images/ subdirectory, then the
-    // _parent's_ images/ subdirectory, and then _that_ parent, on so on, for
-    // six levels up. If the image was not loaded successfully, width() and
-    // height() will return 0.
-
     auto filename = std::string(image_filename);
     // auto imagedir = getenv("RTW_IMAGES");
 
@@ -45,38 +35,13 @@ class rtw_image {
     // if (imagedir && load(std::string(imagedir) + "/" + image_filename))
     // return;
     if (load(filename)) return;
-    // if (load("images/" + filename)) return;
-    // if (load("../images/" + filename)) return;
-    // if (load("../../images/" + filename)) return;
-    // if (load("../../../images/" + filename)) return;
-    // if (load("../../../../images/" + filename)) return;
-    // if (load("../../../../../images/" + filename)) return;
-    // if (load("../../../../../../images/" + filename)) return;
 
     std::cerr << "ERROR: Could not load image file '" << image_filename << "'.\n";
   }
 
-  ~rtw_image() {
-    delete[] bdata;
-    STBI_FREE(fdata);
-  }
+  ~rtw_image();
 
-  bool load(const std::string &filename) {
-    // Loads the linear (gamma=1) image data from the given file name. Returns
-    // true if the load succeeded. The resulting data buffer contains the three
-    // [0.0, 1.0] floating-point values for the first pixel (red, then green,
-    // then blue). Pixels are contiguous, going left to right for the width of
-    // the image, followed by the next row below, for the full height of the
-    // image.
-
-    auto n = bytes_per_pixel;  // Dummy out parameter: original components per pixel
-    fdata = stbi_loadf(filename.c_str(), &image_width, &image_height, &n, bytes_per_pixel);
-    if (fdata == nullptr) return false;
-
-    bytes_per_scanline = image_width * bytes_per_pixel;
-    convert_to_bytes();
-    return true;
-  }
+  bool load(const std::string &filename);
 
   int width() const { return (fdata == nullptr) ? 0 : image_width; }
   int height() const { return (fdata == nullptr) ? 0 : image_height; }
@@ -91,6 +56,18 @@ class rtw_image {
     y = clamp(y, 0, image_height);
 
     return bdata + y * bytes_per_scanline + x * bytes_per_pixel;
+  }
+
+  const float *pixel_data_f(int x, int y) const {
+    // Return the address of the three RGB float values of the pixel at x,y.
+    // If there is no image data, returns magenta.
+    static float magenta[] = {1.0f, 0.0f, 1.0f};
+    if (fdata == nullptr) return magenta;
+
+    x = clamp(x, 0, image_width);
+    y = clamp(y, 0, image_height);
+
+    return fdata + y * (bytes_per_scanline / sizeof(float)) + x * bytes_per_pixel;
   }
 
   bool is_valid() const { return fdata != nullptr; }
