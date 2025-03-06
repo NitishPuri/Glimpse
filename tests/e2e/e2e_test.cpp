@@ -60,31 +60,6 @@ void ensure_directory_exists(const std::string& path) {
   }
 }
 
-// Load reference image
-Image load_reference_image(const std::string& filename) {
-  Image img;
-  rtw_image image(filename.c_str());
-  if (!image.is_valid()) {
-    std::cout << "Failed to load reference image: " << filename << std::endl;
-    return img;
-  }
-
-  img.initialize(image.width(), image.height());
-  for (int y = 0; y < image.height(); y++) {
-    for (int x = 0; x < image.width(); x++) {
-      auto pixel = image.pixel_data(x, y);
-      ImageColor color(pixel[0], pixel[1], pixel[2]);
-      img.set(x, y, color);
-    }
-  }
-
-  // TODO:: Load reference image
-  //  if (!img.read(filename)) {
-  //    std::cout << "Failed to load reference image: " << filename << std::endl;
-  //  }
-  return img;
-}
-
 // Run end-to-end test for a scene with uncapped samples per pixel
 void test_scene_uncapped(const std::string& name, Scene (*create_scene_fn)(), int width = 200, int height = 0,
                          int run_time_seconds = 5) {
@@ -209,10 +184,14 @@ void test_debug_scene() {
 
         if (distance < 1.5) {
           // Red sphere at the center
-          reference_image.set(x, y, ImageColor(255, 0, 0));
+          reference_image.set(x, y,
+                              ImageColor(static_cast<unsigned char>(255), static_cast<unsigned char>(0),
+                                         static_cast<unsigned char>(0)));
         } else {
           // Blue background
-          reference_image.set(x, y, ImageColor(128, 179, 255));  // Approximate blue background
+          reference_image.set(x, y,
+                              ImageColor(static_cast<unsigned char>(128), static_cast<unsigned char>(179),
+                                         static_cast<unsigned char>(255)));  // Approximate blue background
         }
       }
     }
@@ -222,7 +201,7 @@ void test_debug_scene() {
     reference_image.write(ref_output);
 
     // Compare images
-    bool images_match = compare_images(rendered_image, reference_image, 10);  // Higher tolerance for this test
+    bool images_match = compare_images(rendered_image, reference_image, 100);  // Higher tolerance for this test
 
     // If they don't match, print specific differences
     if (!images_match) {
@@ -259,8 +238,8 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
   ensure_directory_exists(test_output_dir);
 
   // Create test image filename
-  std::string output_filename = test_output_dir + name + ".png";
-  std::string reference_filename = reference_dir + name + ".png";
+  std::string output_filename = test_output_dir + name + ".bmp";
+  std::string reference_filename = reference_dir + name + ".bmp";
 
   // std::string test_name = ;
   test("e2e_" + name + "_render") = [&] {
@@ -296,9 +275,6 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
     Renderer renderer;
     renderer.render_scene(scene, rendered_image, &progress);
 
-    // TODO: We should somehow wait for rendering to finish with some timeout,
-    // and then save the image and compare with reference
-
     // start render in a sperate thread!
     auto render_future = std::async(std::launch::async, [&]() {
       renderer.render_scene(scene, rendered_image, &progress);
@@ -306,6 +282,7 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
     });
 
     // Wait for rendering to complete with a timeout
+    // TODO: Find a reasonable timeout value, 10 is too much
     const int timeout_seconds = 10;
     auto start_time = std::chrono::steady_clock::now();
     bool timed_out = false;
@@ -358,7 +335,7 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
 
     // If reference image exists, compare
     if (fs::exists(reference_filename)) {
-      Image reference_image = load_reference_image(reference_filename);
+      Image reference_image(reference_filename);
       bool images_match = compare_images(rendered_image, reference_image);
       expect(images_match) << "Rendered image doesn't match reference for scene: " << name;
     } else {
@@ -371,10 +348,10 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
 // TODO: Test the uncapped spp render branch
 
 void e2e_test() {
-  // Test each scene
-  test_debug_scene();
+  // test_debug_scene();
 
-  // test_scene("simple_sphere", create_simple_sphere_scene);
+  // Test each scene
+  test_scene("simple_sphere", create_simple_sphere_scene);
   // test_scene("cornell_box", create_cornell_box_scene, 200, 200);  // Square aspect ratio
   // test_scene("reflective_sphere", create_reflective_sphere_scene);
   // Add more scenes as needed

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/camera.h"
-#include "core/color.h"
 #include "core/hittables/hittable.h"
 #include "core/hittables/quad.h"
 #include "core/hittables/sphere.h"
