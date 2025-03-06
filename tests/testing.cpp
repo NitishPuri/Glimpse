@@ -15,23 +15,33 @@ void aabb_test();
 namespace cfg {
 class reporter : public ut::reporter<ut::printer> {
  public:
-  std::string_view filter = "*";  // Add filter member
+  using BaseReporter = ut::reporter<ut::printer>;
 
-  auto on(ut::events::test_begin test) -> void { std::cout << "\n[TEST] Running: " << test.name << std::endl; }
-  // auto on(ut::events::test_run) -> void {}
+  auto on(ut::events::test_begin test) -> void { std::cout << "[TEST] Running: " << test.name << std::endl; }
   auto on(ut::events::test_skip test) -> void { std::cout << "[SKIP] Skipped: " << test.name << std::endl; }
-  auto on(ut::events::test_end test) -> void { std::cout << "[DONE] Finished: " << test.name << std::endl; }
+  // auto on(ut::events::test_end test) -> void { std::cout << "[DONE] Finished: " << test.name << std::endl; }
 
-  using ut::reporter<ut::printer>::on;
+  auto operator=(const ut::options& options) -> reporter& {
+    BaseReporter::operator=({options.colors});
+    return *this;
+  }
+
+  // Add this operator to handle initializer list assignments
+  template <class T>
+  auto operator=(std::initializer_list<T> il) -> reporter& {
+    return *this;
+  }
+
+  using BaseReporter::on;
 };
 
 template <class Reporter = reporter>
 class runner : public ut::runner<Reporter> {
  public:
-  std::string_view filter = "*";
+  using BaseRunner = ut::runner<Reporter>;
 
   auto& operator=(const ut::options& options) {
-    filter = options.filter;
+    this->BaseRunner::operator=(options);
     return *this;
   }
 };
