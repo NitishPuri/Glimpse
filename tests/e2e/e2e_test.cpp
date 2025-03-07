@@ -13,9 +13,10 @@
 #include "../test_cfg.h"
 
 namespace fs = std::filesystem;
+constexpr const char* ext_for_testing = ".png";
 
 // Compares two images pixel by pixel with optional tolerance
-bool compare_images(const Image& img1, const Image& img2, int tolerance = 1) {
+bool compare_images(const Image& img1, const Image& img2, int tolerance = 1, Image* diff_image = nullptr) {
   if (img1.width != img2.width || img1.height != img2.height) {
     std::cout << "Image dimensions don't match: "
               << "(" << img1.width << "x" << img1.height << ") vs "
@@ -39,7 +40,25 @@ bool compare_images(const Image& img1, const Image& img2, int tolerance = 1) {
       max_diff = std::max(max_diff, pixel_diff);
 
       if (pixel_diff > tolerance) {
+        // std::cout << "Pixel (" << x << "," << y << ") differs by " << pixel_diff << " (max: " << tolerance << ")"
+        //           << std::endl;
+        // std::cout << "  Expected: [" << static_cast<int>(c1.rgb[0]) << "," << static_cast<int>(c1.rgb[1]) << ","
+        //           << static_cast<int>(c1.rgb[2]) << "]" << std::endl;
+        // std::cout << "  Actual  : [" << static_cast<int>(c2.rgb[0]) << "," << static_cast<int>(c2.rgb[1]) << ","
+        //           << static_cast<int>(c2.rgb[2]) << "]" << std::endl;
         total_diff++;
+      }
+
+      if (diff_image != nullptr) {
+        if (pixel_diff > tolerance) {
+          // Highlight differences in red, with intensity proportional to difference
+          int intensity = std::min(255, pixel_diff * 4);  // Amplify differences for visibility
+          diff_image->set(x, y, ImageColor(intensity, 0, 0));
+        } else {
+          // Use grayscale for pixels that are similar enough
+          unsigned char gray = static_cast<unsigned char>((c1.rgb[0] + c1.rgb[1] + c1.rgb[2]) / 3);
+          diff_image->set(x, y, ImageColor(gray, gray, gray));
+        }
       }
     }
   }
@@ -61,8 +80,11 @@ void ensure_directory_exists(const std::string& path) {
 
 // Run end-to-end test for a scene with uncapped samples per pixel
 void test_scene_uncapped(const std::string& name, Scene (*create_scene_fn)(), int width = 200, int height = 0,
-                         int run_time_seconds = 5) {
+                         int run_time_seconds = 5, int seed = 42) {
   using namespace boost::ut;
+
+  // Set the random seed for deterministic rendering
+  Random::set_seed(seed);
 
   const std::string test_output_dir = "./test_output/";
   const std::string reference_dir = "./tests/e2e/reference_images/";
@@ -70,7 +92,9 @@ void test_scene_uncapped(const std::string& name, Scene (*create_scene_fn)(), in
   ensure_directory_exists(test_output_dir);
 
   // Create test image filename
-  std::string output_filename = test_output_dir + name + "_uncapped.png";
+  std::string output_filename = test_output_dir + name + "_uncapped" + ext_for_testing;
+  std::string diff_filename = test_output_dir + name + "_uncapped_diff" + ext_for_testing;
+  std::string reference_filename = reference_dir + name + "_uncapped" + ext_for_testing;
 
   test("e2e_" + name + "_uncapped_render") = [&, run_time_seconds] {
     // Create scene
@@ -124,6 +148,23 @@ void test_scene_uncapped(const std::string& name, Scene (*create_scene_fn)(), in
     bool write_success = rendered_image.write(output_filename);
     expect(write_success) << "Failed to write uncapped output image to " << output_filename;
 
+    if (fs::exists(reference_filename)) {
+      // Load reference image
+      Image reference_image(reference_filename);
+
+      // Compare images
+      bool images_match = compare_images(rendered_image, reference_image, 10);
+
+      // If they don't match, create a diff image
+      if (!images_match) {
+        Image diff_image(scene.cam.image_width, scene.cam.image_height);
+        compare_images(rendered_image, reference_image, 10, &diff_image);
+        diff_image.write(diff_filename);
+      }
+    } else {
+      std::cout << "Reference image not found for comparison: " << reference_filename << std::endl;
+    }
+
     std::cout << "Completed uncapped rendering test for " << name << std::endl;
   };
 }
@@ -133,7 +174,7 @@ void test_debug_scene() {
 
   const std::string test_output_dir = "./test_output/";
   ensure_directory_exists(test_output_dir);
-  std::string output_filename = test_output_dir + "debug_scene.png";
+  std::string output_filename = test_output_dir + "debug_scene" + ext_for_testing;
 
   test("e2e_debug_scene") = [&] {
     // Create the debug scene
@@ -196,7 +237,7 @@ void test_debug_scene() {
     }
 
     // Save reference image
-    std::string ref_output = test_output_dir + "debug_scene_reference.png";
+    std::string ref_output = test_output_dir + "debug_scene_reference" + ext_for_testing;
     reference_image.write(ref_output);
 
     // Compare images
@@ -232,14 +273,18 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
                 unsigned int seed = 42) {
   using namespace boost::ut;
 
+  // Set the random seed for deterministic rendering
+  Random::set_seed(seed);
+
   const std::string test_output_dir = "./test_output/";
   const std::string reference_dir = "./tests/e2e/reference_images/";
 
   ensure_directory_exists(test_output_dir);
 
   // Create test image filename
-  std::string output_filename = test_output_dir + name + ".png";
-  std::string reference_filename = reference_dir + name + ".png";
+  std::string output_filename = test_output_dir + name + ext_for_testing;
+  std::string reference_filename = reference_dir + name + ext_for_testing;
+  std::string diff_filename = test_output_dir + name + "_diff" + ext_for_testing;
 
   // std::string test_name = ;
   test("e2e_" + name + "_render") = [&] {
@@ -256,11 +301,8 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
     }
 
     // Reduce samples for faster testing
-    scene.cam.samples_per_pixel = 4;  // Low number for quick tests
-    scene.cam.max_depth = 4;          // Reduced bounce depth
-
-    // Set the random seed for deterministic rendering
-    Random::set_seed(seed);
+    scene.cam.samples_per_pixel = 100;  // Low number for quick tests
+    scene.cam.max_depth = 4;            // Reduced bounce depth
 
     scene.cam.initialize();
 
@@ -340,7 +382,11 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
     // If reference image exists, compare
     if (fs::exists(reference_filename)) {
       Image reference_image(reference_filename);
-      bool images_match = compare_images(rendered_image, reference_image, 10);
+
+      // create diff image
+      Image diff_image(scene.cam.image_width, scene.cam.image_height);
+      bool images_match = compare_images(rendered_image, reference_image, 10, &diff_image);
+      diff_image.write(diff_filename);
       expect(images_match) << "Rendered image doesn't match reference for scene: " << name;
     } else {
       std::cout << "No reference image found at: " << reference_filename
@@ -355,12 +401,12 @@ void e2e_test() {
   // test_debug_scene();
 
   // Test each scene
-  // test_scene("simple_sphere", create_simple_sphere_scene);
-  // test_scene("cornell_box", create_cornell_box_scene, 200, 200);  // Square aspect ratio
+  test_scene("simple_sphere", create_simple_sphere_scene);
+  test_scene("cornell_box", create_cornell_box_scene, 200, 200);  // Square aspect ratio
   test_scene("reflective_sphere", create_reflective_sphere_scene);
   // Add more scenes as needed
 
-  // test_scene_uncapped("simple_sphere", create_simple_sphere_scene, 200, 0, 3);
-  // test_scene_uncapped("cornell_box", create_cornell_box_scene, 200, 0, 3);
-  // test_scene_uncapped("reflective_sphere", create_reflective_sphere_scene);
+  test_scene_uncapped("simple_sphere", create_simple_sphere_scene, 200, 0, 3);
+  test_scene_uncapped("cornell_box", create_cornell_box_scene, 200, 0, 3);
+  test_scene_uncapped("reflective_sphere", create_reflective_sphere_scene);
 }

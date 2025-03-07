@@ -14,6 +14,7 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
 - [ ] [nanort](https://github.com/lighttransport/nanort?tab=readme-ov-file)
 - [ ] https://github.com/lighttransport/nanogi
 - [ ] [LuxCore](https://github.com/LuxCoreRender/LuxCore)
+- [ ] https://github.com/google/filament
 
 ## OpenGL Compute shaders
 - https://github.com/wsandst/gpu-raytracer/tree/master/src
@@ -69,7 +70,14 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
   - [x] Motion blur
 - [x] Use glm for vector math.
 - [x] Hook with a unit testing framework 
-  - [ ] Hook with GitHub Actions!
+  - [ ] Hook with GitHub Actions! 
+  - Basic tests work, but that framework sucked in almost a day, setting up was the easy part, fixing the template errors got my hair turning white.
+  - Image comparison tests are also setup, but they dont give consistent results, 
+  - Visually similar images have different values, even with random seed used.
+  - Its partly because of the random nature of ray casting, but that shouldnt affect this much since we are using fixed seeds for the random generator!
+  - Partly because of the crappy way i am reading and writing images, possibly the biggest source of precesion loss, 
+      - TODO: Consider  writing the float output and use that for comparison tests. Completely removing data loss due to type casting and image ccompression.
+  - Another improvement we need to make to this is to possibly use a more clever algorithm that can calculate various metrics about an image and/or an image pair, comparing the two ( not just pixel to pixel differences, but it would also account of similarity in the shapes present in the image and maybe would give a more conving output than just pixel distances,). But ideally, we should aim to pass comparison tests with naive comparison methods as well.
 - [x] Glass, mirrors
 - [ ] Dispersion, rainbows, scattering
 - [ ] Spectral emission/radiance
