@@ -3,8 +3,10 @@
 #include "core/hittables/sphere.h"
 #include "core/material.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"
+//
+#include "../test_cfg.h"
+
+using namespace glimpse;
 
 void bvh_test() {
   using namespace boost::ut;
@@ -46,19 +48,19 @@ void bvh_test() {
       // Test ray that hits first sphere
       ray r1(point3(-10, 0, 0), vec3(1, 0, 0));
       hit_record rec1;
-      expect(bvh.hit(r1, interval(0.001, infinity), rec1) == true);
+      expect(bvh.hit(r1, interval(0.001, glimpse::math::infinity), rec1) == true);
       expect(rec1.p.x() == -3.0_d);
 
       // Test ray that hits second sphere
       ray r2(point3(10, 0, 0), vec3(-1, 0, 0));
       hit_record rec2;
-      expect(bvh.hit(r2, interval(0.001, infinity), rec2) == true);
+      expect(bvh.hit(r2, interval(0.001, glimpse::math::infinity), rec2) == true);
       expect(rec2.p.x() == 3.0_d);
 
       // Test ray that misses all spheres
       ray r3(point3(0, 10, 0), vec3(0, -1, 0));
       hit_record rec3;
-      expect(bvh.hit(r3, interval(0.001, infinity), rec3) == false);
+      expect(bvh.hit(r3, interval(0.001, glimpse::math::infinity), rec3) == false);
     };
 
     skip / "empty_list"_test = [] {
@@ -69,7 +71,7 @@ void bvh_test() {
       ray r(point3(0, 0, 0), vec3(1, 0, 0));
       hit_record rec;
       std::cout << "empty_list 1" << std::endl;
-      expect(empty_bvh.hit(r, interval(0.001, infinity), rec) == false);
+      expect(empty_bvh.hit(r, interval(0.001, glimpse::math::infinity), rec) == false);
       std::cout << "empty_list 2" << std::endl;
     };
 
@@ -85,12 +87,12 @@ void bvh_test() {
       // Ray that hits
       ray r1(point3(0, 0, -5), vec3(0, 0, 1));
       hit_record rec1;
-      expect(single_bvh.hit(r1, interval(0.001, infinity), rec1) == true);
+      expect(single_bvh.hit(r1, interval(0.001, glimpse::math::infinity), rec1) == true);
 
       // Ray that misses
       ray r2(point3(0, 0, -5), vec3(0, 1, 0));
       hit_record rec2;
-      expect(single_bvh.hit(r2, interval(0.001, infinity), rec2) == false);
+      expect(single_bvh.hit(r2, interval(0.001, glimpse::math::infinity), rec2) == false);
     };
 
     "box_comparator"_test = [] {

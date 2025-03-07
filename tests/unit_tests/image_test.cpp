@@ -1,7 +1,8 @@
 #include "core/image.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"
+#include "../test_cfg.h"
+
+using namespace glimpse;
 
 // Add a helper function for approximate comparisons of floating point values
 bool approximately(float a, float b, float epsilon = 0.01f) { return std::abs(a - b) <= epsilon; }

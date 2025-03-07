@@ -2,8 +2,10 @@
 
 #include "core/material.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"
+//
+#include "../test_cfg.h"
+
+using namespace glimpse;
 
 void sphere_test() {
   using namespace boost::ut;
@@ -75,7 +77,7 @@ void sphere_test() {
         // Ray hits sphere directly
         ray r(point3(0, 0, -2), vec3(0, 0, 1));
         hit_record rec;
-        expect(s.hit(r, interval(0.001, infinity), rec) == true);
+        expect(s.hit(r, interval(0.001, glimpse::math::infinity), rec) == true);
         expect(rec.t == 1.0_d);
         expect(rec.p.z() == -1.0_d);
         expect(rec.normal.z() == -1.0_d);
@@ -84,12 +86,12 @@ void sphere_test() {
         // Ray misses sphere
         ray r2(point3(0, 0, -2), vec3(0, 2, 0));
         hit_record rec2;
-        expect(s.hit(r2, interval(0.001, infinity), rec2) == false);
+        expect(s.hit(r2, interval(0.001, glimpse::math::infinity), rec2) == false);
 
         // Ray starts inside sphere
         ray r3(point3(0, 0, 0), vec3(0, 0, 1));
         hit_record rec3;
-        expect(s.hit(r3, interval(0.001, infinity), rec3) == true);
+        expect(s.hit(r3, interval(0.001, glimpse::math::infinity), rec3) == true);
         expect(rec3.t == 1.0_d);
         expect(rec3.p.z() == 1.0_d);
         expect(rec3.normal.z() == -1.0_d);
@@ -107,19 +109,19 @@ void sphere_test() {
         // Ray at time 0 - sphere should be at center1
         ray r1(point3(0, 0, -2), vec3(0, 0, 1), 0.0);
         hit_record rec1;
-        expect(s.hit(r1, interval(0.001, infinity), rec1) == true);
+        expect(s.hit(r1, interval(0.001, glimpse::math::infinity), rec1) == true);
         expect(rec1.p.z() == -1.0_d) << "Sphere should be at initial position at t=0";
 
         // Ray at time 1 - sphere should be at center2
         ray r2(point3(0, 0, 8), vec3(0, 0, 1), 1.0);
         hit_record rec2;
-        expect(s.hit(r2, interval(0.001, infinity), rec2) == true);
+        expect(s.hit(r2, interval(0.001, glimpse::math::infinity), rec2) == true);
         expect(rec2.p.z() == 9.0_d) << "Sphere should be at final position at t=1";
 
         // Ray at time 0.5 - sphere should be halfway between
         ray r3(point3(0, 0, 3), vec3(0, 0, 1), 0.5);
         hit_record rec3;
-        expect(s.hit(r3, interval(0.001, infinity), rec3) == true);
+        expect(s.hit(r3, interval(0.001, glimpse::math::infinity), rec3) == true);
         expect(rec3.p.z() == 4.0_d) << "Sphere should be halfway at t=0.5";
       }
     };
@@ -133,19 +135,19 @@ void sphere_test() {
       // Hit sphere at different positions to test UV mapping
       ray r1(point3(0, 0, -2), vec3(1, 0, 0));  // Hit at (0,0,-1) - back of sphere
       hit_record rec1;
-      s.hit(r1, interval(0.001, infinity), rec1);
+      s.hit(r1, interval(0.001, glimpse::math::infinity), rec1);
       expect(rec1.u == 0.75_d) << "UV mapping for back of sphere";
       expect(rec1.v == 0.5_d);
 
       ray r2(point3(-2, 0, 0), vec3(1, 0, 0));  // Hit at (-1,0,0) - left side
       hit_record rec2;
-      s.hit(r2, interval(0.001, infinity), rec2);
+      s.hit(r2, interval(0.001, glimpse::math::infinity), rec2);
       expect(rec2.u == 0.0_d) << "UV mapping for left side";
       expect(rec2.v == 0.5_d);
 
       ray r3(point3(0, -2, 0), vec3(0, 1, 0));  // Hit at (0,-1,0) - bottom
       hit_record rec3;
-      s.hit(r3, interval(0.001, infinity), rec3);
+      s.hit(r3, interval(0.001, glimpse::math::infinity), rec3);
       expect(rec3.u == 0.5_d) << "UV mapping for bottom";
       expect(rec3.v == 0.0_d);
     };
@@ -166,7 +168,7 @@ void sphere_test() {
       // PDF should be 1 / solid angle
       auto dist_squared = 9.0;  // Distance squared = 3^2
       auto cos_theta_max = std::sqrt(1 - radius * radius / dist_squared);
-      auto solid_angle = 2 * pi * (1 - cos_theta_max);
+      auto solid_angle = 2 * glimpse::math::pi * (1 - cos_theta_max);
       auto expected_pdf = 1.0 / solid_angle;
 
       expect(std::abs(pdf_val - expected_pdf) < 0.0001_d) << "PDF value should match calculation";
@@ -195,7 +197,7 @@ void sphere_test() {
         // Create ray in this direction and test if it hits the sphere
         ray test_ray(origin, random_dir);
         hit_record rec;
-        expect(s.hit(test_ray, interval(0.001, infinity), rec)) << "Random direction should hit sphere";
+        expect(s.hit(test_ray, interval(0.001, glimpse::math::infinity), rec)) << "Random direction should hit sphere";
       }
     };
   };

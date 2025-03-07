@@ -1,7 +1,8 @@
 #include "core/texture.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"  // import boost.ut;
+#include "../test_cfg.h"
+
+using namespace glimpse;
 
 void texture_test() {
   using namespace boost::ut;

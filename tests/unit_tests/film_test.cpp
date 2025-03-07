@@ -1,8 +1,9 @@
 
 #include "core/film.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"
+#include "../test_cfg.h"
+
+using namespace glimpse;
 
 void film_test() {
   using namespace boost::ut;

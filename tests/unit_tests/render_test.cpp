@@ -7,8 +7,10 @@
 #include "core/ray.h"
 #include "core/vec3.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"  // import boost.ut;
+//
+#include "../test_cfg.h"
+
+using namespace glimpse;
 
 // TODO: This should written properly to handle multithreading,
 // and then should be extended to do end to end tests by producing image results with given scenes,

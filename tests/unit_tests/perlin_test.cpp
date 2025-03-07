@@ -1,9 +1,8 @@
 #include "core/perlin.h"
 
-// #include "core/vec3.h"
+#include "../test_cfg.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"
+using namespace glimpse;
 
 void perlin_test() {
   using namespace boost::ut;

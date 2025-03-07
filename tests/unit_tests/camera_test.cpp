@@ -1,7 +1,8 @@
 #include "core/camera.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"
+#include "../test_cfg.h"
+
+using namespace glimpse;
 
 void camera_test() {
   using namespace boost::ut;

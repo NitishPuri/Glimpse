@@ -29,7 +29,7 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
 
   // If the ray hits nothing, return the background color.
   // Use eps = 0.001 to avoid self-intersections
-  if (world.hit(r, interval{0.001, infinity}, rec)) {
+  if (world.hit(r, interval{0.001, math::infinity}, rec)) {
     scatter_record srec;
     color color_from_emission = rec.mat->emitted(r, rec, rec.u, rec.v, rec.p);
 

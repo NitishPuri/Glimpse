@@ -1,7 +1,8 @@
 #include "core/onb.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"
+#include "../test_cfg.h"
+
+using namespace glimpse;
 
 void onb_test() {
   using namespace boost::ut;

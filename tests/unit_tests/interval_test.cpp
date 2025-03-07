@@ -1,7 +1,8 @@
 #include "core/interval.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"
+#include "../test_cfg.h"
+
+using namespace glimpse;
 
 void interval_test() {
   using namespace boost::ut;
@@ -10,8 +11,8 @@ void interval_test() {
     // Test default constructor (empty interval)
     "default_constructor"_test = [] {
       interval i;
-      expect(i.min == infinity);
-      expect(i.max == -infinity);
+      expect(i.min == glimpse::math::infinity);
+      expect(i.max == -glimpse::math::infinity);
     };
 
     // Test min/max constructor
@@ -42,7 +43,7 @@ void interval_test() {
       expect(i.size() == 3.0_d);
 
       interval empty;
-      expect(empty.size() == -infinity);
+      expect(empty.size() == -glimpse::math::infinity);
     };
 
     // Test contains() method

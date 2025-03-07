@@ -8,6 +8,8 @@
 
 #include <algorithm>
 
+using namespace glimpse;
+
 // Setup console for Unicode output (for Windows)
 void setup_console_for_unicode() {
 #ifdef _WIN32
@@ -741,16 +743,16 @@ void print_highres_image(const Image& img, int max_width = 120, int max_height =
 
       // Set character and attributes
       charInfo.Char.AsciiChar = displayChar;
-      charInfo.Attributes = fgColor | bgColor;
+      charInfo.Attributes = static_cast<WORD>(fgColor | bgColor);
     }
   }
 
   // Define the area to write to
   SMALL_RECT writeRegion;
-  writeRegion.Left = cursorPos.X;
-  writeRegion.Top = cursorPos.Y;
-  writeRegion.Right = cursorPos.X + display_width - 1;
-  writeRegion.Bottom = cursorPos.Y + display_height - 1;
+  writeRegion.Left = static_cast<SHORT>(cursorPos.X);
+  writeRegion.Top = static_cast<SHORT>(cursorPos.Y);
+  writeRegion.Right = static_cast<SHORT>(cursorPos.X) + display_width - 1;
+  writeRegion.Bottom = static_cast<SHORT>(cursorPos.Y) + display_height - 1;
 
   // Write the buffer to the console
   if (!WriteConsoleOutput(hConsole, buffer.data(),

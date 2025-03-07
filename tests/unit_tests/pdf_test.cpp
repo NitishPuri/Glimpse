@@ -1,12 +1,8 @@
 #include "core/pdf.h"
 
-// #include "core/onb.h"
-// #include "core/vec3.h"
-// #include "hittables/hittable_list.h"
-// #include "hittables/sphere.h"
+#include "../test_cfg.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"
+using namespace glimpse;
 
 void pdf_test() {
   using namespace boost::ut;
@@ -17,7 +13,7 @@ void pdf_test() {
 
       // Test value method - should return 1/(4π) for any direction
       vec3 dir(1.0, 0.0, 0.0);
-      expect(pdf.value(dir) == 1.0 / (4 * pi)) << "Sphere PDF value should be 1/(4π)";
+      expect(pdf.value(dir) == 1.0 / (4 * glimpse::math::pi)) << "Sphere PDF value should be 1/(4π)";
 
       // Test generate method - should return a unit vector
       vec3 generated = pdf.generate();
@@ -31,13 +27,13 @@ void pdf_test() {
 
       // Test value method with various directions
       vec3 same_dir(0.0, 0.0, 1.0);
-      expect(pdf.value(same_dir) == 1.0 / pi) << "Cosine PDF value in normal direction should be 1/π";
+      expect(pdf.value(same_dir) == 1.0 / glimpse::math::pi) << "Cosine PDF value in normal direction should be 1/π";
 
       vec3 perp_dir(1.0, 0.0, 0.0);
       expect(pdf.value(perp_dir) == 0.0_d) << "Cosine PDF value in perpendicular direction should be 0";
 
       vec3 diagonal_dir(0.0, 0.707, 0.707);  // ~45 degrees
-      expect(std::abs(pdf.value(diagonal_dir) - 0.707 / pi) < 0.001_d)
+      expect(std::abs(pdf.value(diagonal_dir) - 0.707 / glimpse::math::pi) < 0.001_d)
           << "Cosine PDF value at 45° should be cos(45°)/π";
 
       // Test generate method - should return a vector with positive z component

@@ -1,7 +1,8 @@
 #include "core/aabb.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"
+#include "../test_cfg.h"
+
+using namespace glimpse;
 
 void aabb_test() {
   using namespace boost::ut;
@@ -9,12 +10,12 @@ void aabb_test() {
   "aabb"_test = [] {
     // Test empty constructor
     aabb empty_box;
-    expect(empty_box.x.min == infinity);
-    expect(empty_box.x.max == -infinity);
-    expect(empty_box.y.min == infinity);
-    expect(empty_box.y.max == -infinity);
-    expect(empty_box.z.min == infinity);
-    expect(empty_box.z.max == -infinity);
+    expect(empty_box.x.min == glimpse::math::infinity);
+    expect(empty_box.x.max == -glimpse::math::infinity);
+    expect(empty_box.y.min == glimpse::math::infinity);
+    expect(empty_box.y.max == -glimpse::math::infinity);
+    expect(empty_box.z.min == glimpse::math::infinity);
+    expect(empty_box.z.max == -glimpse::math::infinity);
 
     // Test two points constructor
     point3 p1(1.0, 2.0, 3.0);
