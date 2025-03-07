@@ -175,6 +175,9 @@ void Renderer::render_scene(Scene scene, Image &image, std::atomic<int> *progres
 
   film.initialize(scene.cam.image_width, scene.cam.image_height);
 
+  // Fixed seed!
+  // Random::set_seed(42);
+
 #ifdef MULTITHREADED
   const int num_threads = std::thread::hardware_concurrency();
   std::vector<std::future<void>> futures;

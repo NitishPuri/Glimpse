@@ -87,6 +87,7 @@ void random_test() {
     // Test that seed 0 gives different sequences each time
     Random::set_seed(0);
     auto seq1_first = Random::double_value();
+    [[maybe_unused]]
     auto seq1_second = Random::double_value();
 
     Random::set_seed(0);

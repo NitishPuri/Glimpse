@@ -44,19 +44,3 @@ Should also use
 
 - https://github.com/skypjack/entt
 - https://github.com/g-truc/glm
-
-Reference implementations
-
-- [pbrt](https://github.com/mmp/pbrt-v4)
-- [nanort](https://github.com/lighttransport/nanort?tab=readme-ov-file)
-
-
-### Tests
-
-```
-test.bat -> run all tests
-test.bat vec3* -> run all tests matching vec3*
-
-```
-
-See [Roadmap](ROADMAP.md)
