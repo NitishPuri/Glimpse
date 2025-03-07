@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+using namespace glimpse;
+
 bvh_node::bvh_node(std::vector<shared_ptr<hittable>>& objects, size_t start, size_t end) {
   bbox = aabb::empty;
   if (start == end) return;

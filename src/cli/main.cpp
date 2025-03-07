@@ -6,6 +6,8 @@
 #include "core/logger.h"
 #include "core/render.h"
 
+using namespace glimpse;
+
 const std::string log_file_path = "./log_cli.txt";
 
 int main(int argc, char **argv) {

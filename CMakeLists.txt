@@ -11,7 +11,10 @@ set(CMAKE_CXX_STANDARD 20)
 file(GLOB_RECURSE CORE_SOURCES ${PROJECT_SOURCE_DIR}/src/core/*.cpp)
 file(GLOB_RECURSE CORE_HEADERS ${PROJECT_SOURCE_DIR}/src/core/*.h)
 add_library(${NAME} ${CORE_SOURCES} ${CORE_HEADERS})
-target_include_directories(${NAME} PUBLIC ${PROJECT_SOURCE_DIR}/ext)
+target_include_directories(${NAME} PUBLIC
+    ${PROJECT_SOURCE_DIR}/ext
+    ${PROJECT_SOURCE_DIR}/src
+ )
 target_compile_features(${NAME} PUBLIC cxx_std_17)
 
 
@@ -25,9 +28,16 @@ target_link_libraries(${NAME}_cli ${NAME})
 target_compile_features(${NAME}_cli PUBLIC cxx_std_17)
 
 
+# Platform detection
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+    message(STATUS "Linux platform detected")
+endif()
+
 # gui
 option(BUILD_GUI "Build the GUI Viewer" ON)
-if(BUILD_GUI)
+if(BUILD_GUI AND NOT LINUX)
+    message(STATUS "Building GUI")
 
     set(GUI_NAME ${NAME}_gui)
     set(GUI_PATH ${PROJECT_SOURCE_DIR}/src/gui)
@@ -53,7 +63,7 @@ if(BUILD_GUI)
     target_sources(${GUI_NAME} PRIVATE ${GLAD_SOURCES})
     target_sources(${GUI_NAME} PRIVATE ${IMGUI_SOURCES})
 
-    target_compile_features(${GUI_NAME} PUBLIC cxx_std_17)
+    target_compile_features(${GUI_NAME} PUBLIC cxx_std_20)
 
     target_link_directories(${GUI_NAME} PUBLIC ${GLFW_LIB_DIR})
     target_link_libraries(${GUI_NAME}
@@ -73,7 +83,6 @@ endif()
 # Tests
 # Does not work!!
 option(BUILD_TESTS "Build the tests" ON)
-message(STATUS "Building tests????")
 if(BUILD_TESTS)    
     message(STATUS "Building tests")
 
@@ -107,7 +116,7 @@ if(BUILD_TESTS)
     )
     target_link_libraries(Glimpse_tests 
         PRIVATE
-        Glimpse
+        ${NAME}
         boost_ut
     )
     target_include_directories(Glimpse_tests 
@@ -134,27 +143,27 @@ endif()
 
 # Enable warnings
 if (MSVC)
-    target_compile_options(${NAME} PRIVATE 
+    set(COMPILE_OPTIONS 
         /W4 
         /permissive- 
         /wd4100  # Disable unreferenced formal parameter warning
     )
-    target_compile_options(${NAME}_cli PRIVATE 
-        /W4 
-        /permissive- 
-        /wd4100  # Disable unreferenced formal parameter warning
-    )
-    target_compile_options(${NAME}_gui PRIVATE 
-        /W4 
-        /permissive- 
-        /wd4100  # Disable unreferenced formal parameter warning
-    )
+
+    target_compile_options(${NAME} PRIVATE ${COMPILE_OPTIONS})
+    target_compile_options(${NAME}_cli PRIVATE ${COMPILE_OPTIONS})
+    target_compile_options(${NAME}_gui PRIVATE ${COMPILE_OPTIONS})
+    target_compile_options(${NAME}_tests PRIVATE ${COMPILE_OPTIONS})
+
     target_compile_definitions(${NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
     target_compile_definitions(${NAME}_cli PRIVATE _CRT_SECURE_NO_WARNINGS)
     target_compile_definitions(${NAME}_gui PRIVATE _CRT_SECURE_NO_WARNINGS)
     target_compile_definitions(${NAME}_tests PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
-    target_compile_options(${NAME} PRIVATE -Wall -Wextra -pedantic)
-    target_compile_options(${NAME}_cli PRIVATE -Wall -Wextra -pedantic)
-    target_compile_options(${NAME}_gui PRIVATE -Wall -Wextra -pedantic)
+    set(COMPILE_OPTIONS 
+        -Wall -Wextra -pedantic 
+        -Wno-unused-parameter  # Disable unused parameter warning
+    )
+    target_compile_options(${NAME} PRIVATE ${COMPILE_OPTIONS})
+    target_compile_options(${NAME}_cli PRIVATE ${COMPILE_OPTIONS})
+    target_compile_options(${NAME}_tests PRIVATE ${COMPILE_OPTIONS})
 endif()

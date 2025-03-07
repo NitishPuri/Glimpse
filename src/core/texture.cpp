@@ -3,6 +3,8 @@
 #include "image.h"
 #include "interval.h"
 
+using namespace glimpse;
+
 // TODO: Sampling floats directly from texture doesnt work,
 // it kind of does, but there are it seems bands of missing data.
 //  should figure out why that happens.

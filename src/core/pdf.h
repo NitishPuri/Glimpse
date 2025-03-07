@@ -1,5 +1,5 @@
-#ifndef PDF_H
-#define PDF_H
+#pragma once
+
 //==============================================================================================
 // Originally written in 2016 by Peter Shirley <ptrshrl@gmail.com>
 //
@@ -15,6 +15,8 @@
 #include "hittables/sphere.h"
 #include "onb.h"
 
+namespace glimpse {
+
 class pdf {
  public:
   virtual ~pdf() {}
@@ -27,7 +29,7 @@ class sphere_pdf : public pdf {
  public:
   sphere_pdf() {}
 
-  double value(const vec3& direction) const override { return 1 / (4 * pi); }
+  double value(const vec3& direction) const override { return 1 / (4 * math::pi); }
 
   vec3 generate() const override { return random_unit_vector(); }
 };
@@ -38,7 +40,7 @@ class cosine_pdf : public pdf {
 
   double value(const vec3& direction) const override {
     auto cosine_theta = dot(unit_vector(direction), uvw.w());
-    return std::fmax(0, cosine_theta / pi);
+    return std::fmax(0, cosine_theta / math::pi);
   }
 
   vec3 generate() const override { return uvw.transform(random_cosine_direction()); }
@@ -82,4 +84,4 @@ class mixture_pdf : public pdf {
   shared_ptr<pdf> p[2];
 };
 
-#endif
+}  // namespace glimpse

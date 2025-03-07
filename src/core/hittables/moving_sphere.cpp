@@ -1,5 +1,7 @@
 #include "moving_sphere.h"
 
+using namespace glimpse;
+
 bool moving_sphere::hit(const ray &r, interval ray_t, hit_record &rec) const {
   auto current_center = center.at(r.time());
   vec3 oc = current_center - r.origin();

@@ -9,6 +9,8 @@
 #include "core/render.h"
 #include "core/scenes.h"
 
+using namespace glimpse;
+
 struct RayTracer {
   Scene scene;
   Image image;

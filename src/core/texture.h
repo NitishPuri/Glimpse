@@ -3,6 +3,8 @@
 #include "perlin.h"
 #include "vec3.h"
 
+namespace glimpse {
+
 class Image;
 
 class texture {
@@ -60,12 +62,12 @@ class image_texture : public texture {
 
 class noise_texture : public texture {
  public:
-  noise_texture(double scale, color color = color(.5, .5, .5)) : scale(scale), base_color(color) {}
+  noise_texture(double scale, color c = color(.5, .5, .5)) : scale(scale), base_color(c) {}
 
   color value(double u, double v, const point3 &p) const override {
     // return base_color * (1 + std::sin(scale * p.z() + 10 * noise.turb(p, 7)));
 
-    double dynamic_scale = scale * (1.2 * std::sin(1 * pi * u) + 0.3 * std::cos(3 * pi * v));
+    double dynamic_scale = scale * (1.2 * std::sin(1 * math::pi * u) + 0.3 * std::cos(3 * math::pi * v));
     return base_color * (1 + std::sin(dynamic_scale * p.z() + 10 * noise.turb(p, 7)));
 
     // double combined = scale * (p.x() * u + p.y() * v + p.z());
@@ -80,3 +82,5 @@ class noise_texture : public texture {
   double scale;
   color base_color;
 };
+
+}  // namespace glimpse

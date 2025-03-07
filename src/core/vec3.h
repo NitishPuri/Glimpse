@@ -2,6 +2,8 @@
 
 #include "common.h"
 
+namespace glimpse {
+
 class vec3 {
  public:
   double e[3];
@@ -140,10 +142,12 @@ inline vec3 random_cosine_direction() {
   auto r1 = random_double();
   auto r2 = random_double();
 
-  auto phi = 2 * pi * r1;
+  auto phi = 2 * math::pi * r1;
   auto x = std::cos(phi) * std::sqrt(r2);
   auto y = std::sin(phi) * std::sqrt(r2);
   auto z = std::sqrt(1 - r2);
 
   return vec3(x, y, z);
 }
+
+}  // namespace glimpse

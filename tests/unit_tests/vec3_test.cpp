@@ -3,6 +3,8 @@
 #define BOOST_UT_DISABLE_MODULE
 #include "boost/ut.hpp"
 
+using namespace glimpse;
+
 void vec3_test() {
   using namespace boost::ut;
 

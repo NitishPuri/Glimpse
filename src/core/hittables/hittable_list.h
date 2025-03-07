@@ -5,6 +5,8 @@
 #include "../aabb.h"
 #include "hittable.h"
 
+namespace glimpse {
+
 class hittable_list : public hittable {
  public:
   std::vector<shared_ptr<hittable>> objects;
@@ -59,3 +61,5 @@ class hittable_list : public hittable {
  private:
   aabb bbox;
 };
+
+}  // namespace glimpse

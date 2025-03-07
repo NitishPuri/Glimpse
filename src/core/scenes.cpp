@@ -3,6 +3,8 @@
 
 #include "glimpse.h"
 
+using namespace glimpse;
+
 Scene random_scene() {
   hittable_list world;
 

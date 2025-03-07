@@ -3,6 +3,8 @@
 #include "hittable.h"
 #include "hittable_list.h"
 
+namespace glimpse {
+
 class quad : public hittable {
  public:
   quad(const point3& Q, const vec3& u, const vec3& v, shared_ptr<material> mat) : Q(Q), u(u), v(v), mat(mat) {
@@ -66,7 +68,7 @@ class quad : public hittable {
 
   double pdf_value(const point3& origin, const vec3& direction) const override {
     hit_record rec;
-    if (!this->hit(ray(origin, direction), interval(0.001, infinity), rec)) return 0;
+    if (!this->hit(ray(origin, direction), interval(0.001, math::infinity), rec)) return 0;
 
     auto distance_squared = rec.t * rec.t * direction.length_squared();
     auto cosine = std::fabs(dot(direction, rec.normal) / direction.length());
@@ -112,3 +114,5 @@ inline shared_ptr<hittable_list> box(const point3& a, const point3& b, shared_pt
 
   return sides;
 }
+
+}  // namespace glimpse

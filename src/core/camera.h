@@ -2,6 +2,8 @@
 
 #include "ray.h"
 
+namespace glimpse {
+
 // 1. focus plane is orthogonal to the camera
 // 2. focus distance is the distance between camera center and focus plane
 // 3. viewport lies on the focus plane centeered on the camera view direction
@@ -26,7 +28,7 @@ class camera {
     origin = lookfrom;
 
     // Determine viewport dimensions.
-    auto theta = degrees_to_radians(vfov);
+    auto theta = math::degrees_to_radians(vfov);
     auto h = tan(theta / 2);
     auto viewport_height = 2.0 * h * focus_distance;
     auto viewport_width = aspect_ratio * viewport_height;
@@ -45,7 +47,7 @@ class camera {
 
     // Calculate the camera defocus disk basis vectors.
     // defocus_angle = aperture;
-    auto defocus_radius = focus_distance * std::tan(degrees_to_radians(defocus_angle / 2));
+    auto defocus_radius = focus_distance * std::tan(math::degrees_to_radians(defocus_angle / 2));
     defocus_disk_u = u * defocus_radius;
     defocus_disk_v = v * defocus_radius;
   }
@@ -131,3 +133,5 @@ class camera {
   vec3 u, v, w;
   vec3 defocus_disk_u, defocus_disk_v;
 };
+
+}  // namespace glimpse

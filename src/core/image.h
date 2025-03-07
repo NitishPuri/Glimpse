@@ -7,6 +7,8 @@
 
 #include "vec3.h"
 
+namespace glimpse {
+
 // Forward declaration to avoid including stb headers in this header
 struct StbImageData;
 
@@ -109,3 +111,5 @@ class Image {
   // For loading with STB
   std::unique_ptr<StbImageData> load_stb_image(const std::string& filename);
 };
+
+}  // namespace glimpse

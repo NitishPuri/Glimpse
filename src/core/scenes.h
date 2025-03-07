@@ -6,6 +6,8 @@
 #include "camera.h"
 #include "hittables/hittable_list.h"
 
+namespace glimpse {
+
 struct Scene {
   // world
   hittable_list world;
@@ -20,3 +22,5 @@ struct Scene {
   static std::unordered_map<std::string, std::function<Scene()>> SceneMap;
   static std::vector<std::string> SceneNames;
 };
+
+}  // namespace glimpse

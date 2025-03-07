@@ -6,6 +6,8 @@
 #include "hittable.h"
 #include "hittable_list.h"
 
+namespace glimpse {
+
 class bvh_node : public hittable {
  public:
   bvh_node(hittable_list list) : bvh_node(list.objects, 0, list.objects.size()) {
@@ -39,3 +41,5 @@ class bvh_node : public hittable {
 
   static bool box_z_compare(const shared_ptr<hittable> a, const shared_ptr<hittable> b) { return box_compare(a, b, 2); }
 };
+
+}  // namespace glimpse

@@ -1,8 +1,10 @@
 #pragma once
 
+#include "core/material.h"
+#include "core/texture.h"
 #include "hittable.h"
-#include "material.h"
-#include "texture.h"
+
+namespace glimpse {
 
 class constant_medium : public hittable {
  public:
@@ -17,7 +19,7 @@ class constant_medium : public hittable {
 
     if (!boundary->hit(r, interval::universe, rec1)) return false;
 
-    if (!boundary->hit(r, interval(rec1.t + 0.0001, infinity), rec2)) return false;
+    if (!boundary->hit(r, interval(rec1.t + 0.0001, math::infinity), rec2)) return false;
 
     if (rec1.t < ray_t.min) rec1.t = ray_t.min;
     if (rec2.t > ray_t.max) rec2.t = ray_t.max;
@@ -49,3 +51,5 @@ class constant_medium : public hittable {
   double neg_inv_density;
   shared_ptr<material> phase_function;
 };
+
+}

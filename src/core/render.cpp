@@ -15,6 +15,8 @@
 #include "render.h"
 #include "vec3.h"
 
+namespace glimpse {
+
 std::atomic<bool> Renderer::stop_rendering(false);
 
 // Recursive ray tracing with depth limiting
@@ -219,3 +221,5 @@ void Renderer::render_scene(Scene scene, Image &image, std::atomic<int> *progres
 
 #endif
 }
+
+}  // namespace glimpse

@@ -3,6 +3,7 @@
 #include "interval.h"
 #include "ray.h"
 
+namespace glimpse {
 class aabb {
  public:
   interval x, y, z;
@@ -63,3 +64,5 @@ inline aabb operator+(const aabb& bbox, const vec3& offset) {
 }
 
 inline aabb operator+(const vec3& offset, const aabb& bbox) { return bbox + offset; }
+
+}  // namespace glimpse

@@ -1,5 +1,4 @@
-#ifndef ONB_H
-#define ONB_H
+#pragma once
 //==============================================================================================
 // Originally written in 2016 by Peter Shirley <ptrshrl@gmail.com>
 //
@@ -12,6 +11,8 @@
 //==============================================================================================
 
 #include "vec3.h"
+
+namespace glimpse {
 
 class onb {
  public:
@@ -35,4 +36,4 @@ class onb {
   vec3 axis[3];
 };
 
-#endif
+}  // namespace glimpse

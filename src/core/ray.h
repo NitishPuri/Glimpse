@@ -2,6 +2,8 @@
 
 #include "vec3.h"
 
+namespace glimpse {
+
 class ray {
  public:
   ray() {}
@@ -22,3 +24,5 @@ class ray {
   vec3 dir;
   double tm{};
 };
+
+}  // namespace glimpse

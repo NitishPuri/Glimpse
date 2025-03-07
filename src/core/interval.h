@@ -2,11 +2,13 @@
 
 #include "common.h"
 
+namespace glimpse {
+
 class interval {
  public:
   double min, max;
 
-  interval() : min(+infinity), max(-infinity) {}  // Default interval is empty
+  interval() : min(+math::infinity), max(-math::infinity) {}  // Default interval is empty
 
   interval(double min, double max) : min(min), max(max) {}
 
@@ -41,3 +43,5 @@ inline interval operator+(const interval& ival, double displacement) {
 }
 
 inline interval operator+(double displacement, const interval& ival) { return ival + displacement; }
+
+}  // namespace glimpse

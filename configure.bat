@@ -1,3 +1,3 @@
 cls
 rmdir /s /q build
-cmake --preset default
+cmake --preset win

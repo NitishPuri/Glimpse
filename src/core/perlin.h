@@ -2,6 +2,8 @@
 
 #include "vec3.h"
 
+namespace glimpse {
+
 class perlin {
  public:
   perlin() {
@@ -85,3 +87,5 @@ class perlin {
     return accum;
   }
 };
+
+}  // namespace glimpse

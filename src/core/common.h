@@ -6,12 +6,14 @@
 #include <memory>
 #include <random>
 
+namespace glimpse {
+
 // Using
-// using chrono = std::chrono;
 using std::make_shared;
 using std::shared_ptr;
 using std::sqrt;
 
+namespace math {
 // Constants
 const double infinity = std::numeric_limits<double>::infinity();
 const double pi = 3.1415926535897932385;
@@ -24,6 +26,8 @@ inline double clamp(double x, double min, double max) {
   if (x > max) return max;
   return x;
 }
+
+}  // namespace math
 
 // The heart of our engine!
 class Random {
@@ -83,3 +87,5 @@ inline double random_double() { return Random::double_value(); }
 inline double random_double(double min, double max) { return Random::double_value(min, max); }
 
 inline int random_int(int min, int max) { return Random::int_value(min, max); }
+
+}  // namespace glimpse

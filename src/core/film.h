@@ -4,6 +4,8 @@
 
 #include "vec3.h"
 
+namespace glimpse {
+
 class Film {
  public:
   Film() : m_Width(0), m_Height(0) {}
@@ -96,3 +98,5 @@ class Film {
   std::vector<vec3> mean;
   std::vector<vec3> m2;
 };
+
+}  // namespace glimpse

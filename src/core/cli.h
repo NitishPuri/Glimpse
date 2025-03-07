@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+namespace glimpse {
+
 struct CmdOptions {
   int width = 500;
   int height = 500;
@@ -31,3 +33,5 @@ CmdOptions ParseCommandLine(int argc, char *argv[]) {
 
   return options;
 }
+
+}  // namespace glimpse

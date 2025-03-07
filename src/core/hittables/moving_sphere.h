@@ -2,6 +2,8 @@
 
 #include "hittable.h"
 
+namespace glimpse {
+
 class moving_sphere : public hittable {
  public:
   moving_sphere() {}
@@ -24,3 +26,5 @@ class moving_sphere : public hittable {
   aabb bbox;
   shared_ptr<material> mat_ptr;
 };
+
+}  // namespace glimpse

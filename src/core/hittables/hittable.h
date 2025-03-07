@@ -2,6 +2,8 @@
 
 #include "../aabb.h"
 
+namespace glimpse {
+
 class material;
 
 class hit_record {
@@ -66,13 +68,13 @@ class translate : public hittable {
 class rotate_y : public hittable {
  public:
   rotate_y(shared_ptr<hittable> object, double angle) : object(object) {
-    auto radians = degrees_to_radians(angle);
+    auto radians = math::degrees_to_radians(angle);
     sin_theta = std::sin(radians);
     cos_theta = std::cos(radians);
     bbox = object->bounding_box();
 
-    point3 min(infinity, infinity, infinity);
-    point3 max(-infinity, -infinity, -infinity);
+    point3 min(math::infinity, math::infinity, math::infinity);
+    point3 max(-math::infinity, -math::infinity, -math::infinity);
 
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
@@ -131,3 +133,5 @@ class rotate_y : public hittable {
   double cos_theta;
   aabb bbox;
 };
+
+}  // namespace glimpse

@@ -16,6 +16,9 @@
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
 
+using namespace glimpse;
+
+namespace glimpse {
 // Wrapper for STB image data
 struct StbImageData {
   unsigned char* data = nullptr;
@@ -31,6 +34,8 @@ struct StbImageData {
     if (float_data) stbi_image_free(float_data);
   }
 };
+
+}  // namespace glimpse
 
 // Constructors
 Image::Image(int width, int height) { initialize(width, height); }

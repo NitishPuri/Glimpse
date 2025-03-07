@@ -1,9 +1,9 @@
 #include "glimpse.h"
 
-void donothing() {}
+using namespace glimpse;
 
-const interval interval::empty = interval(+infinity, -infinity);
-const interval interval::universe = interval(-infinity, +infinity);
+const interval interval::empty = interval(+math::infinity, -math::infinity);
+const interval interval::universe = interval(-math::infinity, +math::infinity);
 
 const aabb aabb::empty = aabb(interval::empty, interval::empty, interval::empty);
 const aabb aabb::universe = aabb(interval::universe, interval::universe, interval::universe);

@@ -6,6 +6,8 @@
 #include "image.h"
 #include "scenes.h"
 
+namespace glimpse {
+
 // declared here for testing only
 color ray_color(const ray &r, const color &background, const hittable &world,  //
                 int depth, const hittable &lights, bool has_lights);
@@ -18,3 +20,5 @@ class Renderer {
 
   Film film;
 };
+
+}  // namespace glimpse

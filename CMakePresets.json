@@ -2,9 +2,14 @@
     "version": 2,
     "configurePresets": [
         {
-            "name": "default",
+            "name": "win",
             "generator": "Visual Studio 17 2022",
             "binaryDir": "${sourceDir}/build"
+        },
+        {
+            "name": "wsl",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/buildLinux"
         }
     ]
 }

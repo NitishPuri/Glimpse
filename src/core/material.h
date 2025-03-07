@@ -4,6 +4,8 @@
 #include "pdf.h"
 #include "texture.h"
 
+namespace glimpse {
+
 class scatter_record {
  public:
   color attenuation;
@@ -39,7 +41,7 @@ class lambertian : public material {
 
   double scattering_pdf(const ray& r_in, const hit_record& rec, const ray& scattered) const override {
     auto cos_theta = dot(rec.normal, unit_vector(scattered.direction()));
-    return cos_theta < 0 ? 0 : cos_theta / pi;
+    return cos_theta < 0 ? 0 : cos_theta / math::pi;
   }
 
  private:
@@ -133,9 +135,11 @@ class isotropic : public material {
   }
 
   double scattering_pdf(const ray& r_in, const hit_record& rec, const ray& scattered) const override {
-    return 1 / (4 * pi);
+    return 1 / (4 * math::pi);
   }
 
  private:
   shared_ptr<texture> tex;
 };
+
+}  // namespace glimpse
