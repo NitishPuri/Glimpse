@@ -1,5 +1,9 @@
 #include "image.h"
 
+#ifdef _MSC_VER
+#pragma warning(push, 0)
+#endif
+
 #include <algorithm>
 #include <iostream>
 
@@ -159,7 +163,8 @@ bool Image::write(const std::string& filename) const {
   size_t dot_pos = filename.find_last_of('.');
   if (dot_pos != std::string::npos) {
     ext = filename.substr(dot_pos + 1);
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    std::transform(ext.begin(), ext.end(), ext.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
   }
 
   int result = 0;
@@ -185,3 +190,8 @@ bool Image::write(const std::string& filename) const {
 
   return true;
 }
+
+// Restore MSVC compiler warnings
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
