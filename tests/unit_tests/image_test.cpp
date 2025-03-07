@@ -47,7 +47,7 @@ void image_test() {
     }
 
     // Clear the image
-    img.initialize(img.width, img.height);
+    img.clear();
 
     // Verify all bytes are now 0
     bool all_cleared = true;

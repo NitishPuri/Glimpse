@@ -10,10 +10,10 @@
 // Forward declaration to avoid including stb headers in this header
 struct StbImageData;
 
+using uchar = unsigned char;
+
 // Color representation for a pixel
 class ImageColor {
-  using uchar = unsigned char;
-
  public:
   unsigned char rgb[3];
 
@@ -32,11 +32,11 @@ class ImageColor {
 
  private:
   // Helper function to convert float to byte
-  static unsigned char float_to_byte(float value) {
+  static uchar float_to_byte(float value) {
     // value = linear_to_gamma(value);
     if (value <= 0.0f) return 0;
     if (value >= 1.0f) return 255;
-    return static_cast<unsigned char>(256.0f * value);
+    return static_cast<uchar>(256.0f * value);
   }
 };
 
@@ -56,7 +56,9 @@ class Image {
 
   // Initialize a blank image
   void initialize(int w, int h);
-  void clear() { initialize(width, height); }
+
+  // clear to blank image
+  void clear() { std::fill(pixel_data.begin(), pixel_data.end(), uchar{0}); }
 
   // Whether the image has valid data
   bool is_valid() const { return !pixel_data.empty(); }
@@ -76,8 +78,8 @@ class Image {
   bool write(const std::string& filename) const;
 
   // Access raw data
-  std::vector<unsigned char>& data() { return pixel_data; }
-  const std::vector<unsigned char>& data() const { return pixel_data; }
+  std::vector<uchar>& data() { return pixel_data; }
+  const std::vector<uchar>& data() const { return pixel_data; }
 
  private:
   // Convert linear RGB [0,1] to sRGB [0,1]
@@ -97,7 +99,7 @@ class Image {
       return pow((srgb + 0.055f) / 1.055f, 2.4f);
     }
   }
-  std::vector<unsigned char> pixel_data;
+  std::vector<uchar> pixel_data;
   const int bytes_per_pixel = 3;  // RGB format
 
   // Helper methods
