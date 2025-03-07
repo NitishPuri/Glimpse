@@ -92,10 +92,10 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
     }
 
     // TODO: Should we conmtrol how frequent this happens?
-    gl_res.updateFramebuffer(raytracer.image.data);
+    gl_res.updateFramebuffer(raytracer.image.data());
 
   } else if (raytracer.status == RayTracer::DONE) {
-    gl_res.updateFramebuffer(raytracer.image.data);
+    gl_res.updateFramebuffer(raytracer.image.data());
     ImGui::Text("Done");
     raytracer.reset();
   } else {
@@ -159,7 +159,7 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
 }
 
 void UIRenderer::renderOutput(GLResources& gl_res, RayTracer& raytracer) {
-    ImGui::Begin("Render Output");
+  ImGui::Begin("Render Output");
   // flip vertically
   ImGui::Image(ImTextureID(gl_res.framebufferTexture), calculatePanelSize(gl_res), ImVec2(0, 1), ImVec2(1, 0));
 

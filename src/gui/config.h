@@ -14,7 +14,7 @@ struct ImGuiParams {
   // Startup options
   // std::string startScene = "material_showcase";
   // std::string startScene = "cornell_box";
-  std::string startScene = "untitled_1";
+  std::string startScene = "earth";
 
   bool auto_render = true;
 

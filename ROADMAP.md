@@ -68,10 +68,8 @@ Also prioritize **algorithmic flexibility** and **infrastructure improvements**,
   - [x] Depth of field (Aperture, Focus Distance)
   - [x] Motion blur
 - [x] Use glm for vector math.
-- [ ] Hook with a unit testing framework 
-  - Use a header-only framework and hook with ctest, much simpler.
-  - Find a simple header-only lib for image comparison.
-  - Hook with GitHub Actions!
+- [x] Hook with a unit testing framework 
+  - [ ] Hook with GitHub Actions!
 - [x] Glass, mirrors
 - [ ] Dispersion, rainbows, scattering
 - [ ] Spectral emission/radiance

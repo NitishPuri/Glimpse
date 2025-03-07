@@ -13,3 +13,6 @@ log_cli.txt
 log_gui.txt
 glimpse_results/
 test_output/
+tests/e2e/reference_images/
+
+

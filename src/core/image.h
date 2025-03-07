@@ -56,6 +56,7 @@ class Image {
 
   // Initialize a blank image
   void initialize(int w, int h);
+  void clear() { initialize(width, height); }
 
   // Whether the image has valid data
   bool is_valid() const { return !pixel_data.empty(); }
@@ -75,9 +76,8 @@ class Image {
   bool write(const std::string& filename) const;
 
   // Access raw data
-  const unsigned char* data() const { return pixel_data.data(); }
-  unsigned char* data() { return pixel_data.data(); }
-  std::vector<unsigned char>& dataVec() { return pixel_data; }
+  std::vector<unsigned char>& data() { return pixel_data; }
+  const std::vector<unsigned char>& data() const { return pixel_data; }
 
  private:
   // Convert linear RGB [0,1] to sRGB [0,1]

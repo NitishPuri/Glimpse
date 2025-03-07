@@ -295,8 +295,8 @@ void print_enhanced_ascii_image(const Image& img, int max_width = 80, int max_he
 
       // Calculate brightness
       double brightness = 0.299 * pixel.rgb[0] + 0.587 * pixel.rgb[1] + 0.114 * pixel.rgb[2];
-      std::cout << "Color: " << static_cast<int>(pixel.rgb[0]) << "," << static_cast<int>(pixel.rgb[1]) << ","
-                << static_cast<int>(pixel.rgb[2]) << " Brightness: " << brightness << std::endl;
+      //   std::cout << "Color: " << static_cast<int>(pixel.rgb[0]) << "," << static_cast<int>(pixel.rgb[1]) << ","
+      //             << static_cast<int>(pixel.rgb[2]) << " Brightness: " << brightness << std::endl;
       brightness /= 255.0;  // Normalize to 0-1
 
       // Update min/max

@@ -1,7 +1,5 @@
 #include "core/texture.h"
 
-#include "core/rtw_stb_image.h"
-
 #define BOOST_UT_DISABLE_MODULE
 #include "boost/ut.hpp"  // import boost.ut;
 

@@ -42,7 +42,7 @@ void image_test() {
     Image img(5, 5);
 
     // Set all data to non-zero values
-    for (auto& byte : img.dataVec()) {
+    for (auto& byte : img.data()) {
       byte = 255;
     }
 
@@ -51,7 +51,7 @@ void image_test() {
 
     // Verify all bytes are now 0
     bool all_cleared = true;
-    for (auto byte : img.dataVec()) {
+    for (auto byte : img.data()) {
       if (byte != 0) {
         all_cleared = false;
         break;
@@ -68,9 +68,9 @@ void image_test() {
     img.set(5, 5, color);
 
     size_t offset = (5 + 5 * 10) * 3;
-    expect(img.dataVec()[offset] == 128_uc);
-    expect(img.dataVec()[offset + 1] == 64_uc);
-    expect(img.dataVec()[offset + 2] == 32_uc);
+    expect(img.data()[offset] == 128_uc);
+    expect(img.data()[offset + 1] == 64_uc);
+    expect(img.data()[offset + 2] == 32_uc);
 
     // Test boundary conditions
     img.set(-1, 5, ImageColor(255, 255, 255));  // Out of bounds negative x
@@ -79,9 +79,9 @@ void image_test() {
     img.set(5, 10, ImageColor(255, 255, 255));  // Out of bounds max y
 
     // Original values should still be the same
-    expect(img.dataVec()[offset] == 128_uc);
-    expect(img.dataVec()[offset + 1] == 64_uc);
-    expect(img.dataVec()[offset + 2] == 32_uc);
+    expect(img.data()[offset] == 128_uc);
+    expect(img.data()[offset + 1] == 64_uc);
+    expect(img.data()[offset + 2] == 32_uc);
   };
 
   "Image.set_multiple"_test = [] {
@@ -98,15 +98,15 @@ void image_test() {
 
     // Verify center pixel
     size_t center_offset = (1 + 1 * 3) * 3;
-    expect(img.dataVec()[center_offset] == 50_uc);
-    expect(img.dataVec()[center_offset + 1] == 50_uc);
-    expect(img.dataVec()[center_offset + 2] == 50_uc);
+    expect(img.data()[center_offset] == 50_uc);
+    expect(img.data()[center_offset + 1] == 50_uc);
+    expect(img.data()[center_offset + 2] == 50_uc);
 
     // Verify corner pixel
     size_t corner_offset = (2 + 2 * 3) * 3;
-    expect(img.dataVec()[corner_offset] == 100_uc);
-    expect(img.dataVec()[corner_offset + 1] == 100_uc);
-    expect(img.dataVec()[corner_offset + 2] == 100_uc);
+    expect(img.data()[corner_offset] == 100_uc);
+    expect(img.data()[corner_offset + 1] == 100_uc);
+    expect(img.data()[corner_offset + 2] == 100_uc);
   };
 };
 
@@ -134,9 +134,9 @@ void test_image_roundtrip() {
     img.set_float(2, 3, 0.5f, 0.25f, 0.75f);
     // float r, g, b;
     auto c = img.get_float(2, 3);
-    expect(approximately(c[0], 0.5f)) << "Expected r ≈ 0.5";
-    expect(approximately(c[1], 0.25f)) << "Expected g ≈ 0.25";
-    expect(approximately(c[2], 0.75f)) << "Expected b ≈ 0.75";
+    expect(approximately(static_cast<float>(c[0]), 0.5f)) << "Expected r ≈ 0.5";
+    expect(approximately(static_cast<float>(c[1]), 0.25f)) << "Expected g ≈ 0.25";
+    expect(approximately(static_cast<float>(c[2]), 0.75f)) << "Expected b ≈ 0.75";
   };
 
   skip / test("image_roundtrip_precision") = [] {

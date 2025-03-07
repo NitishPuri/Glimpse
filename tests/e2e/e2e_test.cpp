@@ -5,7 +5,6 @@
 
 #include "core/image.h"
 #include "core/render.h"
-#include "core/rtw_stb_image.h"
 #include "core/scenes.h"
 #include "print_ascii_image.h"
 #include "test_scenes.h"
@@ -238,8 +237,8 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
   ensure_directory_exists(test_output_dir);
 
   // Create test image filename
-  std::string output_filename = test_output_dir + name + ".bmp";
-  std::string reference_filename = reference_dir + name + ".bmp";
+  std::string output_filename = test_output_dir + name + ".png";
+  std::string reference_filename = reference_dir + name + ".png";
 
   // std::string test_name = ;
   test("e2e_" + name + "_render") = [&] {
@@ -302,6 +301,9 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
       }
     }
 
+    // TODO: correct image flip behaviour
+    //  TODO: find a way to fix random seed to check for correctness!!
+
     if (!timed_out) {
       // Wait for rendering to finish if it hasnt already,
       // TODO, maybe this should be an assert? since we expect the render to finish
@@ -324,14 +326,13 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
     expect(write_success) << "Failed to write output image to " << output_filename;
 
     // std::cout << "ASCII preview of rendered image:" << std::endl;
-    print_color_ascii_image(rendered_image);
+    // print_color_ascii_image(rendered_image);
     // print_truecolor_image(rendered_image);
     // print_pixel_image(rendered_image);
     // print_best_image(rendered_image);
     // print_highres_image(rendered_image);
-    // print_ultrahd_console_image(rendered_image);
+    // print_ultrahd_console_image(rendered_image, 60, 30);
     // print_enhanced_ascii_image(rendered_image);
-    // print_feature_visualization(rendered_image);
 
     // If reference image exists, compare
     if (fs::exists(reference_filename)) {
@@ -357,4 +358,6 @@ void e2e_test() {
   // Add more scenes as needed
 
   // test_scene_uncapped("simple_sphere", create_simple_sphere_scene, 200, 0, 3);
+  // test_scene_uncapped("cornell_box", create_cornell_box_scene, 200, 0, 3);
+  // test_scene_uncapped("reflective_sphere", create_reflective_sphere_scene);
 }
