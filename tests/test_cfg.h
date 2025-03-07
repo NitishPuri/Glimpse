@@ -1,3 +1,4 @@
+
 #define BOOST_UT_DISABLE_MODULE
 #include "boost/ut.hpp"  // import boost.ut;
 namespace ut = boost::ut;
@@ -37,6 +38,3 @@ class runner : public ut::runner<Reporter> {
   }
 };
 }  // namespace cfg
-
-template <>
-auto ut::cfg<ut::override> = cfg::runner<cfg::reporter>{};

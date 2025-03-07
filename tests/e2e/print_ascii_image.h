@@ -1,12 +1,15 @@
 #include "core/image.h"
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <fcntl.h>
 #include <io.h>
 #include <windows.h>
 #endif
 
 #include <algorithm>
+#include <cstring>
+#include <string>
 
 using namespace glimpse;
 
@@ -24,14 +27,11 @@ void setup_console_for_unicode() {
 #endif
 }
 
-int intMin(int a, int b) { return a < b ? a : b; }
-int intMax(int a, int b) { return a > b ? a : b; }
-
 // Print an image to console using ASCII characters
 void print_ascii_image(const Image& img, int max_width = 80, int max_height = 40) {
   // If image is too large, we'll downsample it to fit terminal
-  int display_width = intMin(img.width, max_width);
-  int display_height = intMin(img.height, max_height);
+  int display_width = std::min(img.width, max_width);
+  int display_height = std::min(img.height, max_height);
 
   // Calculate sampling step (how many pixels to skip)
   double x_step = static_cast<double>(img.width) / display_width;
@@ -65,7 +65,7 @@ void print_ascii_image(const Image& img, int max_width = 80, int max_height = 40
 
       // Map brightness to ASCII character
       int char_index = static_cast<int>(brightness * (chars.length() - 1));
-      char_index = intMin(0, intMax(static_cast<int>(chars.length()) - 1, char_index));
+      char_index = std::min(0, std::max(static_cast<int>(chars.length()) - 1, char_index));
 
       // TODO: Experiment with character sets for different images
       //  Get dominant color (R, G, B)
@@ -97,8 +97,8 @@ void print_ascii_image(const Image& img, int max_width = 80, int max_height = 40
 // Print an image to console using colored ASCII characters (with ANSI colors)
 void print_color_ascii_image(const Image& img, int max_width = 120, int max_height = 40) {
   // If image is too large, we'll downsample it to fit terminal
-  int display_width = intMin(img.width, max_width);
-  int display_height = intMin(img.height, max_height);
+  int display_width = std::min(img.width, max_width);
+  int display_height = std::min(img.height, max_height);
 
   // Calculate sampling step (how many pixels to skip)
   double x_step = static_cast<double>(img.width) / display_width;
@@ -142,7 +142,7 @@ void print_color_ascii_image(const Image& img, int max_width = 120, int max_heig
       brightness /= 255.0;  // Normalize to 0-1
 
       int char_index = static_cast<int>(brightness * (chars.length() - 1));
-      char_index = intMax(0, intMin(static_cast<int>(chars.length()) - 1, char_index));
+      char_index = std::max(0, std::min(static_cast<int>(chars.length()) - 1, char_index));
 
       // More accurate color determination
       int r = pixel.rgb[0];
@@ -274,8 +274,8 @@ void print_color_ascii_image(const Image& img, int max_width = 120, int max_heig
 // Print an image to console with enhanced contrast
 void print_enhanced_ascii_image(const Image& img, int max_width = 80, int max_height = 40) {
   // If image is too large, we'll downsample it to fit terminal
-  int display_width = intMin(img.width, max_width);
-  int display_height = intMin(img.height, max_height);
+  int display_width = std::min(img.width, max_width);
+  int display_height = std::min(img.height, max_height);
 
   // Calculate sampling step (how many pixels to skip)
   double x_step = static_cast<double>(img.width) / display_width;
@@ -302,8 +302,8 @@ void print_enhanced_ascii_image(const Image& img, int max_width = 80, int max_he
       brightness /= 255.0;  // Normalize to 0-1
 
       // Update min/max
-      min_brightness = min(min_brightness, brightness);
-      max_brightness = max(max_brightness, brightness);
+      min_brightness = std::min(min_brightness, brightness);
+      max_brightness = std::max(max_brightness, brightness);
     }
   }
 
@@ -343,11 +343,11 @@ void print_enhanced_ascii_image(const Image& img, int max_width = 80, int max_he
 
       // Apply contrast enhancement
       double enhanced_brightness = (brightness - min_brightness) / brightness_range;
-      enhanced_brightness = max(0.0, min(1.0, enhanced_brightness));  // Clamp to 0-1
+      enhanced_brightness = std::max(0.0, std::min(1.0, enhanced_brightness));  // Clamp to 0-1
 
       // Map brightness to character
       int char_index = static_cast<int>(enhanced_brightness * (chars.length() - 1));
-      char_index = intMax(0, intMin(static_cast<int>(chars.length() - 1), char_index));
+      char_index = std::max(0, std::min(static_cast<int>(chars.length() - 1), char_index));
 
       // Determine colors
       int r = pixel.rgb[0];
@@ -414,8 +414,8 @@ void print_enhanced_ascii_image(const Image& img, int max_width = 80, int max_he
 // Print an image using true color (24-bit RGB) background colors
 void print_truecolor_image(const Image& img, int max_width = 60, int max_height = 30) {
   // Background colors need more horizontal space, so we use smaller defaults
-  int display_width = intMin(img.width, max_width);
-  int display_height = intMin(img.height, max_height);
+  int display_width = std::min(img.width, max_width);
+  int display_height = std::min(img.height, max_height);
 
   // Calculate sampling step (how many pixels to skip)
   double x_step = static_cast<double>(img.width) / display_width;
@@ -475,8 +475,8 @@ void enable_windows_ansi_colors() {
 // Print an image using console background colors
 void print_pixel_image(const Image& img, int max_width = 60, int max_height = 30) {
   // Background colors need more horizontal space, so we use smaller defaults
-  int display_width = intMin(img.width, max_width);
-  int display_height = intMin(img.height, max_height);
+  int display_width = std::min(img.width, max_width);
+  int display_height = std::min(img.height, max_height);
 
   // Calculate sampling step (how many pixels to skip)
   double x_step = static_cast<double>(img.width) / display_width;
@@ -648,8 +648,8 @@ void print_highres_image(const Image& img, int max_width = 120, int max_height =
   int console_height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 
   // Determine display dimensions (leave space for borders)
-  int display_width = intMin(img.width, intMin(max_width, console_width - 2));
-  int display_height = intMin(img.height, intMin(max_height, console_height - 3));
+  int display_width = std::min(img.width, std::min(max_width, console_width - 2));
+  int display_height = std::min(img.height, std::min(max_height, console_height - 3));
 
   // Calculate sampling step
   double x_step = static_cast<double>(img.width) / display_width;
@@ -751,8 +751,8 @@ void print_highres_image(const Image& img, int max_width = 120, int max_height =
   SMALL_RECT writeRegion;
   writeRegion.Left = static_cast<SHORT>(cursorPos.X);
   writeRegion.Top = static_cast<SHORT>(cursorPos.Y);
-  writeRegion.Right = static_cast<SHORT>(cursorPos.X) + display_width - 1;
-  writeRegion.Bottom = static_cast<SHORT>(cursorPos.Y) + display_height - 1;
+  writeRegion.Right = static_cast<SHORT>(cursorPos.X + display_width - 1);
+  writeRegion.Bottom = static_cast<SHORT>(cursorPos.Y + display_height - 1);
 
   // Write the buffer to the console
   if (!WriteConsoleOutput(hConsole, buffer.data(),
@@ -762,7 +762,7 @@ void print_highres_image(const Image& img, int max_width = 120, int max_height =
   }
 
   // Move cursor below the image
-  cursorPos.Y += display_height + 1;
+  cursorPos.Y += static_cast<SHORT>(display_height + 1);
   SetConsoleCursorPosition(hConsole, cursorPos);
   std::cout << std::endl;
 #else
@@ -779,8 +779,8 @@ void print_ultrahd_console_image(const Image& img, int max_width = 80, int max_h
   enable_windows_ansi_colors();
 
   // Calculate dimensions
-  int display_width = intMin(img.width, max_width);
-  int display_height = intMin(img.height, max_height) * 2;  // Double vertical res with half-blocks
+  int display_width = std::min(img.width, max_width);
+  int display_height = std::min(img.height, max_height) * 2;  // Double vertical res with half-blocks
 
   // Calculate sampling step
   double x_step = static_cast<double>(img.width) / display_width;

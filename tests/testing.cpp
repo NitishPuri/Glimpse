@@ -2,6 +2,9 @@
 #include "boost/ut.hpp"  // import boost.ut;
 #include "test_cfg.h"
 
+// template <>
+// auto ut::cfg<ut::override> = cfg::runner<cfg::reporter>{};
+
 constexpr auto sum(auto... values) { return (values + ...); }
 
 void vec3_test();

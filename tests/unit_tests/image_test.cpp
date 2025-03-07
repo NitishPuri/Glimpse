@@ -1,5 +1,7 @@
 #include "core/image.h"
 
+#include <iomanip>
+
 #include "../test_cfg.h"
 
 using namespace glimpse;
@@ -200,9 +202,9 @@ void test_image_roundtrip() {
     for (int y = 0; y < original.height; y++) {
       for (int x = 0; x < original.width; x++) {
         // Use exact values rather than gradients
-        unsigned char r_val = x * 25;  // 0, 25, 50, 75...
-        unsigned char g_val = y * 25;  // 0, 25, 50, 75...
-        unsigned char b_val = 128;     // Constant middle value
+        uchar r_val = static_cast<uchar>(x * 25);  // 0, 25, 50, 75...
+        uchar g_val = static_cast<uchar>(y * 25);  // 0, 25, 50, 75...
+        uchar b_val = 128;                         // Constant middle value
         original.set(x, y, ImageColor(r_val, g_val, b_val));
       }
     }

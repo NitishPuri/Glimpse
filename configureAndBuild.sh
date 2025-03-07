@@ -14,8 +14,8 @@ clear
 
 
 # Configure
-rm -rf buildLinux
-cmake --preset wsl
+# rm -rf buildLinux
+# cmake --preset wsl
 
 # build
 cmake --build buildLinux

@@ -9,8 +9,8 @@
 #include "print_ascii_image.h"
 #include "test_scenes.h"
 
-#define BOOST_UT_DISABLE_MODULE
-#include "boost/ut.hpp"  // import boost.ut;
+//
+#include "../test_cfg.h"
 
 namespace fs = std::filesystem;
 
@@ -35,8 +35,8 @@ bool compare_images(const Image& img1, const Image& img2, int tolerance = 1) {
       int g_diff = std::abs(static_cast<int>(c1.rgb[1]) - static_cast<int>(c2.rgb[1]));
       int b_diff = std::abs(static_cast<int>(c1.rgb[2]) - static_cast<int>(c2.rgb[2]));
 
-      int pixel_diff = intMax(intMax(r_diff, g_diff), b_diff);
-      max_diff = intMax(max_diff, pixel_diff);
+      int pixel_diff = std::max({r_diff, g_diff, b_diff});
+      max_diff = std::max(max_diff, pixel_diff);
 
       if (pixel_diff > tolerance) {
         total_diff++;

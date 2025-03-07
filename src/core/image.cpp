@@ -1,8 +1,8 @@
 #include "image.h"
 
-#ifdef _MSC_VER
+// #ifdef _MSC_VER
 #pragma warning(push, 0)
-#endif
+// #endif
 
 #include <algorithm>
 #include <iostream>
@@ -197,6 +197,6 @@ bool Image::write(const std::string& filename) const {
 }
 
 // Restore MSVC compiler warnings
-#ifdef _MSC_VER
+// #ifdef _MSC_VER
 #pragma warning(pop)
-#endif
+// #endif
