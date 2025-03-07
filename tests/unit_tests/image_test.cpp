@@ -142,7 +142,7 @@ void test_image_roundtrip() {
     expect(approximately(static_cast<float>(c[2]), 0.75f)) << "Expected b ≈ 0.75";
   };
 
-  skip / test("image_roundtrip_precision") = [] {
+  test("image_roundtrip_precision") = [] {
     // Create test image with a gradient pattern
     Image original(100, 100);
     for (int y = 0; y < original.height; y++) {

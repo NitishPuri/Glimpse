@@ -228,7 +228,8 @@ void test_debug_scene() {
 }
 
 // Run end-to-end test for a single scene
-void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width = 200, int height = 0) {
+void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width = 200, int height = 0,
+                unsigned int seed = 42) {
   using namespace boost::ut;
 
   const std::string test_output_dir = "./test_output/";
@@ -255,9 +256,11 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
     }
 
     // Reduce samples for faster testing
-    // TODO: Create tests with varying spp and scene complexity to test limits of renderer
     scene.cam.samples_per_pixel = 4;  // Low number for quick tests
     scene.cam.max_depth = 4;          // Reduced bounce depth
+
+    // Set the random seed for deterministic rendering
+    Random::set_seed(seed);
 
     scene.cam.initialize();
 
@@ -337,7 +340,7 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
     // If reference image exists, compare
     if (fs::exists(reference_filename)) {
       Image reference_image(reference_filename);
-      bool images_match = compare_images(rendered_image, reference_image);
+      bool images_match = compare_images(rendered_image, reference_image, 10);
       expect(images_match) << "Rendered image doesn't match reference for scene: " << name;
     } else {
       std::cout << "No reference image found at: " << reference_filename
@@ -352,9 +355,9 @@ void e2e_test() {
   // test_debug_scene();
 
   // Test each scene
-  test_scene("simple_sphere", create_simple_sphere_scene);
+  // test_scene("simple_sphere", create_simple_sphere_scene);
   // test_scene("cornell_box", create_cornell_box_scene, 200, 200);  // Square aspect ratio
-  // test_scene("reflective_sphere", create_reflective_sphere_scene);
+  test_scene("reflective_sphere", create_reflective_sphere_scene);
   // Add more scenes as needed
 
   // test_scene_uncapped("simple_sphere", create_simple_sphere_scene, 200, 0, 3);

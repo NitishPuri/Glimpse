@@ -22,6 +22,7 @@ void camera_test();
 void render_test();
 void sphere_test();
 void bvh_test();
+void random_test();
 
 // End-to-end tests
 void e2e_test();
@@ -54,6 +55,7 @@ int main(int argc, char** argv) {
   render_test();
   sphere_test();
   bvh_test();
+  random_test();
 
   // E2E
   // e2e_test();

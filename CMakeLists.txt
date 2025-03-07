@@ -95,6 +95,7 @@ if(BUILD_TESTS)
         tests/test_cfg.h
         tests/testing.cpp
 
+        tests/unit_tests/random_test.cpp
         tests/unit_tests/vec3_test.cpp
         tests/unit_tests/ray_test.cpp
         tests/unit_tests/aabb_test.cpp
@@ -151,12 +152,12 @@ if (MSVC)
 
     target_compile_options(${NAME} PRIVATE ${COMPILE_OPTIONS})
     target_compile_options(${NAME}_cli PRIVATE ${COMPILE_OPTIONS})
-    target_compile_options(${NAME}_gui PRIVATE ${COMPILE_OPTIONS})
+    # target_compile_options(${NAME}_gui PRIVATE ${COMPILE_OPTIONS})
     target_compile_options(${NAME}_tests PRIVATE ${COMPILE_OPTIONS})
 
     target_compile_definitions(${NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
     target_compile_definitions(${NAME}_cli PRIVATE _CRT_SECURE_NO_WARNINGS)
-    target_compile_definitions(${NAME}_gui PRIVATE _CRT_SECURE_NO_WARNINGS)
+    # target_compile_definitions(${NAME}_gui PRIVATE _CRT_SECURE_NO_WARNINGS)
     target_compile_definitions(${NAME}_tests PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
     set(COMPILE_OPTIONS 
