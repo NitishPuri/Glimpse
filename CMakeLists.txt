@@ -29,55 +29,41 @@ target_link_libraries(${NAME}_cli ${NAME})
 target_compile_features(${NAME}_cli PUBLIC cxx_std_17)
 
 
-# Platform detection
-if(UNIX AND NOT APPLE)
-    set(LINUX TRUE)
-    message(STATUS "Linux platform detected")
-endif()
-
 # gui
 option(BUILD_GUI "Build the GUI Viewer" ON)
-if(BUILD_GUI AND NOT LINUX)
+if(BUILD_GUI)
     message(STATUS "Building GUI")
+
+    # GLFW 3.4 from source, pinned by hash (same as Glint). X11 only: Wayland needs extra dev packages.
+    include(FetchContent)
+    set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+    set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(glfw
+      URL https://github.com/glfw/glfw/archive/refs/tags/3.4.tar.gz
+      URL_HASH SHA256=c038d34200234d071fae9345bc455e4a8f2f544ab60150765d7704e08f3dac01)
+    FetchContent_MakeAvailable(glfw)
+    set(OpenGL_GL_PREFERENCE GLVND)  # silences CMP0072; GLVND is the modern libOpenGL/libGLX split
+    find_package(OpenGL REQUIRED)
 
     set(GUI_NAME ${NAME}_gui)
     set(GUI_PATH ${PROJECT_SOURCE_DIR}/src/gui)
+    set(IMGUI_PATH ${PROJECT_SOURCE_DIR}/ext/imgui)  # vendored: ImGui + ImPlot + glfw/opengl3 backends
+    set(GLAD_PATH ${PROJECT_SOURCE_DIR}/ext/glad)    # vendored GL loader
 
-    # GLFW
-    set(GLFW_PATH ${PROJECT_SOURCE_DIR}/ext/glfw-3.4.bin.WIN64)
-    set(GLFW_INCLUDE ${GLFW_PATH}/include)
-    set(GLFW_LIB_DIR ${GLFW_PATH}/lib-vc2022)
-
-    # ImGui
-    set(IMGUI_PATH ${PROJECT_SOURCE_DIR}/ext/imgui)
-    file(GLOB_RECURSE IMGUI_SOURCES ${IMGUI_PATH}/*.cpp)
-
-    # GLAD
-    set(GLAD_PATH ${PROJECT_SOURCE_DIR}/ext/glad)
-    set(GLAD_INCLUDE ${GLAD_PATH}/include)
-    file(GLOB_RECURSE GLAD_SOURCES ${GLAD_PATH}/src/*.c)
-
+    file(GLOB IMGUI_SOURCES ${IMGUI_PATH}/*.cpp)
     file(GLOB_RECURSE APP_HEADERS ${GUI_PATH}/*.h)
     file(GLOB_RECURSE APP_SOURCES ${GUI_PATH}/*.cpp)
 
-    add_executable(${GUI_NAME} ${APP_SOURCES} ${APP_HEADERS})
-    target_sources(${GUI_NAME} PRIVATE ${GLAD_SOURCES})
-    target_sources(${GUI_NAME} PRIVATE ${IMGUI_SOURCES})
-
+    add_executable(${GUI_NAME} ${APP_SOURCES} ${APP_HEADERS} ${IMGUI_SOURCES} ${GLAD_PATH}/src/glad.c)
     target_compile_features(${GUI_NAME} PUBLIC cxx_std_20)
-
-    target_link_directories(${GUI_NAME} PUBLIC ${GLFW_LIB_DIR})
-    target_link_libraries(${GUI_NAME}
-        ${NAME} 
-        glfw3
-        opengl32.lib
-    )
-
-    target_include_directories(${GUI_NAME} PUBLIC
+    target_link_libraries(${GUI_NAME} PRIVATE ${NAME} glfw OpenGL::GL)
+    target_include_directories(${GUI_NAME} PRIVATE
         ${PROJECT_SOURCE_DIR}/src
         ${PROJECT_SOURCE_DIR}/ext
-        ${GLAD_INCLUDE}
-        ${GLFW_INCLUDE}
+        ${GLAD_PATH}/include
     )
 endif()
 
@@ -111,6 +97,7 @@ if(BUILD_TESTS)
         tests/unit_tests/sphere_test.cpp
         tests/unit_tests/bvh_node_test.cpp
         tests/unit_tests/cli_test.cpp
+        tests/unit_tests/gui_layout_test.cpp
 
         tests/e2e/e2e_test.cpp
         tests/e2e/test_scenes.h
