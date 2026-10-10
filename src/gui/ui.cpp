@@ -3,6 +3,22 @@
 #include <filesystem>
 
 #include "app.h"
+#include "layout.h"
+
+namespace {
+// Pins the next ImGui window to a rect of the responsive layout (re-applied every frame, so it follows resizes).
+void place_next_window(const glimpse::gui::Rect& r) {
+  ImGui::SetNextWindowPos(ImVec2(r.x, r.y), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(r.w, r.h), ImGuiCond_Always);
+}
+
+glimpse::gui::Layout current_layout() {
+  const ImGuiViewport* vp = ImGui::GetMainViewport();
+  return glimpse::gui::compute_layout(vp->WorkPos.x, vp->WorkPos.y, vp->WorkSize.x, vp->WorkSize.y);
+}
+
+constexpr ImGuiWindowFlags kPinned = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+}  // namespace
 
 void UIRenderer::cameraUI(RayTracer& raytracer, GLResources& gl_res) {
   // Render parameters
@@ -105,7 +121,8 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
 
 void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
   bool controlsEnabled = (raytracer.status == RayTracer::IDLE);
-  ImGui::Begin("Control Panel");
+  place_next_window(current_layout().controls);
+  ImGui::Begin("Control Panel", nullptr, kPinned);
 
   if (!controlsEnabled) {
     ImGui::BeginDisabled();
@@ -159,7 +176,8 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
 }
 
 void UIRenderer::renderOutput(GLResources& gl_res, RayTracer& raytracer) {
-  ImGui::Begin("Render Output");
+  place_next_window(current_layout().output);
+  ImGui::Begin("Render Output", nullptr, kPinned);
   // Image rows are top-down and so is ImGui's default uv (0,0) -> (1,1): no flip needed.
   ImGui::Image(ImTextureID(gl_res.framebufferTexture), calculatePanelSize(gl_res));
 

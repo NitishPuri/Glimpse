@@ -5,9 +5,7 @@ out/
 log.txt
 .vscode/*
 results/
-ext/glad/
 ext/glfw*
-ext/imgui/
 ext/stb/
 imgui.ini
 log_cli.txt

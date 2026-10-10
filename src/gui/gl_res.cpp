@@ -2,6 +2,7 @@
 #include "gl_res.h"
 
 #include "config.h"
+#include "layout.h"
 
 int GLResources::initGL() {
   // Initialize GLFW and OpenGL
@@ -10,7 +11,12 @@ int GLResources::initGL() {
     return -1;
   }
 
-  window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Glimpse", nullptr, nullptr);
+  // Open at 80% of the monitor's work area, centered; the window stays resizable and the layout follows it.
+  int work_x = 0, work_y = 0, work_w = 0, work_h = 0;
+  if (GLFWmonitor* monitor = glfwGetPrimaryMonitor()) glfwGetMonitorWorkarea(monitor, &work_x, &work_y, &work_w, &work_h);
+  const auto size = glimpse::gui::initial_window_size(work_w, work_h, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+  window = glfwCreateWindow(size.w, size.h, "Glimpse", nullptr, nullptr);
   if (!window) {
     const char* description;
     int code = glfwGetError(&description);
@@ -18,6 +24,7 @@ int GLResources::initGL() {
     glfwTerminate();
     return -1;
   }
+  if (work_w > 0) glfwSetWindowPos(window, work_x + (work_w - size.w) / 2, work_y + (work_h - size.h) / 2);
 
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);  // Enable vsync

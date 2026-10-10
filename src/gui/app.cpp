@@ -6,6 +6,8 @@ int AppWindow::initApp() {
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
+  // The layout is computed every frame (layout.h); a saved imgui.ini would only fight it.
+  ImGui::GetIO().IniFilename = nullptr;
   ImGui_ImplGlfw_InitForOpenGL(gl_res.window, true);
   ImGui_ImplOpenGL3_Init("#version 330");
 

@@ -19,6 +19,7 @@ void sphere_test();
 void bvh_test();
 void random_test();
 void cli_test();
+void gui_layout_test();
 
 // End-to-end tests
 void e2e_test();
@@ -48,6 +49,7 @@ int main(int argc, char** argv) {
   bvh_test();
   random_test();
   cli_test();
+  gui_layout_test();
 
   // E2E
   // e2e_test();
