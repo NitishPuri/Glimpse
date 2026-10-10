@@ -72,6 +72,30 @@ void render_test() {
       expect(lit == 32_i) << "every pixel should see the white background";
     };
 
+    // Image rows are top-down like image files (row 0 = top of the picture); the camera's v runs bottom-up.
+    // Regression (2026-10-10): the CLI wrote every image upside down.
+    "image_rows_are_top_down"_test = [] {
+      Scene scene;
+      scene.cam.aspect_ratio = 1.0;
+      scene.cam.image_width = 16;
+      scene.cam.samples_per_pixel = 1;
+      scene.cam.max_depth = 1;
+      scene.cam.vfov = 90.0f;
+      scene.cam.defocus_angle = 0.0f;
+      scene.background = color(0, 0, 0);
+      // A light entirely in the upper half of the view.
+      scene.world.add(make_shared<sphere>(point3(0, 0.5, -1), 0.3, make_shared<diffuse_light>(color(1, 1, 1))));
+
+      Image image(16, 16);
+      Renderer renderer;
+      renderer.render_scene(scene, image);
+
+      long top = 0, bottom = 0;
+      for (int j = 0; j < image.height; ++j)
+        for (int i = 0; i < image.width; ++i) (j < image.height / 2 ? top : bottom) += image.get(i, j).rgb[0];
+      expect(top > 0 and bottom == 0) << "light must land in the top rows: top=" << top << " bottom=" << bottom;
+    };
+
     skip / "render_scene"_test = [] {
       // Create renderer and image
       Renderer renderer;

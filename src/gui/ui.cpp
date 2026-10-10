@@ -160,8 +160,8 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
 
 void UIRenderer::renderOutput(GLResources& gl_res, RayTracer& raytracer) {
   ImGui::Begin("Render Output");
-  // flip vertically
-  ImGui::Image(ImTextureID(gl_res.framebufferTexture), calculatePanelSize(gl_res), ImVec2(0, 1), ImVec2(1, 0));
+  // Image rows are top-down and so is ImGui's default uv (0,0) -> (1,1): no flip needed.
+  ImGui::Image(ImTextureID(gl_res.framebufferTexture), calculatePanelSize(gl_res));
 
   // Check if the Rener Output window is hovered
   if (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {

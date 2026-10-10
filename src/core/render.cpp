@@ -118,8 +118,9 @@ void render_section(RenderSectionArgs &args) {
           pixel_color = film.get_sample(i, j);
           pixel_color = sqrt(pixel_color);  // gamma correction!
           // image.set(i, j, ImageColor{float(pixel_color.x()), float(pixel_color.y()), float(pixel_color.z())});
-          image.set_float(i, j, static_cast<float>(pixel_color.x()), static_cast<float>(pixel_color.y()),
-                          static_cast<float>(pixel_color.z()));
+          // j counts up from the bottom (camera v); Image rows count down from the top, like image files.
+          image.set_float(i, cam.image_height - 1 - j, static_cast<float>(pixel_color.x()),
+                          static_cast<float>(pixel_color.y()), static_cast<float>(pixel_color.z()));
         }
       }
     }
@@ -158,8 +159,9 @@ void render_section_uncap(RenderSectionArgs &args) {
             pixel_color = film.get_sample(i, j);
             pixel_color = sqrt(pixel_color);  // gamma correction!
             // image.set(i, j, ImageColor{float(pixel_color.x()), float(pixel_color.y()), float(pixel_color.z())});
-            image.set_float(i, j, static_cast<float>(pixel_color.x()), static_cast<float>(pixel_color.y()),
-                            static_cast<float>(pixel_color.z()));
+            // j counts up from the bottom (camera v); Image rows count down from the top, like image files.
+            image.set_float(i, cam.image_height - 1 - j, static_cast<float>(pixel_color.x()),
+                            static_cast<float>(pixel_color.y()), static_cast<float>(pixel_color.z()));
           }
         }
       }
