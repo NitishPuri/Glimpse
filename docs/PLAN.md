@@ -85,6 +85,19 @@ reorder, drop or swap whatever turned out to be (un)interesting.
       `.gitattributes` for line endings (`README.md`/`ROADMAP.md` are CRLF today, new files are LF). Add
       `refs/` and `results/` to `.gitignore` if they are missing.
 - [ ] Optional: re-enable a Linux CI job (build plus tests) in place of the stale workflows.
+- [ ] **Structure review** (added 2026-10-11). Glimpse was built by hand in 2025 without today's goals, while
+      Glint was started fresh with them. Before Stage 1 builds on the current layout, check how well it fits:
+  - **Folders and file names:** do `src/core`, `hittables/`, the header-heavy files and the scene registry
+    scale to 29 techniques? Where do per-technique code, notes, test scenes and references live? (Glint has
+    `techniques/NN_name/` with code and `NOTES.md`, plus `tools/`, `docs/`, `cmake/` and `external/`.)
+  - **Conventions:** naming (RTIOW snake_case vs pbrt/Glint style), namespaces, one class per file, headers vs
+    `.cpp`, `ext/` vs FetchContent, where logs and results go.
+  - **Readability:** the goal is literate, pbrt-like code that a reader learns from: comments that explain
+    the math and the *why*, consistent terms (radiance, pdf, measure), and no dead code. The `#if 0` files,
+    commented-out experiments and stale TODOs get resolved (revived, moved into the plan, or deleted).
+  - Deliverable: `docs/structure.md` with the findings and a proposed layout, reviewed by the owner. Approved
+    changes are applied as mechanical, behaviour-preserving moves and renames (the tests must still pass)
+    before Stage 1. Anything that changes behaviour stays with the technique that needs it.
 
 **Done when:** a clean clone configures and builds with one command on Linux, the tests pass, the viewer
 runs, and `Glimpse_cli --scene cornell_box --spp 64 --out x.png` writes an image.

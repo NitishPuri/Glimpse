@@ -1,7 +1,8 @@
+#include <chrono>
+#include <filesystem>
+#include <iostream>
 
-#include <future>
-
-#include "core/cli.h"
+#include "core/cli_options.h"
 #include "core/glimpse.h"
 #include "core/logger.h"
 #include "core/render.h"
@@ -11,50 +12,57 @@ using namespace glimpse;
 const std::string log_file_path = "./log_cli.txt";
 
 int main(int argc, char **argv) {
+  const ParseResult parsed = parse_command_line(argc, argv);
+  if (!parsed.ok()) {
+    std::cerr << "error: " << parsed.error << "\n\n" << usage();
+    return 2;
+  }
+  const CmdOptions &options = parsed.options;
+
+  if (options.help) {
+    std::cout << usage();
+    return 0;
+  }
+  if (options.list_scenes) {
+    for (size_t i = 0; i < Scene::SceneNames.size(); ++i) std::cout << i << "  " << Scene::SceneNames[i] << "\n";
+    return 0;
+  }
+
+  const auto scene_name = resolve_scene_name(options.scene);
+  if (!scene_name) {
+    std::cerr << "error: unknown scene '" << options.scene << "' (see --list-scenes)\n";
+    return 2;
+  }
+
   Logger logger(log_file_path);
-  logger.log("Starting...");
+  // Seeds every worker thread's generator. Rows are split per thread, so this is reproducible on one machine;
+  // seeding that is independent of the thread count is technique 03.
+  if (options.seed) Random::set_seed(*options.seed);
 
-  // TODO: Parameterize scene from cli
-  auto options = ParseCommandLine(argc, argv);
-  // logger.log("Width: ", options.width);
-  // logger.log("Height: ", options.height);
-  logger.log("Samples: ", options.samples);
-  logger.log("Max Depth: ", options.max_depth);
-  logger.log("Scene: ", options.scene);
+  // Scenes declare their own lights (scene.lights); nothing is added here.
+  Scene scene = Scene::SceneMap[*scene_name]();
+  apply_options(options, scene);
+  const camera &cam = scene.cam;
+  Image image(cam.image_width, cam.image_height);
 
-  // Scene
-  auto scene = Scene::SceneMap[Scene::SceneNames[options.scene]]();
-
-  // Image
-  auto aspect_ratio = scene.cam.aspect_ratio;
-  int image_width = scene.cam.image_width;
-  int samples_per_pixel = scene.cam.samples_per_pixel;
-
-  const int image_height = static_cast<int>(image_width / aspect_ratio);
-  Image image(image_width, image_height);
-
-  // Render
-  logger.log("Rendering... ", image_width, "x", image_height, " with ", samples_per_pixel, " samples per pixel");
-  auto startTime = std::chrono::high_resolution_clock::now();
-
-  // Light Sources
-  auto empty_material = shared_ptr<material>();
-  // quad lights;
-  scene.lights.add(make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), empty_material));
+  // Stratified sampling uses a sqrt_spp x sqrt_spp grid: the real sample count is sqrt_spp^2.
+  logger.log("Rendering ", *scene_name, " at ", cam.image_width, "x", cam.image_height, ", ", cam.sqrt_spp * cam.sqrt_spp,
+             " spp, depth ", cam.max_depth);
+  const auto start = std::chrono::high_resolution_clock::now();
 
   Renderer renderer;
   renderer.render_scene(scene, image, nullptr);
 
-  auto endTime = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration<float, std::chrono::seconds::period>(endTime - startTime).count();
+  const auto seconds = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - start).count();
+  logger.log("Rendered in ", seconds, " s");
 
-  logger.log("Image generated in ", duration, " seconds");
-
-  std::string result_path("./results/final21.jpg");
-  logger.log("Writing result to :: ", result_path);
-  if (image.write(result_path) != 0) {
-    logger.log("Image written to ", result_path);
-  } else {
-    logger.log("Failed to write image to ", result_path);
+  const std::string out = options.out.empty() ? default_output_path(*scene_name) : options.out;
+  const auto parent = std::filesystem::path(out).parent_path();
+  if (!parent.empty()) std::filesystem::create_directories(parent);
+  if (!image.write(out)) {
+    logger.log("Failed to write ", out);
+    return 1;
   }
+  logger.log("Wrote ", out);
+  return 0;
 }
