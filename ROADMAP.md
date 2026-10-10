@@ -1,3 +1,6 @@
+> **Superseded (2026-10-10):** the active plan is [docs/PLAN.md](docs/PLAN.md), the Glimpse learning path.
+> This file is kept as the 2025 history; its open items were folded into the plan.
+
 ## Roadmap
 
 This roadmap prioritizes a **progressive learning experience** while keeping it **modular and experimental**.
