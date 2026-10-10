@@ -54,6 +54,11 @@ void AppWindow::run() {
     glfwSwapBuffers(gl_res.window);
   }
 
+  // A render still running would block forever in the std::async future's destructor (uncapped renders never
+  // finish on their own). Ask it to stop and wait for the worker threads before tearing down the window.
+  raytracer.stopRendering();
+  if (raytracer.trace_future) raytracer.trace_future->wait();
+
   glfwDestroyWindow(gl_res.window);
   glfwTerminate();
 }

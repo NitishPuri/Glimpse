@@ -18,6 +18,9 @@ struct RayTracer {
   std::atomic<Status> status{IDLE};
   std::optional<std::future<void>> trace_future{};
   std::atomic<int> progress{0};
+  // Samples per pixel of the last finished render (for the saved file name). Kept here because `renderer`, and
+  // with it the film's sample counts, is released when a render completes.
+  std::atomic<int> last_spp{0};
 
   std::shared_ptr<Renderer> renderer;
 
@@ -31,6 +34,8 @@ struct RayTracer {
     }
 
     renderer = std::make_shared<Renderer>();
+    // A Stop pressed just as the previous render finished would otherwise abort this one immediately.
+    Renderer::stop_rendering = false;
     trace_future = std::async(std::launch::async, [&]() {
       image.clear();
       scene.cam.initialize();
@@ -40,6 +45,8 @@ struct RayTracer {
 
       status = RENDERING;
       renderer->render_scene(scene, image, &progress);
+      last_spp = scene.cam.uncapped_spp ? renderer->film.get_average_sample_count()
+                                        : scene.cam.sqrt_spp * scene.cam.sqrt_spp;
       status = DONE;
 
       auto endTime = std::chrono::high_resolution_clock::now();

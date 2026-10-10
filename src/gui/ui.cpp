@@ -73,8 +73,8 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
   if (ImGui::Button("Save Image")) {
     auto now = std::chrono::system_clock::now();
     auto now_time = std::chrono::system_clock::to_time_t(now);
-    auto spp = raytracer.scene.cam.uncapped_spp ? raytracer.renderer->film.get_average_sample_count()
-                                                : raytracer.scene.cam.samples_per_pixel;
+    // `renderer` is released once a render completes, so use the spp recorded when it finished.
+    const int spp = raytracer.last_spp.load();
 
     // Ensure the results directory exists
     std::string dir = "./glimpse_results";
@@ -85,7 +85,7 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
        << Scene::SceneNames[params.current_scene] << "_samples_" << spp << ".jpg";
     auto outfile_path = ss.str();
 
-    if (raytracer.image.write(outfile_path) != 0) {
+    if (raytracer.image.write(outfile_path)) {
       logger.log("Image written to ", outfile_path);
     } else {
       logger.log("Failed to write image to ", outfile_path);
@@ -99,11 +99,12 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
       ImGui::Text("Average SPP ... %d", avg_spp);
       ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(0.0f, 0.0f), "Progress..");
     } else {
-      int totalPixels = gl_res.renderWidth * gl_res.renderHeight * raytracer.scene.cam.samples_per_pixel;
-      int samples_done = raytracer.progress.load();
-      ImGui::Text("Rendering...%d/%d", samples_done / (gl_res.renderWidth * gl_res.renderHeight),
-                  raytracer.scene.cam.samples_per_pixel);
-      float progress = float(samples_done) / float(totalPixels);
+      // The stratified grid renders sqrt_spp^2 samples (e.g. 10 requested -> 9), so count against that.
+      const int spp = raytracer.scene.cam.sqrt_spp * raytracer.scene.cam.sqrt_spp;
+      const int pixels = gl_res.renderWidth * gl_res.renderHeight;
+      const int samples_done = raytracer.progress.load();
+      ImGui::Text("Rendering...%d/%d", samples_done / pixels, spp);
+      float progress = float(samples_done) / float(pixels * spp);
       ImGui::ProgressBar(progress, ImVec2(-1, 0), "Progress");
     }
 
@@ -153,10 +154,8 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
   if (!controlsEnabled) {
     ImGui::EndDisabled();
 
-    if (raytracer.scene.cam.uncapped_spp) {
-      if (ImGui::Button("Stop Rendering")) {
-        raytracer.stopRendering();
-      }
+    if (ImGui::Button("Stop Rendering")) {
+      raytracer.stopRendering();
     }
   }
 
@@ -181,32 +180,40 @@ void UIRenderer::renderOutput(GLResources& gl_res, RayTracer& raytracer) {
   // Image rows are top-down and so is ImGui's default uv (0,0) -> (1,1): no flip needed.
   ImGui::Image(ImTextureID(gl_res.framebufferTexture), calculatePanelSize(gl_res));
 
-  // Check if the Rener Output window is hovered
-  if (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
-    //  camera mode
+  // Camera drag: cheap preview renders (2 spp, depth 2) while dragging keep it interactive. On release the
+  // user's quality comes back and one full render follows.
+  auto& cam = raytracer.scene.cam;
+  const bool dragging = params.camera_mode != NONE && ImGui::IsWindowHovered() &&
+                        ImGui::IsMouseDragging(ImGuiMouseButton_Right);
+  if (dragging) {
+    if (!drag_saved_quality) drag_saved_quality = {cam.samples_per_pixel, cam.max_depth};
 
     ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
     ImGui::SetWindowFocus();
-    ImGui::SetWindowPos(ImGui::GetWindowPos(), ImGuiCond_Always);
 
     ImVec2 mouse_delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
     ImGui::ResetMouseDragDelta(ImGuiMouseButton_Right);
-
     float dx = mouse_delta.x * 0.005f;
     float dy = mouse_delta.y * 0.005f;
 
     if (params.camera_mode == FLY) {
-      raytracer.scene.cam.fly(dx, dy);
-      //
-      raytracer.scene.cam.samples_per_pixel = 2;
-      raytracer.scene.cam.max_depth = 2;
-      maybeRenderOnParamChange(raytracer);
-    } else if (params.camera_mode == ORBIT) {
-      raytracer.scene.cam.orbit(dx, dy);
-      raytracer.scene.cam.samples_per_pixel = 2;
-      raytracer.scene.cam.max_depth = 2;
-      maybeRenderOnParamChange(raytracer);
+      cam.fly(dx, dy);
+    } else {
+      cam.orbit(dx, dy);
     }
+    cam.samples_per_pixel = 2;
+    cam.max_depth = 2;
+    maybeRenderOnParamChange(raytracer);
+  } else if (drag_saved_quality && !ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+    cam.samples_per_pixel = drag_saved_quality->first;
+    cam.max_depth = drag_saved_quality->second;
+    drag_saved_quality.reset();
+    // The last preview may still be running (renderSceneAsync ignores requests while busy): render once idle.
+    render_when_idle = params.auto_render;
+  }
+  if (render_when_idle && raytracer.status == RayTracer::IDLE) {
+    render_when_idle = false;
+    raytracer.renderSceneAsync();
   }
 
   ImGui::End();

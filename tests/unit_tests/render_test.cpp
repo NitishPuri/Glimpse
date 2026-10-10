@@ -164,13 +164,28 @@ void render_test() {
       expect(sample.z() == 0.0_d) << "Sample z should be 0";
     };
 
-    "stop_rendering"_test = [] {
-      // Test the stop rendering flag
-      Renderer::stop_rendering = true;
-      expect(Renderer::stop_rendering.load() == true);
+    // The stop flag must also abort capped (fixed-spp) renders, so closing the viewer doesn't wait for a long
+    // render to finish. render_scene clears the flag on the way out, ready for the next render.
+    "stop_flag_aborts_capped_render"_test = [] {
+      Scene scene;
+      scene.cam.aspect_ratio = 1.0;
+      scene.cam.image_width = 16;
+      scene.cam.samples_per_pixel = 4;
+      scene.cam.max_depth = 1;
+      scene.background = color(1, 1, 1);  // would light every pixel if anything rendered
+      scene.world.add(make_shared<sphere>(point3(0, 0, 100), 0.1, make_shared<lambertian>(color(0.5, 0.5, 0.5))));
 
-      Renderer::stop_rendering = false;
-      expect(Renderer::stop_rendering.load() == false);
+      Image image(16, 16);
+      Renderer renderer;
+      Renderer::stop_rendering = true;  // already set: no pixel should be rendered
+      renderer.render_scene(scene, image);
+
+      int lit = 0;
+      for (int j = 0; j < image.height; ++j)
+        for (int i = 0; i < image.width; ++i)
+          if (image.get(i, j).rgb[0] > 0) ++lit;
+      expect(lit == 0_i) << "a stopped render writes nothing";
+      expect(!Renderer::stop_rendering.load()) << "the flag is cleared after the render returns";
     };
   };
 }

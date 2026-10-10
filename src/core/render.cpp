@@ -102,6 +102,8 @@ void render_section(RenderSectionArgs &args) {
   for (int s_j = 0; s_j < cam.sqrt_spp; ++s_j) {
     for (int s_i = 0; s_i < cam.sqrt_spp; ++s_i) {
       for (int j = end_row - 1; j >= start_row; --j) {
+        // Checked once per row: cheap, and a stop (viewer closing, Stop button) takes effect within a row.
+        if (Renderer::stop_rendering.load()) return;
         for (int i = 0; i < cam.image_width; ++i) {
           // color pixel_color(0, 0, 0);
           color pixel_color(0, 0, 0);
