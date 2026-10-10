@@ -18,6 +18,7 @@ void render_test();
 void sphere_test();
 void bvh_test();
 void random_test();
+void cli_test();
 
 // End-to-end tests
 void e2e_test();
@@ -46,6 +47,7 @@ int main(int argc, char** argv) {
   sphere_test();
   bvh_test();
   random_test();
+  cli_test();
 
   // E2E
   // e2e_test();

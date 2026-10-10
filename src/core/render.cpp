@@ -171,6 +171,10 @@ void render_section_uncap(RenderSectionArgs &args) {
 }
 
 void Renderer::render_scene(Scene scene, Image &image, std::atomic<int> *progress) {
+  // Derived camera fields (image_height, sqrt_spp, viewport) must be current. Callers set public fields and
+  // may forget initialize(); it only recomputes, so calling it again is harmless.
+  scene.cam.initialize();
+
   auto world_bvh = bvh_node(scene.world);
 
   film.initialize(scene.cam.image_width, scene.cam.image_height);

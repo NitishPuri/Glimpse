@@ -68,13 +68,12 @@ Obsidian vault (`/mnt/d/ObsidianVault`, use the obsidian-kb skill):
 
 ## Build & run
 
-Linux:
+Linux (same pattern as Glint):
 ```bash
-cmake -S . -B buildLinux -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build buildLinux
-./buildLinux/Glimpse_cli --scene 6        # index into Scene::SceneNames
-./buildLinux/Glimpse_tests                # all suites
-./buildLinux/Glimpse_tests "camera*"      # argv[1] is a boost.ut name filter
+./build.sh                            # Release into build/release (./build.sh debug -> build/debug)
+./run.sh cli --scene cornell_box      # runs from the repo root; CFG=debug selects the debug build
+./run.sh gui
+./run.sh tests "camera*"              # argv[1] is a boost.ut name filter; or: ctest --test-dir build/release
 ```
 Windows (old setup): `configure.bat` → `build.bat`; `cli.bat`, `gui.bat`, `test.bat <filter>`.
 

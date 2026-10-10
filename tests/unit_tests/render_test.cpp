@@ -48,6 +48,30 @@ void render_test() {
 
   // TODO: Fix this test
   "renderer"_test = [] {
+    // Regression (2026-10-10): Glimpse_cli never called cam.initialize(), so image_height stayed 0 and
+    // render_scene produced an all-black image. render_scene must initialise the camera itself.
+    "render_scene_initializes_camera"_test = [] {
+      Scene scene;
+      scene.cam.aspect_ratio = 2.0;
+      scene.cam.image_width = 8;  // image_height deliberately left at 0
+      scene.cam.samples_per_pixel = 1;
+      scene.cam.max_depth = 1;
+      scene.cam.defocus_angle = 0.0f;
+      scene.background = color(1, 1, 1);  // every camera ray misses, so every pixel is white
+      // One object behind the camera, because the BVH needs at least one primitive.
+      scene.world.add(make_shared<sphere>(point3(0, 0, 100), 0.1, make_shared<lambertian>(color(0.5, 0.5, 0.5))));
+
+      Image image(8, 4);
+      Renderer renderer;
+      renderer.render_scene(scene, image);
+
+      int lit = 0;
+      for (int j = 0; j < image.height; ++j)
+        for (int i = 0; i < image.width; ++i)
+          if (image.get(i, j).rgb[0] > 0) ++lit;
+      expect(lit == 32_i) << "every pixel should see the white background";
+    };
+
     skip / "render_scene"_test = [] {
       // Create renderer and image
       Renderer renderer;

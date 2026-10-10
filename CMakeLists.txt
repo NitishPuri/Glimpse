@@ -109,6 +109,7 @@ if(BUILD_TESTS)
         tests/unit_tests/render_test.cpp
         tests/unit_tests/sphere_test.cpp
         tests/unit_tests/bvh_node_test.cpp
+        tests/unit_tests/cli_test.cpp
 
         tests/e2e/e2e_test.cpp
         tests/e2e/test_scenes.h
