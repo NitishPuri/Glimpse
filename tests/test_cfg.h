@@ -4,6 +4,11 @@
 #include "boost/ut.hpp"  // import boost.ut;
 namespace ut = boost::ut;
 
+// The one runner every test file reports to. It must be `inline` and visible before any test file uses
+// ut::cfg, otherwise each file instantiates its own copy (ODR violation; GCC refuses to link, MSVC didn't).
+template <>
+inline auto ut::cfg<ut::override> = ut::runner<ut::reporter<ut::printer>>{};
+
 // namespace cfg {
 // class reporter : public ut::reporter<ut::printer> {
 //  public:

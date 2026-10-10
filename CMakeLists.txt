@@ -81,7 +81,6 @@ if(BUILD_GUI AND NOT LINUX)
 endif()
 
 # Tests
-# Does not work!!
 option(BUILD_TESTS "Build the tests" ON)
 if(BUILD_TESTS)    
     message(STATUS "Building tests")
@@ -99,7 +98,6 @@ if(BUILD_TESTS)
         tests/unit_tests/vec3_test.cpp
         tests/unit_tests/ray_test.cpp
         tests/unit_tests/aabb_test.cpp
-        tests/unit_tests/texture_test.cpp
         tests/unit_tests/texture_test.cpp
         tests/unit_tests/image_test.cpp
         tests/unit_tests/film_test.cpp
@@ -126,17 +124,9 @@ if(BUILD_TESTS)
         ${PROJECT_SOURCE_DIR}/ext
     )
 
-    add_test(
-        NAME GlimpseTests 
-        COMMAND Glimpse_tests
-        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-    )
-
-    # Add test properties to show output
-    set_tests_properties(GlimpseTests PROPERTIES
-       FAIL_REGULAR_EXPRESSION "FAILED"
-       PASS_REGULAR_EXPRESSION "Suite.*\\| 0 failed"
-    )
+    # boost.ut's runner calls std::exit(-1) when any assertion failed, so ctest can rely on the exit code.
+    # Run from the repo root: tests read ./res and write ./test_output.
+    add_test(NAME GlimpseTests COMMAND Glimpse_tests WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
 
 
