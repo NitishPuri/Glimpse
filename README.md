@@ -61,7 +61,7 @@ Windows (the original 2025 setup, Visual Studio 2022): `configure.bat`, `build.b
 
 ## Layout
 
-- `src/core/`: the renderer library: camera, BVH, materials, pdfs, scenes, `Renderer`.
+- `src/glimpse/`: the renderer library (camera, BVH, materials, pdfs, scenes, `Renderer`); small utilities in `src/glimpse/util/`.
 - `src/cli/`: `Glimpse_cli`, which renders a scene to an image file.
 - `src/gui/`: `Glimpse_gui`, a GLFW + ImGui viewer with progressive rendering.
 - `tests/`: boost.ut unit tests (`unit_tests/`) and end-to-end image tests (`e2e/`).

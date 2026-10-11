@@ -1,4 +1,4 @@
-#include "core/ray.h"
+#include "glimpse/ray.h"
 
 #include "../test_cfg.h"
 

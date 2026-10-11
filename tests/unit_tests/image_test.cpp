@@ -1,4 +1,4 @@
-#include "core/image.h"
+#include "glimpse/util/image.h"
 
 #include <iomanip>
 

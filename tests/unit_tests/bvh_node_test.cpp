@@ -1,7 +1,7 @@
-#include "core/hittables/bvh_node.h"
+#include "glimpse/hittables/bvh_node.h"
 
-#include "core/hittables/sphere.h"
-#include "core/material.h"
+#include "glimpse/hittables/sphere.h"
+#include "glimpse/material.h"
 
 //
 #include "../test_cfg.h"

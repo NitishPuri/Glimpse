@@ -1,4 +1,4 @@
-#include "core/interval.h"
+#include "glimpse/util/interval.h"
 
 #include "../test_cfg.h"
 

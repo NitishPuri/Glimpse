@@ -1,4 +1,4 @@
-#include "core/image.h"
+#include "glimpse/util/image.h"
 
 #ifdef _WIN32
 #define NOMINMAX

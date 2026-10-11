@@ -5,7 +5,7 @@
 #include "glad/glad.h"
 //
 #include "GLFW/glfw3.h"
-#include "core/logger.h"
+#include "glimpse/util/logger.h"
 
 struct GLResources {
   GLResources(Logger& logger) : logger(logger) {}

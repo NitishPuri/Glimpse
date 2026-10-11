@@ -1,6 +1,6 @@
-#include "core/hittables/sphere.h"
+#include "glimpse/hittables/sphere.h"
 
-#include "core/material.h"
+#include "glimpse/material.h"
 
 //
 #include "../test_cfg.h"

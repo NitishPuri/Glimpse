@@ -1,12 +1,12 @@
 #pragma once
 
-#include "core/camera.h"
-#include "core/hittables/hittable.h"
-#include "core/hittables/quad.h"
-#include "core/hittables/sphere.h"
-#include "core/material.h"
-#include "core/scenes.h"
-#include "core/vec3.h"
+#include "glimpse/camera.h"
+#include "glimpse/hittables/hittable.h"
+#include "glimpse/hittables/quad.h"
+#include "glimpse/hittables/sphere.h"
+#include "glimpse/material.h"
+#include "glimpse/scenes.h"
+#include "glimpse/util/vec3.h"
 
 // Simple scene with a single sphere
 inline Scene create_simple_sphere_scene() {

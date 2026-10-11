@@ -1,5 +1,5 @@
 
-#include "core/film.h"
+#include "glimpse/film.h"
 
 #include "../test_cfg.h"
 

@@ -4,10 +4,10 @@
 #include <future>
 #include <optional>
 
-#include "core/hittables/quad.h"
-#include "core/image.h"
-#include "core/render.h"
-#include "core/scenes.h"
+#include "glimpse/hittables/quad.h"
+#include "glimpse/util/image.h"
+#include "glimpse/render.h"
+#include "glimpse/scenes.h"
 
 using namespace glimpse;
 

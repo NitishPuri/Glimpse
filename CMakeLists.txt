@@ -10,8 +10,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 # Core library
-file(GLOB_RECURSE CORE_SOURCES ${PROJECT_SOURCE_DIR}/src/core/*.cpp)
-file(GLOB_RECURSE CORE_HEADERS ${PROJECT_SOURCE_DIR}/src/core/*.h)
+file(GLOB_RECURSE CORE_SOURCES ${PROJECT_SOURCE_DIR}/src/glimpse/*.cpp)
+file(GLOB_RECURSE CORE_HEADERS ${PROJECT_SOURCE_DIR}/src/glimpse/*.h)
 add_library(${NAME} ${CORE_SOURCES} ${CORE_HEADERS})
 target_include_directories(${NAME} PUBLIC
     ${PROJECT_SOURCE_DIR}/ext

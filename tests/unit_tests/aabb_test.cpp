@@ -1,4 +1,4 @@
-#include "core/aabb.h"
+#include "glimpse/util/aabb.h"
 
 #include "../test_cfg.h"
 

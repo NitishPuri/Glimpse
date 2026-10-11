@@ -1,4 +1,4 @@
-#include "core/pdf.h"
+#include "glimpse/pdf.h"
 
 #include "../test_cfg.h"
 

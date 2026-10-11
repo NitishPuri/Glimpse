@@ -3,9 +3,9 @@
 #include <future>
 #include <string>
 
-#include "core/image.h"
-#include "core/render.h"
-#include "core/scenes.h"
+#include "glimpse/util/image.h"
+#include "glimpse/render.h"
+#include "glimpse/scenes.h"
 #include "print_ascii_image.h"
 #include "test_scenes.h"
 

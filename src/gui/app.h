@@ -1,7 +1,7 @@
 #pragma once
 
 #include "config.h"
-#include "core/logger.h"
+#include "glimpse/util/logger.h"
 #include "gl_res.h"
 #include "raytracer.h"
 #include "ui.h"

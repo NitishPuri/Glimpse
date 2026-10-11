@@ -1,9 +1,9 @@
-#include "core/cli_options.h"
+#include "glimpse/util/cli_options.h"
 
 #include <initializer_list>
 #include <vector>
 
-#include "core/scenes.h"
+#include "glimpse/scenes.h"
 
 //
 #include "../test_cfg.h"

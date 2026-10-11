@@ -1,11 +1,11 @@
-#include "core/render.h"
+#include "glimpse/render.h"
 
-#include "core/hittables/bvh_node.h"
-#include "core/hittables/sphere.h"
-#include "core/image.h"
-#include "core/material.h"
-#include "core/ray.h"
-#include "core/vec3.h"
+#include "glimpse/hittables/bvh_node.h"
+#include "glimpse/hittables/sphere.h"
+#include "glimpse/util/image.h"
+#include "glimpse/material.h"
+#include "glimpse/ray.h"
+#include "glimpse/util/vec3.h"
 
 //
 #include "../test_cfg.h"

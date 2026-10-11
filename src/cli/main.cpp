@@ -2,10 +2,10 @@
 #include <filesystem>
 #include <iostream>
 
-#include "core/cli_options.h"
-#include "core/glimpse.h"
-#include "core/logger.h"
-#include "core/render.h"
+#include "glimpse/util/cli_options.h"
+#include "glimpse/glimpse.h"
+#include "glimpse/util/logger.h"
+#include "glimpse/render.h"
 
 using namespace glimpse;
 

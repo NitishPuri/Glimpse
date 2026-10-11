@@ -1,4 +1,4 @@
-#include "core/camera.h"
+#include "glimpse/camera.h"
 
 #include "../test_cfg.h"
 

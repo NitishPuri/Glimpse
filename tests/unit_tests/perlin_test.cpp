@@ -1,4 +1,4 @@
-#include "core/perlin.h"
+#include "glimpse/perlin.h"
 
 #include "../test_cfg.h"
 
