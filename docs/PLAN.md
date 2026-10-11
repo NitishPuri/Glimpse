@@ -108,7 +108,7 @@ reorder, drop or swap whatever turned out to be (un)interesting.
       `.gitattributes` for line endings (`README.md`/`ROADMAP.md` are CRLF today, new files are LF). Add
       `refs/` and `results/` to `.gitignore` if they are missing.
 - [x] ~~Optional: re-enable a Linux CI job~~ skipped (2026-10-11): local `ctest` is enough for now.
-- [ ] **Structure review** (added 2026-10-11). Glimpse was built by hand in 2025 without today's goals, while
+- [x] **Structure review** (added 2026-10-11, done the same day; see `docs/structure.md`). Glimpse was built by hand in 2025 without today's goals, while
       Glint was started fresh with them. Before Stage 1 builds on the current layout, check how well it fits:
   - **Folders and file names:** do `src/core`, `hittables/`, the header-heavy files and the scene registry
     scale to 29 techniques? Where do per-technique code, notes, test scenes and references live? (Glint has

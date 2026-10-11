@@ -77,6 +77,10 @@ Dependencies: [stb](https://github.com/nothings/stb), [boost.ut](https://github.
 
 ## Status
 
-Stage 0 (foundation on Linux) is done. The tests, CLI, viewer and build scripts all work on Linux, and several
-2025 bugs are fixed: upside-down images, the CLI's black renders, a crash on Save, and a hang on close. The
-structure review comes next, then Stage 1, measuring (float output, reference renders, error metrics).
+**Stage 0 (foundation) is done** (2026-10-11):
+- The tests, CLI, viewer and build scripts work on Linux.
+- Several 2025 bugs are fixed: upside-down images, the CLI's black renders, a crash on Save, a hang on close.
+- The structure review is applied: `src/glimpse/` with a pbrt-like file split, pbrt/Glint naming, a scene registry,
+  self-registering tests, file headers, diagram tooling.
+
+Next: Stage 1, measuring (float output, reference renders, error metrics).

@@ -84,7 +84,7 @@ Linux (same pattern as Glint):
 ```
 Windows (old setup): `configure.bat` → `build.bat`; `cli.bat`, `gui.bat`, `test.bat <filter>`.
 
-State (Stage 0, 2026-10-11): the library, CLI, viewer and tests build with GCC 11, and the tests pass under ctest.
+State (**Stage 0 done**, 2026-10-11; next is Stage 1, technique 01 `float_output`): the library, CLI, viewer and tests build with GCC 11, and the tests pass under ctest.
 - CLI flags: `--scene <name|index> --spp --width --depth --seed --out --list-scenes --help`.
   - `--spp` is rounded down to a square (the stratified grid is `sqrtSpp × sqrtSpp`).
   - `--seed` is reproducible on one machine, but not across thread counts (technique 03).
