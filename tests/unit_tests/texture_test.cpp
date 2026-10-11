@@ -4,7 +4,7 @@
 
 using namespace glimpse;
 
-void texture_test() {
+static ut::suite<"texture"> texture_suite = [] {
   using namespace boost::ut;
   using namespace std;
 
@@ -66,4 +66,4 @@ void texture_test() {
     expect(c1.y() <= 1.0_d);
     expect(c1.z() <= 1.0_d);
   };
-}
+};

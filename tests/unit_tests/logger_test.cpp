@@ -9,7 +9,7 @@
 
 using namespace glimpse;
 
-void logger_test() {
+static ut::suite<"logger"> logger_suite = [] {
   using namespace boost::ut;
   namespace fs = std::filesystem;
 
@@ -34,4 +34,4 @@ void logger_test() {
       expect(line.find("hello 42") != std::string::npos) << line;
     };
   };
-}
+};

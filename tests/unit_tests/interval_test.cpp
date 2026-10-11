@@ -4,7 +4,7 @@
 
 using namespace glimpse;
 
-void interval_test() {
+static ut::suite<"interval"> interval_suite = [] {
   using namespace boost::ut;
 
   "interval"_test = [] {
@@ -111,4 +111,4 @@ void interval_test() {
       expect(negative_size.size() == -3.0_d);
     };
   };
-}
+};

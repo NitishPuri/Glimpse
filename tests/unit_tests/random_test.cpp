@@ -6,7 +6,7 @@
 #include "../test_cfg.h"
 using namespace glimpse;
 
-void random_test() {
+static ut::suite<"random"> random_suite = [] {
   using namespace boost::ut;
 
   "random_seed"_test = [] {
@@ -97,4 +97,4 @@ void random_test() {
     // This is a probabilistic test, so it might occasionally fail
     expect(seq1_first != seq2_first) << "Using seed 0 should give different sequences";
   };
-}
+};

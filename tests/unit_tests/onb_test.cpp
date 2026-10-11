@@ -4,7 +4,7 @@
 
 using namespace glimpse;
 
-void onb_test() {
+static ut::suite<"onb"> onb_suite = [] {
   using namespace boost::ut;
 
   "onb"_test = [] {
@@ -91,4 +91,4 @@ void onb_test() {
       }
     };
   };
-}
+};

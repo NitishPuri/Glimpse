@@ -8,7 +8,7 @@
 
 using namespace glimpse;
 
-void registry_test() {
+static ut::suite<"registry"> registry_suite = [] {
   using namespace boost::ut;
 
   "scene_registry"_test = [] {
@@ -36,4 +36,4 @@ void registry_test() {
       expect(findScene("no_such_scene") == nullptr);
     };
   };
-}
+};

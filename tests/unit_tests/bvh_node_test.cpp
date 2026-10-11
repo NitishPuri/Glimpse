@@ -8,7 +8,7 @@
 
 using namespace glimpse;
 
-void bvh_test() {
+static ut::suite<"bvh"> bvh_suite = [] {
   using namespace boost::ut;
 
   "bvh_node"_test = [] {
@@ -132,4 +132,4 @@ void bvh_test() {
       expect(test_bvh_node::test_box_z_compare(sphere4, sphere1) == false);
     };
   };
-}
+};

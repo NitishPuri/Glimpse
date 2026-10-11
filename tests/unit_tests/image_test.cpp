@@ -10,7 +10,7 @@ using namespace glimpse;
 bool approximately(float a, float b, float epsilon = 0.01f) { return std::abs(a - b) <= epsilon; }
 constexpr bool log_to_console = false;
 
-void image_test() {
+static ut::suite<"image"> image_suite = [] {
   using namespace boost::ut;
 
   "Image.construction"_test = [] {
@@ -113,7 +113,7 @@ void image_test() {
   };
 };
 
-void test_image_roundtrip() {
+static ut::suite<"image_roundtrip"> image_roundtrip_suite = [] {
   using namespace boost::ut;
 
   test("image_initialization") = [] {
@@ -378,4 +378,4 @@ void test_image_roundtrip() {
     expect(loaded.is_valid());
     expect(diff_count < 1_i) << "Too many pixel differences: " << diff_count;
   };
-}
+};

@@ -18,7 +18,7 @@ ParseResult parse(std::initializer_list<const char*> args) {
 }
 }  // namespace
 
-void cli_test() {
+static ut::suite<"cli"> cli_suite = [] {
   using namespace boost::ut;
 
   "cli"_test = [] {
@@ -115,4 +115,4 @@ void cli_test() {
 
     "default_output_path"_test = [] { expect(default_output_path("earth") == "results/earth.png"); };
   };
-}
+};

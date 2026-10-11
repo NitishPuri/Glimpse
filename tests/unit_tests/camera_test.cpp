@@ -4,7 +4,7 @@
 
 using namespace glimpse;
 
-void camera_test() {
+static ut::suite<"camera"> camera_suite = [] {
   using namespace boost::ut;
 
   "camera"_test = [] {
@@ -91,4 +91,4 @@ void camera_test() {
       expect((cam.lookfrom - cam.lookat).length() == (pre_orbit_lookfrom - cam.lookat).length());
     };
   };
-}
+};

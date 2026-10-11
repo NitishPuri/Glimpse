@@ -4,7 +4,7 @@
 
 using namespace glimpse;
 
-void pdf_test() {
+static ut::suite<"pdf"> pdf_suite = [] {
   using namespace boost::ut;
 
   "pdf"_test = [] {
@@ -104,4 +104,4 @@ void pdf_test() {
       expect(got_cosine_sample) << "Mixture PDF should generate samples from second component";
     };
   };
-}
+};

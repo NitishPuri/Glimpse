@@ -5,7 +5,7 @@
 
 using namespace glimpse;
 
-void film_test() {
+static ut::suite<"film"> film_suite = [] {
   using namespace boost::ut;
 
   "film.construction"_test = [] {
@@ -77,4 +77,4 @@ void film_test() {
     f.add_sample(1, 1, vec3(1.0f, 1.0f, 1.0f));
     expect(f.get_sample_count(1, 1) == 1_i);
   };
-}
+};

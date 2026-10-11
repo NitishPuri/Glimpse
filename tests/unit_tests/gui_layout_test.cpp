@@ -5,7 +5,7 @@
 
 using namespace glimpse::gui;
 
-void gui_layout_test() {
+static ut::suite<"gui_layout"> gui_layout_suite = [] {
   using namespace boost::ut;
 
   "gui_layout"_test = [] {
@@ -43,4 +43,4 @@ void gui_layout_test() {
       expect(s.w == 1800_i && s.h == 1600_i);
     };
   };
-}
+};

@@ -43,7 +43,7 @@ Scene create_test_scene() {
   return scene;
 }
 
-void render_test() {
+static ut::suite<"render"> render_suite = [] {
   using namespace boost::ut;
 
   // TODO: Fix this test
@@ -188,4 +188,4 @@ void render_test() {
       expect(!Renderer::stop_rendering.load()) << "the flag is cleared after the render returns";
     };
   };
-}
+};

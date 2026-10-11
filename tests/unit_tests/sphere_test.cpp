@@ -7,7 +7,7 @@
 
 using namespace glimpse;
 
-void sphere_test() {
+static ut::suite<"sphere"> sphere_suite = [] {
   using namespace boost::ut;
 
   "sphere"_test = [] {
@@ -201,4 +201,4 @@ void sphere_test() {
       }
     };
   };
-}
+};

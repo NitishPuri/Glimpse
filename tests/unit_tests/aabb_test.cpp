@@ -4,7 +4,7 @@
 
 using namespace glimpse;
 
-void aabb_test() {
+static ut::suite<"aabb"> aabb_suite = [] {
   using namespace boost::ut;
 
   "aabb"_test = [] {
@@ -132,4 +132,4 @@ void aabb_test() {
       expect(box.axis_interval(2).max == 6.0_d);
     }
   };
-}
+};

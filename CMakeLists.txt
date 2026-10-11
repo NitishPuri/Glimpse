@@ -76,33 +76,9 @@ if(BUILD_TESTS)
     add_library(boost_ut INTERFACE)
     target_include_directories(boost_ut INTERFACE ${PROJECT_SOURCE_DIR}/ext)
 
-    add_executable(Glimpse_tests 
-        tests/test_cfg.h
-        tests/testing.cpp
-
-        tests/unit_tests/random_test.cpp
-        tests/unit_tests/vec3_test.cpp
-        tests/unit_tests/ray_test.cpp
-        tests/unit_tests/aabb_test.cpp
-        tests/unit_tests/texture_test.cpp
-        tests/unit_tests/image_test.cpp
-        tests/unit_tests/film_test.cpp
-        tests/unit_tests/interval_test.cpp
-        tests/unit_tests/onb_test.cpp
-        tests/unit_tests/pdf_test.cpp
-        tests/unit_tests/perlin_test.cpp
-        tests/unit_tests/camera_test.cpp
-        tests/unit_tests/render_test.cpp
-        tests/unit_tests/sphere_test.cpp
-        tests/unit_tests/bvh_node_test.cpp
-        tests/unit_tests/cli_test.cpp
-        tests/unit_tests/gui_layout_test.cpp
-        tests/unit_tests/logger_test.cpp
-        tests/unit_tests/registry_test.cpp
-
-        tests/e2e/e2e_test.cpp
-        tests/e2e/test_scenes.h
-    )
+    # Test files register their own suites, so a new file only has to exist (re-run configure to pick it up).
+    file(GLOB TEST_SOURCES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/tests/unit_tests/*.cpp ${PROJECT_SOURCE_DIR}/tests/e2e/*.cpp)
+    add_executable(Glimpse_tests tests/testing.cpp tests/test_cfg.h ${TEST_SOURCES})
     target_link_libraries(Glimpse_tests 
         PRIVATE
         ${NAME}
@@ -114,7 +90,7 @@ if(BUILD_TESTS)
         ${PROJECT_SOURCE_DIR}/ext
     )
 
-    # boost.ut's runner calls std::exit(-1) when any assertion failed, so ctest can rely on the exit code.
+    # main() returns 1 when any assertion failed, so ctest relies on the exit code.
     # Tests write their scratch files into the build tree, and run from the repo root like the apps (./res).
     target_compile_definitions(Glimpse_tests PRIVATE GLIMPSE_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test_output")
     add_test(NAME GlimpseTests COMMAND Glimpse_tests WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

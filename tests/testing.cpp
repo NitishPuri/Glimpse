@@ -4,64 +4,18 @@
 
 #include <filesystem>
 
-void vec3_test();
-void ray_test();
-void film_test();
-void aabb_test();
-void texture_test();
-void image_test();
-void test_image_roundtrip();
-void interval_test();
-void onb_test();
-void pdf_test();
-void perlin_test();
-void camera_test();
-void render_test();
-void sphere_test();
-void bvh_test();
-void random_test();
-void cli_test();
-void gui_layout_test();
-void logger_test();
-void registry_test();
-
-// End-to-end tests
-void e2e_test();
+// Every test file registers its suites itself (`static ut::suite<"name"> ... = [] { ... };`), so there is no list
+// to keep in sync here. The e2e suite (tests/e2e/) is not registered: it is rewritten in Stage 1 (01-03).
 
 int main(int argc, char** argv) {
-  // setup filter
+  // argv[1] filters top-level test names, e.g. "camera*".
   const auto filter = argc > 1 ? argv[1] : "*";
   ut::cfg<ut::override> = ut::options{.filter = filter};
 
   // Scratch space for tests that write files, inside the build tree (see CMakeLists.txt).
   std::filesystem::create_directories(GLIMPSE_TEST_OUTPUT_DIR);
-  // ut::cfg<ut::runner<ut::reporter<ut::printer>>> = ut::options{.filter = filter};
-  // ut::runner<ut::reporter<ut::printer>> = ut::options{.filter = filter};
 
-  // Unit Tests
-  vec3_test();
-  ray_test();
-  film_test();
-  aabb_test();
-  texture_test();
-  image_test();
-  test_image_roundtrip();
-  interval_test();
-  onb_test();
-  pdf_test();
-  perlin_test();
-  camera_test();
-  render_test();
-  sphere_test();
-  bvh_test();
-  random_test();
-  cli_test();
-  gui_layout_test();
-  logger_test();
-  registry_test();
-
-  // E2E
-  // e2e_test();
-
-  return 0;
+  // Run all registered suites now (after the filter is set). The runner prints the summary when it is destroyed.
+  const bool failed = ut::cfg<ut::override>.run();
+  return failed ? 1 : 0;
 }

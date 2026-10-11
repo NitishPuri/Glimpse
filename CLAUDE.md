@@ -141,11 +141,11 @@ while the move is in progress.
 
 ## Tests
 
-- boost.ut (`ext/boost/ut.hpp`, header only, `BOOST_UT_DISABLE_MODULE`). Each file in `tests/unit_tests/`
-  defines a `void <name>_test()` function. `tests/testing.cpp` forward-declares and calls every one of them.
-- Test sources are **listed explicitly** in CMakeLists (no glob). A new test file needs a CMake entry, a
-  forward declaration and a call in `testing.cpp`.
-- `tests/e2e/` renders small scenes (`test_scenes.h`) with a fixed seed and compares them against
+- boost.ut (`ext/boost/ut.hpp`, header only, `BOOST_UT_DISABLE_MODULE`). Each file in `tests/unit_tests/` registers
+  its own suites: `static ut::suite<"name"> name_suite = [] { using namespace boost::ut; ... };`. CMake globs the test
+  files (re-run configure after adding one), and `tests/testing.cpp` only sets the filter and calls `run()`.
+- Tests that write files use `test_output_path("x.png")` (`build/<cfg>/test_output`).
+- `tests/e2e/` (compiled, but **not registered**, so it doesn't run) renders small scenes (`test_scenes.h`) with a fixed seed and compares them against
   `tests/e2e/reference_images/` (gitignored, so they must be generated locally) with a per-channel tolerance.
   The ROADMAP notes these comparisons are flaky because of 8-bit encoding loss and threading. The planned
   fix is float output for comparisons.

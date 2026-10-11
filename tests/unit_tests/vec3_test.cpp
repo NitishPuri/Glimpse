@@ -4,7 +4,7 @@
 
 using namespace glimpse;
 
-void vec3_test() {
+static ut::suite<"vec3"> vec3_suite = [] {
   using namespace boost::ut;
 
   "vec3"_test = [] {

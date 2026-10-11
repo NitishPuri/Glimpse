@@ -4,7 +4,7 @@
 
 using namespace glimpse;
 
-void perlin_test() {
+static ut::suite<"perlin"> perlin_suite = [] {
   using namespace boost::ut;
 
   "perlin"_test = [] {
@@ -161,4 +161,4 @@ void perlin_test() {
       // lower than halfway between them, but it's not guaranteed
     };
   };
-}
+};

@@ -4,7 +4,7 @@
 
 using namespace glimpse;
 
-void ray_test() {
+static ut::suite<"ray"> ray_suite = [] {
   using namespace boost::ut;
 
   "ray"_test = [] {
@@ -45,4 +45,4 @@ void ray_test() {
       expect(pt.z() == 0.0_d);
     };
   };
-}
+};
