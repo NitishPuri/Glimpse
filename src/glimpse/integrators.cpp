@@ -50,9 +50,6 @@ Color rayColor(const Ray &r, const Color &background, const Hittable &world, int
   }
 
   return background;
-  // vec3 unitDirection = unitVector(r.direction());
-  // auto t = 0.5 * (unitDirection.y() + 1.0);
-  // return (1.0 - t) * color(1.0, 1.0, 1.0) + t * background;
 }
 
 }  // namespace glimpse

@@ -5,16 +5,14 @@
 
 namespace glimpse {
 
-// TODO: Sampling floats directly from texture doesnt work,
-// it kind of does, but there are it seems bands of missing data.
-//  should figure out why that happens.
+// Known issue (backlog): sampling the float pixels directly shows bands of missing data, so textures read the
+// 8-bit pixels for now.
 constexpr bool USE_FLOAT_PIXELS = false;
 
 ImageTexture::ImageTexture(const char *filename) : image(std::make_shared<Image>(filename)) {}
 
 Color ImageTexture::value(double u, double v, const Vec3 &p) const {
   // If we have no texture data, then return solid cyan as a debugging aid.
-  // if (image == nullptr || image->height() <= 0) return color(0, 1, 1);
   if (!image || !image->isValid()) return Color(0, 1, 1);
 
   // Clamp input texture coordinates to [0,1] x [1,0]
@@ -22,10 +20,7 @@ Color ImageTexture::value(double u, double v, const Vec3 &p) const {
   v = 1.0 - Interval(0, 1).clamp(v);  // Flip V to image coordinates
 
   // Sampling from texture.
-  // TODO:  Here we should consider at least linear filtering, but we are not doing it for now.
-  // Should be a switch to visualize differences.
-  // Or should we, ? since we are anyways doing random sampling!
-  // Still should see effect of linear filtering here.
+  // Nearest-neighbour lookup; filtering (pbrt §10.4) is in the backlog.
   auto i = std::min(static_cast<int>(u * image->width), image->width - 1);
   auto j = std::min(static_cast<int>(v * image->height), image->height - 1);
 

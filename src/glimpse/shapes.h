@@ -109,29 +109,6 @@ class Sphere : public Hittable {
   }
 };
 
-class MovingSphere : public Hittable {
- public:
-  MovingSphere() {}
-  MovingSphere(Point3 cen0, Point3 cen1, double r, shared_ptr<Material> m)
-      : center{cen0, cen1 - cen0}, radius{r}, matPtr{m} {
-    auto rvec = Vec3(radius, radius, radius);
-    AABB box1(center.at(0) - rvec, center.at(0) + rvec);
-    AABB box2(center.at(1) - rvec, center.at(1) + rvec);
-    bbox = AABB(box1, box2);
-  }
-
-  bool hit(const Ray &r, Interval rayT, HitRecord &rec) const override;
-
-  AABB boundingBox() const override { return bbox; }
-
- public:
-  Ray center;
-  double time0{}, time1{};
-  double radius{};
-  AABB bbox;
-  shared_ptr<Material> matPtr;
-};
-
 class Quad : public Hittable {
  public:
   Quad(const Point3& Q, const Vec3& u, const Vec3& v, shared_ptr<Material> mat) : Q(Q), u(u), v(v), mat(mat) {

@@ -17,10 +17,6 @@ Scene directionsTest() {
   objects.add(make_shared<Sphere>(Point3(0, 10, 0), 0.5, make_shared<Lambertian>(Color(0.2, 0.8, 0.8))));
   objects.add(make_shared<Sphere>(Point3(0, -10, 0), 0.5, make_shared<Lambertian>(Color(0.2, 0.2, 0.8))));
 
-  // objects.add(
-  //     make_shared<sphere>(point3(0, -100.5, -1), 100,
-  //                         make_shared<lambertian>(color(0.8, 0.8, 0.0))));
-
   Scene scene;
   scene.world = objects;
   scene.background = Color(0.7, 0.8, 1.0);
@@ -68,10 +64,8 @@ Scene materialShowcase() {
   objects.add(make_shared<Sphere>(Point3(-4, 2, 0), 1.4, make_shared<Dielectric>(1.0 / 1.33)));
 
   // bouncing balls
-  objects.add(make_shared<MovingSphere>(Point3(-8, 2, 2), Point3(-8, 2.2, 2), 2,
-                                         make_shared<Metal>(Color(0.6, 0.2, 0.8), 0.04)));
-
-  // TODO: add light
+  objects.add(make_shared<Sphere>(Point3(-8, 2, 2), Point3(-8, 2.2, 2), 2,
+                                   make_shared<Metal>(Color(0.6, 0.2, 0.8), 0.04)));
 
   // ground
   objects.add(make_shared<Sphere>(Point3(0, -1000, 0), 1000, make_shared<Lambertian>(Color(0.8, 0.0, 0.8))));
@@ -88,27 +82,10 @@ Scene materialShowcase() {
 
 Scene untitled1() {
   HittableList objects;
-  HittableList lightsList;
 
-  // // diffuse
+  // diffuse
   objects.add(make_shared<Sphere>(Point3(-4, 2, -4), 2, make_shared<Lambertian>(Color(0.5, 0.8, 0.7))));
   objects.add(make_shared<Sphere>(Point3(2, 2, -6), 2, make_shared<Lambertian>(make_shared<NoiseTexture>(4))));
-
-  // // metal
-  // objects.add(make_shared<sphere>(point3(5, 2, -3), 2, make_shared<metal>(color(0.6, 0.2, 0.8), 0.2)));
-  // objects.add(make_shared<sphere>(point3(-8, 2, -4), 2, make_shared<metal>(color(0.3, 0.5, 0.8), 0.01)));
-
-  // // // "air bubble"
-  // objects.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<dielectric>(1.5)));
-  // objects.add(make_shared<sphere>(point3(0, 2, 0), 1.95, make_shared<dielectric>(1.0 / 1.5)));
-
-  // // glass sphere
-  // objects.add(make_shared<sphere>(point3(-4, 2, 0), 2, make_shared<dielectric>(1.33)));
-  // objects.add(make_shared<sphere>(point3(-4, 2, 0), 1.4, make_shared<dielectric>(1.0 / 1.33)));
-
-  // // bouncing balls
-  // objects.add(make_shared<moving_sphere>(point3(-8, 2, 2), point3(-8, 2.2, 2), 2,
-  //                                        make_shared<metal>(color(0.6, 0.2, 0.8), 0.04)));
 
   // Giant Mirrors!
   shared_ptr<Material> aluminium = make_shared<Metal>(Color(0.8, 0.85, 0.88), 0.0);
@@ -117,26 +94,18 @@ Scene untitled1() {
   objects.add(giantMirror);
 
   for (int i = 0; i < 13; ++i) {
-    Color c = Color::random();
-    // noise_texture nt(4);
-    // TODO: add light
-    // auto light1 = make_shared<sphere>(point3(5 * (i + 1), 2, -4), 2, make_shared<diffuse_light>(color(0.1, 0.9,
-    // 0.4)));
     auto light1 = make_shared<Sphere>(Point3(5 * (i + 1), 2 + 2 * std::sin(i * 0.01), -4 + +10 * std::sin(i * 0.01)),
                                        2, make_shared<DiffuseLight>(nt));
     objects.add(light1);
-    // lightsList.add(light1);
   }
 
   // ground
   auto pertext = make_shared<NoiseTexture>(10, Color(.8, .4, .2));
   const auto groundSize = 10000;
   objects.add(make_shared<Sphere>(Point3(0, -groundSize, 0), groundSize, make_shared<Lambertian>(pertext)));
-  // objects.add(make_shared<sphere>(point3(0, 0, 0), groundSize, make_shared<lambertian>(pertext)));
 
   Scene scene;
   scene.world = objects;
-  // scene.background = color(0.3, 0.03, 0.4);
   scene.background = Color(0.3, 0.03, 0.4);
   scene.cam.samplesPerPixel = 5;
   scene.cam.lookfrom = Point3(0, 7, 25);

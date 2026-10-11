@@ -29,10 +29,6 @@ Scene cornellBox() {
   box1 = make_shared<Translate>(box1, Vec3(265, 0, 295));
   world.add(box1);
 
-  // Glass Sphere
-  // auto glass = make_shared<dielectric>(1.5);
-  // world.add(make_shared<sphere>(point3(190, 90, 190), 90, glass));
-
   shared_ptr<Hittable> box2 = box(Point3(0, 0, 0), Point3(165, 165, 165), white);
   box2 = make_shared<RotateY>(box2, -18);
   box2 = make_shared<Translate>(box2, Vec3(130, 0, 65));
@@ -76,12 +72,10 @@ Scene cornellSmoke() {
   shared_ptr<Hittable> box1 = box(Point3(0, 0, 0), Point3(165, 330, 165), white);
   box1 = make_shared<RotateY>(box1, 15);
   box1 = make_shared<Translate>(box1, Vec3(265, 0, 295));
-  // objects.add(box1);
 
   shared_ptr<Hittable> box2 = box(Point3(0, 0, 0), Point3(165, 165, 165), white);
   box2 = make_shared<RotateY>(box2, -18);
   box2 = make_shared<Translate>(box2, Vec3(130, 0, 65));
-  // objects.add(box2);
 
   objects.add(make_shared<ConstantMedium>(box1, 0.01, Color(0, 0, 0)));
   objects.add(make_shared<ConstantMedium>(box2, 0.01, Color(1, 1, 1)));

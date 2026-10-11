@@ -75,12 +75,7 @@ void Image::set(int x, int y, const ImageColor& c) {
 
 // Float-based getters and setters
 Color Image::getFloat(int x, int y) const {
-  if (!isValid()) {
-    // r = 0.0f;
-    // g = 0.0f;
-    // b = 0.0f;
-    return {};
-  }
+  if (!isValid()) return {};
 
   clampCoordinates(x, y);
   int idx = getIndex(x, y);
@@ -112,12 +107,6 @@ std::unique_ptr<StbImageData> Image::loadStbImage(const std::string& filename) {
     std::cerr << "Failed to load image: " << stbi_failure_reason() << std::endl;
     return result;
   }
-
-  // TODO: Using float data causes differences in read write loopback tests
-  // Either remove float path or fix the issues.
-  //  Also load float data for precision
-  //  result->floatData =
-  //      stbi_loadf(filename.c_str(), &result->width, &result->height, &result->channels, bytesPerPixel);
 
   return result;
 }

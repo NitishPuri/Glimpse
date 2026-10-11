@@ -24,8 +24,7 @@ class ImageColor {
   ImageColor(uchar r, uchar g, uchar b) : rgb{r, g, b} {}
   ImageColor(int r, int g, int b) : rgb{static_cast<uchar>(r), static_cast<uchar>(g), static_cast<uchar>(b)} {}
 
-  // Add constructor from float values
-  // ImageColor(float r, float g, float b) {
+  // Float channels in [0, 1], clamped and quantised to 8 bits.
   ImageColor(float r, float g, float b) {
     rgb[0] = floatToByte(r);
     rgb[1] = floatToByte(g);
@@ -35,7 +34,6 @@ class ImageColor {
  private:
   // Helper function to convert float to byte
   static uchar floatToByte(float value) {
-    // value = linearToGamma(value);
     if (value <= 0.0f) return 0;
     if (value >= 1.0f) return 255;
     return static_cast<uchar>(256.0f * value);

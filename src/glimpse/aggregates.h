@@ -41,7 +41,6 @@ class HittableList : public Hittable {
   AABB boundingBox() const override { return bbox; }
 
   double pdfValue(const Point3& origin, const Vec3& direction) const override {
-    // ASSERT(objects.size() > 0);
     if (objects.empty()) return 0.0;
     auto weight = 1.0 / objects.size();
     auto sum = 0.0;
@@ -52,9 +51,7 @@ class HittableList : public Hittable {
   }
 
   Vec3 random(const Point3& origin) const override {
-    // ASSERT(objects.size() > 0);
     if (objects.empty()) return Vec3(1, 0, 0);
-    // if (objects.empty()) return vec3(0, 0, 0);
     auto intSize = int(objects.size());
     return objects[randomInt(0, intSize - 1)]->random(origin);
   }

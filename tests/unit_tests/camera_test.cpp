@@ -1,4 +1,5 @@
 #include "glimpse/camera.h"
+#include "gui/camera_controls.h"
 
 #include "../test_cfg.h"
 
@@ -75,7 +76,7 @@ static ut::suite<"camera"> cameraSuite = [] {
       cam.initialize();
 
       // Test fly mode
-      cam.fly(1.0, 0.0);  // Move right
+      glimpse::gui::fly(cam, 1.0, 0.0);  // Move right
       expect(cam.lookfrom.x() > originalLookfrom.x());
       expect(cam.lookat.x() > originalLookat.x());
 
@@ -84,7 +85,7 @@ static ut::suite<"camera"> cameraSuite = [] {
       cam.lookat = Point3(0, 0, 0);
       cam.initialize();
       Point3 preOrbitLookfrom = cam.lookfrom;
-      cam.orbit(0.1f, 0);  // Orbit around lookat
+      glimpse::gui::orbit(cam, 0.1f, 0);  // Orbit around lookat
 
       // Lookfrom should change but maintain same distance to lookat
       expect(cam.lookfrom != preOrbitLookfrom);

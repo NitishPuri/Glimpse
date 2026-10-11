@@ -25,7 +25,7 @@ Scene randomScene() {
           auto albedo = Color::random() * Color::random();
           sphereMaterial = make_shared<Lambertian>(albedo);
           auto center2 = center + Vec3(0, randomDouble(0, 0.5), 0);
-          world.add(make_shared<MovingSphere>(center, center2, 0.2, sphereMaterial));
+          world.add(make_shared<Sphere>(center, center2, 0.2, sphereMaterial));
         } else if (chooseMat < 0.95) {
           // metal
           auto albedo = Color::random(0.5, 1);
@@ -194,20 +194,17 @@ Scene finalScene() {
     }
   }
 
-  // std::cout << "Final scene,.. \n" << std::endl;
-
   HittableList world;
 
   world.add(make_shared<BVHNode>(boxes1));
 
   auto light = make_shared<DiffuseLight>(Color(7, 7, 7));
   world.add(make_shared<Quad>(Point3(123, 554, 147), Vec3(300, 0, 0), Vec3(0, 0, 265), light));
-  // objects.add(make_shared<xzRect>(123, 423, 147, 412, 554, light));
 
   auto center1 = Point3(400, 400, 200);
   auto center2 = center1 + Vec3(30, 0, 0);
   auto movingSphereMaterial = make_shared<Lambertian>(Color(0.7, 0.3, 0.1));
-  world.add(make_shared<MovingSphere>(center1, center2, 50, movingSphereMaterial));
+  world.add(make_shared<Sphere>(center1, center2, 50, movingSphereMaterial));
 
   world.add(make_shared<Sphere>(Point3(260, 150, 45), 50, make_shared<Dielectric>(1.5)));
   world.add(make_shared<Sphere>(Point3(0, 150, 145), 50, make_shared<Metal>(Color(0.8, 0.8, 0.9), 1.0)));

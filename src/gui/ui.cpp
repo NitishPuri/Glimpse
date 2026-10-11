@@ -3,6 +3,7 @@
 #include <filesystem>
 
 #include "app.h"
+#include "camera_controls.h"
 #include "layout.h"
 
 namespace glimpse::gui {
@@ -96,7 +97,6 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& glRes) {
 
   if (raytracer.status == RayTracer::RENDERING) {
     if (raytracer.scene.cam.uncappedSpp) {
-      // TODO: Implement this, add more stats
       auto avgSpp = raytracer.renderer->film.getAverageSampleCount();
       ImGui::Text("Average SPP ... %d", avgSpp);
       ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(0.0f, 0.0f), "Progress..");
@@ -110,7 +110,7 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& glRes) {
       ImGui::ProgressBar(progress, ImVec2(-1, 0), "Progress");
     }
 
-    // TODO: Should we conmtrol how frequent this happens?
+    // Uploaded every frame while rendering; the workers write the Image concurrently (see the viewer backlog).
     glRes.updateFramebuffer(raytracer.image.data());
 
   } else if (raytracer.status == RayTracer::DONE) {
@@ -163,17 +163,7 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& glRes) {
 
   ImGui::Checkbox("Auto Render", &params.autoRender);
 
-  //   static bool plotPdf = true;
-  //   if (ImGui::Button("Plot PDF")) {
-  //     plotPdf = true;
-  //   }
-
   ImGui::End();
-
-  // if (plotPdf) {
-  //   plotPdf();
-  //   //estimatePi();
-  // }
 }
 
 void UIRenderer::renderOutput(GLResources& glRes, RayTracer& raytracer) {
@@ -199,9 +189,9 @@ void UIRenderer::renderOutput(GLResources& glRes, RayTracer& raytracer) {
     float dy = mouseDelta.y * 0.005f;
 
     if (params.cameraMode == FLY) {
-      cam.fly(dx, dy);
+      fly(cam, dx, dy);
     } else {
-      cam.orbit(dx, dy);
+      orbit(cam, dx, dy);
     }
     cam.samplesPerPixel = 2;
     cam.maxDepth = 2;

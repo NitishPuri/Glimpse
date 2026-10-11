@@ -42,12 +42,12 @@ class Camera {
     // Calculate the vectors across the horizontal and down the vertical
     // viewport edges.
     horizontal = viewportWidth * u;
-    vertical = viewportHeight * v;  // TODO: should this be inverted ?
+    vertical = viewportHeight * v;  // +v is up: getRay(s, t) has t = 0 at the bottom edge. Image rows are top-down,
+                                    // so the renderer flips rows when it writes the Image (render.cpp).
 
     lowerLeftCorner = origin - horizontal / 2 - vertical / 2 - focusDistance * w;
 
     // Calculate the camera defocus disk basis vectors.
-    // defocusAngle = aperture;
     auto defocusRadius = focusDistance * std::tan(math::degreesToRadians(defocusAngle / 2));
     defocusDiskU = u * defocusRadius;
     defocusDiskV = v * defocusRadius;
@@ -69,35 +69,6 @@ class Camera {
     // Returns a random point in the camera defocus disk.
     auto p = randomInUnitDisk();
     return origin + (p[0] * defocusDiskU) + (p[1] * defocusDiskV);
-  }
-
-  // TODO: Move manipulator out of base camera!
-  void fly(float dx, float dy) {
-    Vec3 forward = unitVector(lookat - lookfrom);
-    Vec3 right = unitVector(cross(forward, vup));
-
-    lookfrom += forward * dy + right * dx;
-    lookat += forward * dy + right * dx;
-
-    initialize();
-  }
-
-  void orbit(float dx, float dy) {
-    Vec3 direction = lookfrom - lookat;
-    auto radius = direction.length();
-
-    auto theta = atan2(direction.z(), direction.x());
-    auto phi = acos(direction.y() / radius);
-
-    theta += dx;
-    phi = std::clamp(phi + dy, 0.1, 3.1);
-
-    direction[0] = radius * sin(phi) * cos(theta);
-    direction[1] = radius * cos(phi);
-    direction[2] = radius * sin(phi) * sin(theta);
-
-    lookfrom = lookat + direction;
-    initialize();
   }
 
  public:

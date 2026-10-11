@@ -69,7 +69,6 @@ void renderSection(RenderSectionArgs &args) {
           film.addSample(i, j, pixelColor);
           pixelColor = film.getSample(i, j);
           pixelColor = sqrt(pixelColor);  // gamma correction!
-          // image.set(i, j, ImageColor{float(pixelColor.x()), float(pixelColor.y()), float(pixelColor.z())});
           // j counts up from the bottom (camera v); Image rows count down from the top, like image files.
           image.setFloat(i, cam.imageHeight - 1 - j, static_cast<float>(pixelColor.x()),
                           static_cast<float>(pixelColor.y()), static_cast<float>(pixelColor.z()));
@@ -110,7 +109,6 @@ void renderSectionUncap(RenderSectionArgs &args) {
             film.addSample(i, j, pixelColor);
             pixelColor = film.getSample(i, j);
             pixelColor = sqrt(pixelColor);  // gamma correction!
-            // image.set(i, j, ImageColor{float(pixelColor.x()), float(pixelColor.y()), float(pixelColor.z())});
             // j counts up from the bottom (camera v); Image rows count down from the top, like image files.
             image.setFloat(i, cam.imageHeight - 1 - j, static_cast<float>(pixelColor.x()),
                             static_cast<float>(pixelColor.y()), static_cast<float>(pixelColor.z()));
@@ -132,9 +130,6 @@ void Renderer::renderScene(Scene scene, Image &image, std::atomic<int> *progress
   auto worldBvh = BVHNode(scene.world);
 
   film.initialize(scene.cam.imageWidth, scene.cam.imageHeight);
-
-  // Fixed seed!
-  // Random::setSeed(42);
 
 #ifdef MULTITHREADED
   const int numThreads = std::thread::hardware_concurrency();
@@ -161,17 +156,10 @@ void Renderer::renderScene(Scene scene, Image &image, std::atomic<int> *progress
     }
   }
 
-  // Wait for a signal to stop rendering before waiting for threaads to finish.
-  // while (!stopRequested.load()) {
-  //   std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  // }
-
   for (auto &f : futures) {
     f.get();
   }
 
-  // TODO: Implement __FUNCTION__ logging with logger!?..
-  // control logging from the logger class
   std::cout << __FUNCTION__ << " : All threads finished rendering..." << std::endl;
   Renderer::stopRequested = false;
 #else  // SINGLETHREADED

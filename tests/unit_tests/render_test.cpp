@@ -12,41 +12,9 @@
 
 using namespace glimpse;
 
-// TODO: This should written properly to handle multithreading,
-// and then should be extended to do end to end tests by producing image results with given scenes,
-// and comparing with expected results.
-
-// Helper function to create a simple test scene
-Scene createTestScene() {
-  Scene scene;
-
-  // Setup simple camera
-  scene.cam.imageWidth = 10;
-  scene.cam.imageHeight = 8;
-  scene.cam.sqrtSpp = 1;
-  scene.cam.recipSqrtSpp = 1.0;
-  scene.cam.maxDepth = 1;
-  scene.cam.lookfrom = Point3(0, 0, 0);
-  scene.cam.lookat = Point3(0, 0, -1);
-  scene.cam.vup = Vec3(0, 1, 0);
-  scene.cam.vfov = 90.0;
-  scene.cam.defocusAngle = 0.0;
-  scene.cam.initialize();
-
-  // Basic world with one sphere
-  auto mat = make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
-  scene.world.add(make_shared<Sphere>(Point3(0, 0, -1), 0.5, mat));
-
-  // Black background
-  scene.background = Color(0, 0, 0);
-
-  return scene;
-}
-
 static ut::suite<"render"> renderSuite = [] {
   using namespace boost::ut;
 
-  // TODO: Fix this test
   "renderer"_test = [] {
     // Regression (2026-10-10): Glimpse_cli never called cam.initialize(), so imageHeight stayed 0 and
     // renderScene produced an all-black image. renderScene must initialise the camera itself.
@@ -94,45 +62,6 @@ static ut::suite<"render"> renderSuite = [] {
       for (int j = 0; j < image.height; ++j)
         for (int i = 0; i < image.width; ++i) (j < image.height / 2 ? top : bottom) += image.get(i, j).rgb[0];
       expect(top > 0 and bottom == 0) << "light must land in the top rows: top=" << top << " bottom=" << bottom;
-    };
-
-    skip / "render_scene"_test = [] {
-      // Create renderer and image
-      Renderer renderer;
-      Image image(10, 8);
-
-      // Create a simple test scene
-      Scene scene = createTestScene();
-
-      // Test basic rendering
-      std::atomic<int> progress = 0;
-      renderer.renderScene(scene, image, &progress);
-
-      // here we need to wait for the rendering to finish
-      // and then check the image, or maybe let that be handled by e2e tests
-      // willl only check non image related stuff here, like progress and if the renderer launches stuff as expected,
-      // maybe also test if the renderer can stop rendering when trigegred
-      // and if the progress is updated correctly, or leave that to e2e as well?
-
-      // I think we should test the launch,  dispatch, progress and stopping logic here,
-      // and then test the rendering logic in e2e tests
-
-      // Check that rendering produced some non-black pixels
-      bool hasContent = false;
-      for (int j = 0; j < image.height; ++j) {
-        for (int i = 0; i < image.width; ++i) {
-          ImageColor pixel = image.get(i, j);
-          if (pixel.rgb[0] > 0 || pixel.rgb[1] > 0 || pixel.rgb[2] > 0) {
-            hasContent = true;
-            break;
-          }
-        }
-        if (hasContent) break;
-      }
-      expect(hasContent) << "Rendered image should contain some non-black pixels";
-
-      // Progress should have been updated
-      expect(progress.load() > 0_i) << "Progress counter should be incremented during rendering";
     };
 
     "ray_color"_test = [] {

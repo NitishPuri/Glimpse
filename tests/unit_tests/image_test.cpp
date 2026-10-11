@@ -89,7 +89,6 @@ static ut::suite<"image"> imageSuite = [] {
 
   "Image.set_multiple"_test = [] {
     Image img(3, 3);
-    // img.clear();
     img.initialize(img.width, img.height);
 
     // Set each pixel to a unique color

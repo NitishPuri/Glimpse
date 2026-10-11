@@ -91,8 +91,6 @@ struct RayTracer {
   void stopRendering() {
     if (traceFuture.has_value()) {
       Renderer::stopRequested = true;
-      // traceFuture->wait();
-      // traceFuture.reset();
     }
   }
 };

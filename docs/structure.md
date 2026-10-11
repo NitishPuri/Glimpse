@@ -132,8 +132,8 @@ src/glimpse/               the renderer library (include as "glimpse/<file>.h"),
 src/cli/main.cpp
 src/gui/                   namespace glimpse::gui; camera manipulators move here
 tests/                     test_<file>.cpp mirroring src/glimpse/, self-registering boost.ut suites
-docs/                      PLAN.md, structure.md, techniques/NN_name.md
-tools/                     scripts (compare/convergence plots arrive in Stage 1)
+docs/                      PLAN.md, structure.md, techniques/NN_name.md, diagrams/ (generated SVGs)
+tools/                     diagrams.py (+ requirements.txt, .venv), compare/convergence scripts from Stage 1
 cmake/                     deps.cmake (FetchContent: GLFW today, later OIDN, ...)
 ext/                       vendored single-file libraries (as in Glint's external/)
 res/                       assets
@@ -173,7 +173,12 @@ Each step is one reviewable chunk, and the tests stay green after each:
    the test files too)*
 6. **Naming** per D1, as a mechanical rename. *(done 2026-10-11, per the table in section 6: 431 identifiers +
    36 types in 69 files; 13/13 scenes render byte-identical with `--seed 7`)*
-7. **File-header comments** across the tree, plus resolving the TODOs and the commented-out code. Each item
+7. **File-header comments** across the tree, plus resolving the TODOs and the commented-out code.
+   - A+B+C *(done 2026-10-11)*: TODOs resolved (into PLAN.md or answered), commented-out code deleted, `fly`/`orbit`
+     → `src/gui/camera_controls.h`, `MovingSphere` → `Sphere`'s moving constructor (renders byte-identical), the
+     skipped legacy render test removed. The clean build has 0 warnings.
+   Then `tools/diagrams.py` with its first figures, and a mermaid architecture diagram (added 2026-10-11, as in
+   Glint). Each item
    is decided in context; some are alternative scene setups.
 
 Behaviour changes found on the way (like the bugs in Stage 0) are listed separately, not mixed into the moves.

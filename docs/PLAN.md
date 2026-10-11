@@ -48,9 +48,31 @@ Work top to bottom. Tick boxes as work lands, and commit each tick together with
       (gitignored).
 - [ ] The comparison tool reports **RMSE and relMSE** against the reference, plus an **equal-time comparison**
       with the method it improves on. pbrt-v4's `imgtool diff` is an independent cross-check.
-- [ ] `docs/techniques/NN_name.md` is written, following the template below.
+- [ ] `docs/techniques/NN_name.md` is written, following the template below, including its **Diagrams**.
 - [ ] Unit tests still pass. New math (warps, pdfs, BSDF reciprocity and energy) gets a unit test.
 - [ ] Learnings are added to the vault stage note, and its reading items are ticked.
+
+### Diagrams (convention taken from Glint)
+
+The goal is to keep the learning and the architecture visible, not only the code.
+- **Mermaid**, inline in the markdown, for flow and structure:
+  - the integrator's path loop
+  - where samples come from and where they go (camera → sampler → integrator → film)
+  - class and file relationships
+  - stage dependencies
+
+  It renders on GitHub, in Obsidian, and in VS Code with a mermaid extension.
+- **Computed figures** (Python + matplotlib) for anything quantitative or spatial:
+  - pdfs and sampling warps
+  - sample patterns (independent vs stratified vs Sobol')
+  - Fresnel and microfacet curves
+  - error vs spp / time, and equal-time comparisons
+- **`tools/diagrams.py`** generates the figures. Each one is computed from the same formulas the C++ uses, or from
+  the renderer's own CSV output, so a change in a technique means a change in its figure.
+  - Output is deterministic SVG (white background, text kept as text) in `docs/diagrams/NN_*.svg`, committed and
+    embedded with `![...](../diagrams/x.svg)`.
+  - Setup: `python3 -m venv tools/.venv && tools/.venv/bin/pip install -r tools/requirements.txt` (pinned
+    versions).
 
 Pace: about one technique per session, one commit per technique. Review at the end of each stage and
 reorder, drop or swap whatever turned out to be (un)interesting.
@@ -64,6 +86,7 @@ reorder, drop or swap whatever turned out to be (un)interesting.
 - pbrt-v4 §x.y — <link> · source: `src/pbrt/...`
 - RTG I/II ch N — <link>
 ## Idea          (one paragraph of theory, in my own words)
+## Diagrams      (mermaid for flow/structure; computed figures from tools/diagrams.py, see below)
 ## What changed  (files, refactors and why)
 ## Numbers       (scene, spp/time, RMSE/relMSE vs reference, equal-time vs previous method, image)
 ## Gotchas
@@ -116,7 +139,8 @@ runs, and `Glimpse_cli --scene cornell_box --spp 64 --out x.png` writes an image
   - A comparison tool (`Glimpse_cli compare a.pfm b.pfm`) prints RMSE and relMSE and can write a
     false-colour error image.
   - A convergence mode writes error against SPP and against time to CSV.
-  - The viewer plots the live error against the reference with ImPlot.
+  - The viewer plots the live error against the reference with ImPlot, plus uncapped-mode stats (average spp,
+    samples/s), which used to be a TODO in `ui.cpp`.
 - [ ] **03 `deterministic_rng`**
   - Each (pixel, sample index) gets its own seed (hashed), so images are the same for any thread count.
   - Threads take tiles from a queue instead of fixed row ranges.
@@ -144,6 +168,8 @@ Read: pbrt §2.3–2.4, §8.1–8.8, §A.4–A.5; RTG1 ch16 *Sampling Transforma
   - The recursive `rayColor` becomes a loop with a running throughput and Russian roulette.
   - The new loop must produce the same image as the old one, within noise, against the reference.
 - [ ] **08 `nee`**
+  - The showcase scenes `material_showcase` and `untitled_1` have emitters that aren't in `scene.lights` (old
+    "add light" TODOs). Add them here, where `scene.lights` starts to matter.
   - Next-event estimation: sample a light, cast a shadow ray, and avoid counting emission twice.
   - Robust ray offsets (RTG1 ch6) replace the `0.001` epsilon.
 - [ ] **09 `mis`**
@@ -251,6 +277,14 @@ Read: pbrt §15.1–15.3 (+ `pbrt-v4/src/pbrt/wavefront/`); RTG1 ch3 *Introducti
 [vk_raytracing_tutorial_KHR](https://github.com/nvpro-samples/vk_raytracing_tutorial_KHR).
 
 ---
+
+## Backlog (small items, not techniques)
+
+Collected from the 2025 TODOs in the Stage 0 structure review:
+- **Viewer:** the framebuffer is uploaded every frame while rendering, and the worker threads write the `Image`
+  concurrently (benign tearing, but a data race). Upload a snapshot, or at a fixed rate.
+- **Textures:** sampling the float pixels shows bands of missing data, so `USE_FLOAT_PIXELS` is off (`textures.cpp`).
+  Image textures use nearest-neighbour lookup; add bilinear filtering (pbrt §10.4).
 
 ## Not on the path (yet)
 

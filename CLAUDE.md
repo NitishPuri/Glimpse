@@ -47,6 +47,10 @@ Rules that come with it:
   - pbrt-v4's `imgtool diff` can cross-check error metrics.
 - **Code is for reading.** The owner learns from it, so comment the *why* (the estimator, the pdf, the measure
   conversion), not the *what*.
+- **Diagrams** (as in Glint), wherever a picture beats words: mermaid inline in the docs for flow and structure,
+  and computed matplotlib figures from `tools/diagrams.py` (deterministic SVG in `docs/diagrams/`, using the same
+  formulas as the code) for pdfs, warps, sample patterns, BSDF curves and convergence plots. See `docs/PLAN.md`,
+  "Diagrams".
 
 Obsidian vault (`/mnt/d/ObsidianVault`, use the obsidian-kb skill):
 - `1_TOPICS/Tech/Tech Projects/Glimpse/`: `Glimpse - Learning Path.md` and one `Glimpse - Stage N - <name>.md` per
@@ -125,8 +129,8 @@ read, so new scenes go at the end. `findScene(name)` looks one up by name.
 ...), `interval.h`, `AABB`, `image`, `log.h` (`Logger`, `logFileFor`), `cli_options`. The viewer code is in
 `namespace glimpse::gui`. Nothing in `src/` has a global `using namespace`.
 
-**Geometry** (pbrt-like split): `interaction.h` (`HitRecord` + the `Hittable` interface), `shapes.{h,cpp}`
-(`Sphere`, `MovingSphere`, `Quad` + `box()`), `aggregates.{h,cpp}` (`HittableList`, `BVHNode`), `instancing.h`
+**Geometry** (pbrt-like split): `interaction.h` (`HitRecord` + the `Hittable` interface), `shapes.h`
+(`Sphere`, whose moving-center constructor gives motion blur; `Quad` + `box()`), `aggregates.{h,cpp}` (`HittableList`, `BVHNode`), `instancing.h`
 (`Translate`, `RotateY`), `media.h` (`ConstantMedium`). Materials (`materials.h`) return a `ScatterRecord` holding
 either a pdf or a `skipPdfRay`; textures are in `textures.{h,cpp}`.
 

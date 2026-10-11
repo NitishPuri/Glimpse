@@ -34,13 +34,7 @@ class Film {
     int index = getIndex(x, y);
     sampleCount[index]++;
 
-    // TODO: Enable variance calcualtion after initial setup.
-    // TODO: Actually use variance map to do adaptive sampling!
-    //  vec3 delta = sample - mean[index];
-    //  mean[index] += delta / sampleCount[index];
-    //  vec3 delta2 = sample - mean[index];
-    //  m2[index] += delta * delta2;
-
+    // mean/m2 (Welford's running variance) are filled in by technique 05, adaptive sampling.
     accumulatedSamples[index] += sample;
   }
 
