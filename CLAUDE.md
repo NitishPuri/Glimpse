@@ -61,10 +61,12 @@ Obsidian vault (`/mnt/d/ObsidianVault`, use the obsidian-kb skill):
 
 - Now on **Pop!_OS 22.04, GCC 11.4** (so no `std::format`), with cmake and ninja available. The repo is on an
   NTFS mount, so expect slow builds and every file showing mode 755.
-- The Windows helper scripts (`*.bat`, `CMakePresets.json` preset `win`) and the committed `build/` and
-  `buildLinux/` trees are from the old Windows setup. All `build*` dirs are gitignored.
-- `ext/`: only `boost/ut.hpp` and `stb/` are tracked. `glad/`, `imgui/` (with ImPlot) and the prebuilt
-  `glfw-3.4.bin.WIN64` are gitignored but archived in `ext/ext.7z`.
+- Line endings are LF (`.gitattributes`; `.bat` files stay CRLF). `.git-blame-ignore-revs` lists the
+  line-ending-only commits.
+- Build trees live under `build/` (gitignored): `build/release` and `build/debug` (Linux, `build.sh`) and
+  `build/windows` (preset `win`, the `.bat` scripts, untested since the move to Linux).
+- `ext/`: boost.ut, stb, ImGui + ImPlot and glad are vendored. GLFW 3.4 is fetched by CMake (FetchContent,
+  pinned like Glint). `ext/ext.7z` and the prebuilt `glfw-3.4.bin.WIN64` are legacy.
 
 ## Build & run
 
@@ -77,24 +79,25 @@ Linux (same pattern as Glint):
 ```
 Windows (old setup): `configure.bat` → `build.bat`; `cli.bat`, `gui.bat`, `test.bat <filter>`.
 
-Known state on Linux (checked 2026-10-03):
-- The **GUI is not built on Linux**. CMake skips `Glimpse_gui` when `LINUX` and hardwires the WIN64 GLFW
-  libs plus `opengl32.lib`. Glint already did this port (system GLFW + `OpenGL::GL`) and can be copied.
-- **`Glimpse_tests` fails to link under GCC**: there are multiple definitions of `ut::cfg<ut::override>`. It is
-  explicitly specialized in `tests/testing.cpp`, but other TUs have already used the primary template.
-  MSVC tolerated this. The library and CLI build fine.
-- The CLI only honours `--scene`. `--width/--height/--samples` are parsed but ignored, because resolution
-  and SPP come from the scene's camera. `main.cpp` always adds the Cornell-box ceiling light quad to
-  `scene.lights` and writes to `./results/final21.jpg`.
-- The GitHub workflows are disabled or stale: `cpp-tests.yml` targets branch `main` and runs `test.bat`
-  on Ubuntu.
+State (Stage 0, 2026-10-11): the library, CLI, viewer and tests build with GCC 11, and the tests pass under ctest.
+- CLI flags: `--scene <name|index> --spp --width --depth --seed --out --list-scenes --help`.
+  - `--spp` is rounded down to a square (the stratified grid is `sqrt_spp × sqrt_spp`).
+  - `--seed` is reproducible on one machine, but not across thread counts (technique 03).
+  - `--out` takes `.png/.jpg/.bmp/.tga` (PFM comes with technique 01).
+- `Renderer::render_scene` calls `cam.initialize()` itself, and the stop flag aborts capped renders too.
+- `Image` rows are top-down, like image files: the renderer converts from camera `v` when writing, and the viewer
+  doesn't flip.
+- Scenes declare their own `scene.lights`.
+- The viewer window opens at 80% of the screen. `src/gui/layout.h` pins a 420 px sidebar and an output panel
+  every frame, and `imgui.ini` is not used.
+- The GitHub workflows are stale: `cpp-tests.yml` targets branch `main` and runs `test.bat` on Ubuntu.
 
 Style: `.clang-format` (Google base, 2-space indent, 120 columns). Everything is in `namespace glimpse`.
 
 ## Architecture
 
 Targets: `Glimpse` (static library, a recursive glob over `src/core`), `Glimpse_cli` (`src/cli/main.cpp`),
-`Glimpse_gui` (`src/gui`, Windows only) and `Glimpse_tests`.
+`Glimpse_gui` (`src/gui`) and `Glimpse_tests`.
 
 **Rendering pipeline** (`src/core/render.cpp`):
 - `Renderer::render_scene(Scene, Image&, progress*)` builds a `bvh_node` from `scene.world` on every render.

@@ -2,14 +2,15 @@
     "version": 2,
     "configurePresets": [
         {
-            "name": "win",
-            "generator": "Visual Studio 17 2022",
-            "binaryDir": "${sourceDir}/build"
+            "name": "linux",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/release",
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
         },
         {
-            "name": "wsl",
-            "generator": "Unix Makefiles",
-            "binaryDir": "${sourceDir}/buildLinux"
+            "name": "win",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build/windows"
         }
     ]
 }

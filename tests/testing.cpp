@@ -2,6 +2,8 @@
 #include "boost/ut.hpp"  // import boost.ut;
 #include "test_cfg.h"
 
+#include <filesystem>
+
 void vec3_test();
 void ray_test();
 void film_test();
@@ -28,6 +30,9 @@ int main(int argc, char** argv) {
   // setup filter
   const auto filter = argc > 1 ? argv[1] : "*";
   ut::cfg<ut::override> = ut::options{.filter = filter};
+
+  // Image tests write here. It is gitignored, so a fresh clone doesn't have it.
+  std::filesystem::create_directories("./test_output");
   // ut::cfg<ut::runner<ut::reporter<ut::printer>>> = ut::options{.filter = filter};
   // ut::runner<ut::reporter<ut::printer>> = ut::options{.filter = filter};
 

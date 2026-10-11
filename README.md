@@ -65,7 +65,7 @@ Windows (the original 2025 setup, Visual Studio 2022): `configure.bat`, `build.b
 - `src/cli/`: `Glimpse_cli`, which renders a scene to an image file.
 - `src/gui/`: `Glimpse_gui`, a GLFW + ImGui viewer with progressive rendering.
 - `tests/`: boost.ut unit tests (`unit_tests/`) and end-to-end image tests (`e2e/`).
-- `ext/`: vendored single-header libraries (boost.ut, stb).
+- `ext/`: vendored libraries (boost.ut, stb, Dear ImGui + ImPlot, glad). GLFW is fetched by CMake.
 
 Dependencies: [stb](https://github.com/nothings/stb), [boost.ut](https://github.com/boost-ext/ut),
 [Dear ImGui](https://github.com/ocornut/imgui) + [ImPlot](https://github.com/epezent/implot),
@@ -73,10 +73,6 @@ Dependencies: [stb](https://github.com/nothings/stb), [boost.ut](https://github.
 
 ## Status
 
-Stage 0 (foundation on Linux) is in progress:
-- The tests link and pass under GCC.
-- `render_scene` sets up the camera itself.
-- Still to come: the new CLI flags in `Glimpse_cli`, images written the right way up, and the viewer on Linux
-  (`./run.sh gui` reports "not built" until then).
-
-Next: Stage 1, measuring (float output, reference renders, error metrics).
+Stage 0 (foundation on Linux) is done. The tests, CLI, viewer and build scripts all work on Linux, and several
+2025 bugs are fixed: upside-down images, the CLI's black renders, a crash on Save, and a hang on close. The
+structure review comes next, then Stage 1, measuring (float output, reference renders, error metrics).

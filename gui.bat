@@ -1,3 +1,3 @@
 call build.bat
-build\Release\Glimpse_gui.exe %1
+build\windows\Release\Glimpse_gui.exe %*
 

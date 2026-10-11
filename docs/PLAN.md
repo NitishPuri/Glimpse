@@ -74,14 +74,14 @@ reorder, drop or swap whatever turned out to be (un)interesting.
 
 ## Stage 0 — Foundation on Linux (infrastructure)
 
-- [ ] Fix the GCC link error in `Glimpse_tests`. `ut::cfg<ut::override>` is specialized after it has
+- [x] Fix the GCC link error in `Glimpse_tests`. `ut::cfg<ut::override>` is specialized after it has
       already been used in other files. Then get the suite passing (or document the known failures).
-- [ ] Make the CLI flags real: `--scene <name|index> --spp --width --depth --seed --out`. Use
+- [x] Make the CLI flags real: `--scene <name|index> --spp --width --depth --seed --out`. Use
       `--list-scenes`. Remove the hardcoded Cornell light from `main.cpp` and let scenes declare their own
       `lights`.
-- [ ] `Glimpse_gui` builds on Linux: GLFW from FetchContent or the system (as Glint did), `OpenGL::GL`,
+- [x] `Glimpse_gui` builds on Linux: GLFW from FetchContent or the system (as Glint did), `OpenGL::GL`,
       and the ImGui/glad sources from `ext/ext.7z` or FetchContent.
-- [ ] Clean up the build: one `CMakePresets.json` preset for Linux/Ninja, `compile_commands.json`, and
+- [x] Clean up the build: one `CMakePresets.json` preset for Linux/Ninja, `compile_commands.json`, and
       `.gitattributes` for line endings (`README.md`/`ROADMAP.md` are CRLF today, new files are LF). Add
       `refs/` and `results/` to `.gitignore` if they are missing.
 - [ ] Optional: re-enable a Linux CI job (build plus tests) in place of the stale workflows.

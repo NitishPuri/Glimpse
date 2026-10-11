@@ -5,6 +5,7 @@ set(NAME Glimpse)
 message(STATUS "Using ${CMAKE_GENERATOR}")
 project(${NAME} VERSION 0.0.1)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # for clangd / VS Code IntelliSense
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
