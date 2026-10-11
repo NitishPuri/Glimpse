@@ -18,6 +18,7 @@ struct CmdOptions {
   std::optional<int> width;  // height follows from the scene camera's aspect ratio
   std::optional<int> depth;
   std::optional<uint32_t> seed;  // >= 1; 0 is reserved by Random::setSeed for "random"
+  double exposure = 0.0;          // stops, applied before sRGB encoding (8-bit outputs only)
   std::string out;               // empty: defaultOutputPath(scene)
   bool listScenes = false;
   bool help = false;
@@ -39,5 +40,8 @@ std::optional<std::string> resolveSceneName(const std::string& nameOrIndex);
 void applyOptions(const CmdOptions& options, Scene& scene);
 
 std::string defaultOutputPath(const std::string& sceneName);
+
+// True for .pfm: the linear float film is written as-is (no exposure, no sRGB).
+bool isFloatOutput(const std::string& path);
 
 }  // namespace glimpse

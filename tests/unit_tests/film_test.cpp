@@ -77,4 +77,19 @@ static ut::suite<"film"> filmSuite = [] {
     f.addSample(1, 1, Vec3(1.0f, 1.0f, 1.0f));
     expect(f.getSampleCount(1, 1) == 1_i);
   };
+
+  // linearRGB() is the running mean (linear radiance) as a FloatImage. Film row j counts up from the bottom like
+  // camera v, FloatImage row 0 is the top, so Film (x, j) lands in FloatImage row height-1-j.
+  "film.linearRGB"_test = [] {
+    Film f(2, 3);
+    f.addSample(1, 0, Vec3(2.0, 4.0, 6.0));  // bottom row
+    f.addSample(1, 0, Vec3(4.0, 8.0, 12.0));  // mean (3, 6, 9): above 1, not clamped
+    f.addSample(0, 2, Vec3(0.25, 0.5, 0.75));  // top row
+    const FloatImage img = f.linearRGB();
+    expect(img.width == 2_i && img.height == 3_i);
+    const size_t bottom = img.index(1, 2), top = img.index(0, 0);
+    expect(img.rgb[bottom] == 3.0_f && img.rgb[bottom + 1] == 6.0_f && img.rgb[bottom + 2] == 9.0_f);
+    expect(img.rgb[top] == 0.25_f && img.rgb[top + 2] == 0.75_f);
+    expect(img.rgb[img.index(0, 1)] == 0.0_f) << "pixels without samples are black";
+  };
 };

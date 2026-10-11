@@ -176,6 +176,53 @@ def cosine_hemisphere():
     return fig
 
 
+# --- color --------------------------------------------------------------------------------------------------------
+
+def linear_to_srgb(x):
+    """Same as src/glimpse/util/color.cpp linearToSRGB (IEC 61966-2-1)."""
+    x = np.asarray(x, dtype=float)
+    return np.where(x <= 0.0031308, 12.92 * x, 1.055 * np.power(np.maximum(x, 0), 1 / 2.4) - 0.055)
+
+
+@figure("srgb_vs_sqrt", "docs/diagrams/srgb_vs_sqrt.svg")
+def srgb_vs_sqrt():
+    """Display encodings of linear radiance: sRGB (technique 01) vs RTIOW's sqrt ("gamma 2"). sRGB is brighter in the
+    midtones (18% grey: 0.461 vs 0.424) and darker near black, where its linear toe (12.92 x) replaces the power curve's
+    infinite slope."""
+    x = np.linspace(0, 1, 500)
+    fig, axes = plt.subplots(1, 2, figsize=(9.6, 4.0))
+    ax = axes[0]
+    ax.plot(x, linear_to_srgb(x), color=COSINE_COLOR, lw=2, label="sRGB (linearToSRGB)")
+    ax.plot(x, np.sqrt(x), color=UNIFORM_COLOR, lw=2, ls="--", label="sqrt  (RTIOW, before 01)")
+    ax.plot(x, x, color="#cbd5e0", lw=1, label="no encoding")
+    for v in (0.18,):
+        s, q = float(linear_to_srgb(v)), math.sqrt(v)
+        ax.plot([v, v], [0, s], color="#a0aec0", lw=0.8, ls=":")
+        ax.scatter([v, v], [s, q], color=[COSINE_COLOR, UNIFORM_COLOR], zorder=3, s=18)
+        ax.annotate(f"18% grey: {s:.3f} vs {q:.3f}", (v, s), xytext=(0.3, 0.42), fontsize=8,
+                    arrowprops=dict(arrowstyle="-", color="#a0aec0"))
+    ax.set_xlabel("linear radiance (after exposure)")
+    ax.set_ylabel("encoded value written to the 8-bit file")
+    ax.set_title("full range")
+    ax.legend(fontsize=8, frameon=False, loc="lower right")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1.02)
+
+    ax = axes[1]
+    xs = np.linspace(0, 0.02, 400)
+    ax.plot(xs, linear_to_srgb(xs), color=COSINE_COLOR, lw=2, label="sRGB")
+    ax.plot(xs, np.sqrt(xs), color=UNIFORM_COLOR, lw=2, ls="--", label="sqrt")
+    ax.axvline(0.0031308, color="#a0aec0", lw=0.8, ls=":")
+    ax.text(0.0034, 0.005, "knee 0.0031308:\nlinear toe 12.92·x below", fontsize=8, color="#4a5568")
+    ax.set_xlabel("linear radiance")
+    ax.set_title("near black: sqrt lifts shadows (and their noise)")
+    ax.legend(fontsize=8, frameon=False, loc="lower right")
+    ax.set_xlim(0, 0.02)
+    ax.set_ylim(0, 0.16)
+    ax.set_xticks([0, 0.005, 0.01, 0.015, 0.02])
+    return fig
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("names", nargs="*", help="figures to build (default: all)")

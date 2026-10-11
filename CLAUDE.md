@@ -108,8 +108,10 @@ Targets: `Glimpse` (static library, a recursive glob over `src/glimpse`), `Glimp
 - `Renderer::renderScene(Scene, Image&, progress*)` builds a `BVHNode` from `scene.world` on every render.
   It then splits the image **by rows across `hardware_concurrency()` threads** using `std::async`.
 - Each thread loops over stratified sub-pixel cells (`cam.sqrtSpp`²), then over its rows and pixels. It calls
-  `rayColor(...)` and adds the sample to the shared `Film`. Then it writes the running mean, gamma-corrected
-  with `sqrt`, into `Image` via `setFloat`. The GUI uploads that same buffer while rendering is still going.
+  `rayColor(...)` and adds the sample to the shared `Film`. Then it writes the running mean, sRGB-encoded
+  (`util/color.h`), into `Image` via `setFloat`. The GUI uploads that same buffer while rendering is still going.
+- Output comes from the linear film: `Film::linearRGB()` gives a `FloatImage`. `--out x.pfm` writes it as-is;
+  8-bit formats get `encodeSRGB(linear, --exposure)`.
 - `cam.uncappedSpp` switches to `renderSectionUncap`, which repeats passes until the static
   `Renderer::stopRequested` flag is set (the GUI's stop button).
 - `rayColor` is recursive. Emission plus scatter: specular materials use `srec.skipPdf`. Otherwise it

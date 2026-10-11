@@ -26,14 +26,21 @@ std::optional<T> parseInt(std::string_view text, long long min, long long max) {
   return static_cast<T>(value);
 }
 
-// Formats Image::write can produce today. PFM arrives with technique 01 (float_output).
-bool isWritableExtension(std::string_view path) {
+// Lower-case extension without the dot ("" if none).
+std::string extensionOf(std::string_view path) {
   auto dot = path.find_last_of('.');
   auto slash = path.find_last_of('/');
-  if (dot == std::string_view::npos || (slash != std::string_view::npos && dot < slash)) return false;
+  if (dot == std::string_view::npos || (slash != std::string_view::npos && dot < slash)) return "";
   std::string ext(path.substr(dot + 1));
-  std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-  return ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp" || ext == "tga";
+  std::transform(ext.begin(), ext.end(), ext.begin(),
+                 [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+  return ext;
+}
+
+// 8-bit formats go through Image::write (sRGB-encoded); .pfm is the linear float film (technique 01).
+bool isWritableExtension(std::string_view path) {
+  const std::string ext = extensionOf(path);
+  return ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp" || ext == "tga" || ext == "pfm";
 }
 
 }  // namespace
@@ -53,7 +60,7 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
       continue;
     }
     if (arg != "--scene" && arg != "--spp" && arg != "--width" && arg != "--depth" && arg != "--seed" &&
-        arg != "--out") {
+        arg != "--out" && arg != "--exposure") {
       result.error = "unknown argument: " + arg;
       return result;
     }
@@ -68,10 +75,19 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
       o.scene = value;
     } else if (arg == "--out") {
       if (!isWritableExtension(value)) {
-        result.error = invalid + " (supported: .png .jpg .jpeg .bmp .tga)";
+        result.error = invalid + " (supported: .png .jpg .jpeg .bmp .tga .pfm)";
         return result;
       }
       o.out = value;
+    } else if (arg == "--exposure") {
+      double stops = 0.0;
+      const char* end = value.data() + value.size();
+      auto [ptr, ec] = std::from_chars(value.data(), end, stops);
+      if (ec != std::errc{} || ptr != end || stops < -20.0 || stops > 20.0) {
+        result.error = invalid + " (stops, -20 .. 20)";
+        return result;
+      }
+      o.exposure = stops;
     } else if (arg == "--seed") {
       o.seed = parseInt<uint32_t>(value, 1, std::numeric_limits<uint32_t>::max());
       if (!o.seed) {
@@ -95,13 +111,15 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
 std::string usage() {
   std::ostringstream ss;
   ss << "usage: Glimpse_cli [--scene <name|index>] [--spp N] [--width N] [--depth N] [--seed N] [--out file]\n"
-        "                   [--list-scenes] [--help]\n"
+        "                   [--exposure STOPS] [--list-scenes] [--help]\n"
         "  --scene   scene name or index (default cornell_box; see --list-scenes)\n"
         "  --spp     samples per pixel; rounded down to a square (10 -> 9) for stratified sampling\n"
         "  --width   image width; height follows the scene's aspect ratio\n"
         "  --depth   maximum bounces\n"
         "  --seed    fixed RNG seed (>= 1); reproducible on the same machine and thread count\n"
-        "  --out     output image: .png .jpg .bmp .tga (default results/<scene>.png)\n";
+        "  --out     output image: .png .jpg .bmp .tga (sRGB, 8-bit) or .pfm (linear float radiance)\n"
+        "            (default results/<scene>.png)\n"
+        "  --exposure  scale radiance by 2^STOPS before sRGB encoding (8-bit outputs only; default 0)\n";
   return ss.str();
 }
 
@@ -120,5 +138,7 @@ void applyOptions(const CmdOptions& options, Scene& scene) {
 }
 
 std::string defaultOutputPath(const std::string& sceneName) { return "results/" + sceneName + ".png"; }
+
+bool isFloatOutput(const std::string& path) { return extensionOf(path) == "pfm"; }
 
 }  // namespace glimpse

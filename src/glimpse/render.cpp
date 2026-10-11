@@ -1,5 +1,5 @@
 // Renderer: each thread renders a band of rows. For every stratified sub-pixel cell (sqrtSpp x sqrtSpp, TROYL
-// "Stratification") it traces one ray per pixel, accumulates it in Film, and writes the running mean (sqrt gamma)
+// "Stratification") it traces one ray per pixel, accumulates it in Film, and writes the running mean (sRGB)
 // into Image. Uncapped mode repeats passes until stopRequested; the stop flag is checked once per row.
 // Per-pixel seeding and a tile queue replace the row bands in technique 03.
 
@@ -16,6 +16,7 @@
 #include "glimpse/materials.h"
 #include "glimpse/integrators.h"
 #include "glimpse/render.h"
+#include "glimpse/util/color.h"
 #include "glimpse/util/vecmath.h"
 
 namespace glimpse {
@@ -71,7 +72,9 @@ void renderSection(RenderSectionArgs &args) {
 
           film.addSample(i, j, pixelColor);
           pixelColor = film.getSample(i, j);
-          pixelColor = sqrt(pixelColor);  // gamma correction!
+          // Display encoding for the live Image (viewer): linear mean -> sRGB. Film keeps the linear value.
+          pixelColor =
+              Color(linearToSRGB(pixelColor.x()), linearToSRGB(pixelColor.y()), linearToSRGB(pixelColor.z()));
           // j counts up from the bottom (camera v); Image rows count down from the top, like image files.
           image.setFloat(i, cam.imageHeight - 1 - j, static_cast<float>(pixelColor.x()),
                           static_cast<float>(pixelColor.y()), static_cast<float>(pixelColor.z()));
@@ -111,7 +114,9 @@ void renderSectionUncap(RenderSectionArgs &args) {
 
             film.addSample(i, j, pixelColor);
             pixelColor = film.getSample(i, j);
-            pixelColor = sqrt(pixelColor);  // gamma correction!
+            // Display encoding for the live Image (viewer): linear mean -> sRGB. Film keeps the linear value.
+            pixelColor =
+                Color(linearToSRGB(pixelColor.x()), linearToSRGB(pixelColor.y()), linearToSRGB(pixelColor.z()));
             // j counts up from the bottom (camera v); Image rows count down from the top, like image files.
             image.setFloat(i, cam.imageHeight - 1 - j, static_cast<float>(pixelColor.x()),
                             static_cast<float>(pixelColor.y()), static_cast<float>(pixelColor.z()));

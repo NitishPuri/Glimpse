@@ -6,6 +6,8 @@
 #include <iostream>
 
 #include "glimpse/util/cli_options.h"
+#include "glimpse/util/color.h"
+#include "glimpse/util/float_image.h"
 #include "glimpse/glimpse.h"
 #include "glimpse/util/log.h"
 #include "glimpse/render.h"
@@ -60,7 +62,11 @@ int main(int argc, char **argv) {
   const std::string out = options.out.empty() ? defaultOutputPath(*sceneName) : options.out;
   const auto parent = std::filesystem::path(out).parent_path();
   if (!parent.empty()) std::filesystem::create_directories(parent);
-  if (!image.write(out)) {
+  // The output comes from the linear film: .pfm writes it as-is (lossless radiance, the measurement), 8-bit formats
+  // get exposure + sRGB. The live `image` above is only the progress view and is not written.
+  const FloatImage linear = renderer.film.linearRGB();
+  const bool ok = isFloatOutput(out) ? writePFM(out, linear) : encodeSRGB(linear, options.exposure).write(out);
+  if (!ok) {
     logger.log("Failed to write ", out);
     return 1;
   }

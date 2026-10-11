@@ -44,6 +44,16 @@ static ut::suite<"cli"> cliSuite = [] {
       expect(r.options.out == "renders/e.png");
     };
 
+    "exposure"_test = [] {
+      expect(parse({}).options.exposure == 0.0_d) << "default: no exposure change";
+      expect(parse({"--exposure", "1.5"}).options.exposure == 1.5_d);
+      expect(parse({"--exposure", "-2"}).options.exposure == -2.0_d);
+      expect(!parse({"--exposure", "abc"}).ok());
+      expect(!parse({"--exposure", "1.5x"}).ok()) << "trailing garbage";
+      expect(!parse({"--exposure", "100"}).ok()) << "outside [-20, 20] stops";
+      expect(!parse({"--exposure"}).ok()) << "missing value";
+    };
+
     "help_and_list"_test = [] {
       expect(parse({"--help"}).options.help);
       expect(parse({"-h"}).options.help);
@@ -69,7 +79,8 @@ static ut::suite<"cli"> cliSuite = [] {
       expect(parse({"--out", "a.jpeg"}).ok());
       expect(parse({"--out", "dir/a.bmp"}).ok());
       expect(parse({"--out", "a.tga"}).ok());
-      expect(!parse({"--out", "a.pfm"}).ok()) << "PFM arrives in technique 01";
+      expect(parse({"--out", "a.pfm"}).ok()) << "linear float output (technique 01)";
+      expect(parse({"--out", "refs/a.PFM"}).ok());
       expect(!parse({"--out", "a.exr"}).ok());
       expect(!parse({"--out", "noext"}).ok());
     };

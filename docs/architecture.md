@@ -68,11 +68,11 @@ sequenceDiagram
     loop each stratified cell (sqrtSpp²), each row, each pixel
       T->>I: rayColor(cam.getRay(u, v), ..., maxDepth)
       I-->>T: radiance sample
-      T->>F: film.addSample(i, j) · image.setFloat(i, H−1−j, sqrt(mean))
+      T->>F: film.addSample(i, j) · image.setFloat(i, H−1−j, sRGB(mean)) (live view)
     end
   end
   R-->>main: all threads joined
-  main->>F: image.write(results/SCENE.png)
+  main->>F: film.linearRGB() → writePFM (.pfm) or encodeSRGB(exposure).write (.png)
 ```
 
 The viewer drives the same `renderScene` from a background thread (`gui/raytracer.h`) and uploads the `Image`

@@ -6,6 +6,7 @@
 #include <numeric>
 #include <vector>
 
+#include "glimpse/util/float_image.h"
 #include "glimpse/util/vecmath.h"
 
 namespace glimpse {
@@ -84,6 +85,21 @@ class Film {
   }
 
   inline int getIndex(int x, int y) const { return y * width + x; }
+
+  // The estimate so far as linear radiance (unclamped, no gamma): what --out x.pfm writes and what references and
+  // error metrics compare. Film row j counts up from the bottom (camera v); FloatImage row 0 is the top.
+  FloatImage linearRGB() const {
+    FloatImage out(width, height);
+    for (int j = 0; j < height; ++j)
+      for (int i = 0; i < width; ++i) {
+        const Vec3 c = getSample(i, j);
+        const size_t o = out.index(i, height - 1 - j);
+        out.rgb[o] = static_cast<float>(c.x());
+        out.rgb[o + 1] = static_cast<float>(c.y());
+        out.rgb[o + 2] = static_cast<float>(c.z());
+      }
+    return out;
+  }
 
  private:
   int width, height;
