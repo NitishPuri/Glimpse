@@ -1,5 +1,9 @@
 #pragma once
 
+// Sampling warps: uniform random points or directions (unit sphere, hemisphere, disk, square) and cosine-weighted
+// hemisphere directions. Follows RTIOW "Diffuse Materials", TROYL "Generating Random Directions"; pbrt-v4 §A.5 and
+// RTG1 ch16 "Sampling Transformations Zoo".
+
 #include "glimpse/util/rng.h"
 #include "glimpse/util/vecmath.h"
 

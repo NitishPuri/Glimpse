@@ -1,5 +1,8 @@
 #pragma once
 
+// AABB: an axis-aligned bounding box as three Intervals, with the slab ray test used by the BVH.
+// Follows TNW "Bounding Volume Hierarchies"; pbrt-v4 §3.7 (Bounds3) and §6.1.
+
 #include "glimpse/util/interval.h"
 #include "glimpse/ray.h"
 

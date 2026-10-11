@@ -1,5 +1,7 @@
 #pragma once
 
+// Interval [min, max] on the real line: ray t ranges, AABB slabs, clamping. Follows RTIOW "An Interval Class".
+
 #include "glimpse/util/math.h"
 
 namespace glimpse {

@@ -1,5 +1,9 @@
 #pragma once
 
+// ConstantMedium: a homogeneous participating medium (fog, smoke) inside a boundary hittable. Free-flight
+// distance is sampled from the exponential distribution; the phase function is isotropic.
+// Follows TNW "Volumes"; pbrt-v4 ch11 and technique 20 (media, delta/ratio tracking) replace it.
+
 #include "glimpse/interaction.h"
 #include "glimpse/materials.h"
 #include "glimpse/textures.h"

@@ -1,5 +1,8 @@
 #pragma once
 
+// Film: per-pixel sample counts and running sums; getSample() is the mean so far (progressive rendering).
+// mean/m2 are reserved for Welford's running variance (technique 05, adaptive sampling). pbrt-v4 §5.4.
+
 #include <numeric>
 #include <vector>
 

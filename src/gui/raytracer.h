@@ -1,5 +1,8 @@
 #pragma once
 
+// RayTracer: runs Renderer::renderScene on a background thread (std::async) and exposes status/progress to the UI.
+// lastSpp records the finished render's samples per pixel, because the renderer is released when it completes.
+
 #include <atomic>
 #include <future>
 #include <optional>

@@ -1,5 +1,8 @@
 #pragma once
 
+// Instancing: Translate and RotateY move a hittable by transforming the ray into its object space.
+// Follows TNW "Instances"; pbrt-v4 §7.1 (transformed primitives).
+
 #include "glimpse/interaction.h"
 
 namespace glimpse {

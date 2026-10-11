@@ -1,3 +1,6 @@
+// Glimpse_cli: render one scene to an image file.
+// Flags are parsed in util/cli_options; the scene comes from scenes/registry; logs go to logs/cli_<time>.log.
+
 #include <chrono>
 #include <filesystem>
 #include <iostream>

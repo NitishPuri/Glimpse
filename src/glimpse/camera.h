@@ -1,5 +1,10 @@
 #pragma once
 
+// Camera: a thin-lens perspective camera (field of view, look-from/look-at, defocus blur, shutter time).
+// initialize() derives the viewport from the public fields; Renderer::renderScene calls it, so callers may set
+// fields freely. +v is up (t = 0 is the bottom edge), and Image rows are top-down: the renderer flips when writing.
+// Follows RTIOW "Positionable Camera", "Defocus Blur" and TNW "Motion Blur"; pbrt-v4 §5.1–5.2.
+
 #include "glimpse/ray.h"
 #include "glimpse/util/sampling.h"
 

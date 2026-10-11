@@ -1,5 +1,8 @@
 #pragma once
 
+// Integrators: the light transport estimators. Today one: rayColor, the RTIOW-style recursive path tracer.
+// Techniques 07–09 add the iterative loop, next-event estimation and MIS alongside it (pbrt-v4 ch13).
+
 #include "glimpse/interaction.h"
 #include "glimpse/ray.h"
 

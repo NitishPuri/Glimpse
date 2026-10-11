@@ -1,4 +1,7 @@
-
+// Renderer: each thread renders a band of rows. For every stratified sub-pixel cell (sqrtSpp x sqrtSpp, TROYL
+// "Stratification") it traces one ray per pixel, accumulates it in Film, and writes the running mean (sqrt gamma)
+// into Image. Uncapped mode repeats passes until stopRequested; the stop flag is checked once per row.
+// Per-pixel seeding and a tile queue replace the row bands in technique 03.
 
 #define MULTITHREADED
 #ifdef MULTITHREADED

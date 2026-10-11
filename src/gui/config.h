@@ -1,5 +1,7 @@
 #pragma once
 
+// Viewer defaults: fallback window size, start scene, and the UI parameters (ImGuiParams).
+
 #include <string>
 
 namespace glimpse::gui {

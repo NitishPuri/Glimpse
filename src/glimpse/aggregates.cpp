@@ -1,3 +1,5 @@
+// BVHNode construction: sort the primitives along the box's longest axis and split them in half.
+
 #include "glimpse/aggregates.h"
 
 #include <algorithm>

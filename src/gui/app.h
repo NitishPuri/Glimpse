@@ -1,5 +1,7 @@
 #pragma once
 
+// AppWindow: owns the window/GL resources, the UI and the ray tracer, and runs the frame loop.
+
 #include "config.h"
 #include "glimpse/util/log.h"
 #include "gl_res.h"

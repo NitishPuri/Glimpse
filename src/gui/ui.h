@@ -1,5 +1,7 @@
 #pragma once
 
+// UIRenderer: the Control Panel (scene, camera and sampling parameters, Render/Save/Stop) and the Render Output panel.
+
 #include <optional>
 #include <utility>
 

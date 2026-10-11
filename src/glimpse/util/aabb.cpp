@@ -1,3 +1,5 @@
+// AABB::hit: the slab test. Intersect the ray's t range with each axis' entry/exit interval.
+
 #include "glimpse/util/aabb.h"
 
 namespace glimpse {

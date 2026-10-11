@@ -1,5 +1,8 @@
 #pragma once
 
+// Renderer: drives a render. It builds the BVH, splits the image across threads, and accumulates samples into the
+// Film and the displayed Image.
+
 #include <atomic>
 
 #include "glimpse/film.h"

@@ -1,3 +1,6 @@
+// ImGui panels, pinned to the responsive layout (layout.h). Right-drag in the output panel moves the camera with
+// cheap 2-spp previews, and the user's quality is restored with one full render on release.
+
 #include "ui.h"
 
 #include <filesystem>

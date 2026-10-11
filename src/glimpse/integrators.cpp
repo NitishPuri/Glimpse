@@ -1,3 +1,8 @@
+// rayColor: one-sample estimate of the radiance arriving along a ray (pbrt-v4 §13.2–13.3, TROYL).
+// Each bounce adds emission, then scatters: specular materials follow their one ray, others sample a direction
+// from the material pdf, or a 50/50 mixture with the light pdf when the scene lists lights, and weight the result by
+// BRDF * cos / pdf.
+
 #include "glimpse/integrators.h"
 
 #include "glimpse/materials.h"

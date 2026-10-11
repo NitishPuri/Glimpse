@@ -1,3 +1,6 @@
+// Flag parsing with full validation (every number must parse completely and be in range; only writable image
+// formats are accepted).
+
 #include "glimpse/util/cli_options.h"
 
 #include <algorithm>

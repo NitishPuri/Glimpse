@@ -1,5 +1,8 @@
 #pragma once
 
+// Textures: SolidColor, CheckerTexture, ImageTexture, NoiseTexture (Perlin). value(u, v, p) returns a color.
+// Follows TNW "Texture Mapping", "Perlin Noise"; pbrt-v4 §10.3–10.4.
+
 #include "glimpse/perlin.h"
 #include "glimpse/util/vecmath.h"
 

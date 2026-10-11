@@ -1,5 +1,9 @@
 #pragma once
 
+// Aggregates: HittableList (a flat list; also the "lights" list of a scene) and BVHNode, a bounding volume
+// hierarchy split at the midpoint of the longest axis.
+// Follows TNW "Bounding Volume Hierarchies"; pbrt-v4 §7.2–7.3 (the SAH build replaces it in technique 15).
+
 #include <algorithm>
 #include <vector>
 

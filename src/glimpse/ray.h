@@ -1,5 +1,8 @@
 #pragma once
 
+// Ray: origin + t * direction, plus a time for motion blur.
+// Follows RTIOW "Rays, a Simple Camera, and Background" and TNW "Motion Blur"; pbrt-v4 §3.6.
+
 #include "glimpse/util/vecmath.h"
 
 namespace glimpse {

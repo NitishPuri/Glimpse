@@ -1,3 +1,5 @@
+// Image I/O through stb_image / stb_image_write (compiled here), plus pixel access.
+
 #include "glimpse/util/image.h"
 
 #ifdef _MSC_VER

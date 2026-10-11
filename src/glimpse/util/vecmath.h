@@ -1,5 +1,8 @@
 #pragma once
 
+// Vec3 (with the aliases Point3 and Color), its operators, reflect/refract, and ONB, an orthonormal basis.
+// Follows RTIOW "The vec3 Class", "Metal", "Dielectrics" and TROYL "Orthonormal Bases"; pbrt-v4 §3.3.
+
 #include <cmath>
 #include <iostream>
 

@@ -177,6 +177,8 @@ Each step is one reviewable chunk, and the tests stay green after each:
    - A+B+C *(done 2026-10-11)*: TODOs resolved (into PLAN.md or answered), commented-out code deleted, `fly`/`orbit`
      → `src/gui/camera_controls.h`, `MovingSphere` → `Sphere`'s moving constructor (renders byte-identical), the
      skipped legacy render test removed. The clean build has 0 warnings.
+   - D *(done 2026-10-11)*: a header comment at the top of every `src/` file (what it is, the RTIOW/TNW/TROYL
+     chapter and pbrt-v4 section it follows, which technique replaces or extends it).
    Then `tools/diagrams.py` with its first figures, and a mermaid architecture diagram (added 2026-10-11, as in
    Glint). Each item
    is decided in context; some are alternative scene setups.

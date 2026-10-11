@@ -1,5 +1,7 @@
 #pragma once
 
+// Logger: timestamped lines to the console and a file; logFileFor(app) names a per-run file logs/<app>_<time>.log.
+
 #ifdef _MSC_VER
 #pragma warning(disable : 4996)  // MSVC flags std::localtime as unsafe
 #endif

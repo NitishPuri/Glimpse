@@ -1,5 +1,7 @@
 #pragma once
 
+// Math constants (pi, infinity), degreesToRadians and clamp, plus the std aliases the core uses (shared_ptr, sqrt).
+
 #include <cmath>
 #include <limits>
 #include <memory>

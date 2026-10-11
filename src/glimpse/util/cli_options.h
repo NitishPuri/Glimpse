@@ -1,5 +1,8 @@
 #pragma once
 
+// Command-line options for Glimpse_cli: parse and validate flags, resolve a scene by name or index, apply the
+// overrides to the scene's camera. Kept in the library so the unit tests cover it.
+
 #include <cstdint>
 #include <optional>
 #include <string>

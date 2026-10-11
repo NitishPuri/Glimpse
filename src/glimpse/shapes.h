@@ -1,5 +1,10 @@
 #pragma once
 
+// Shapes: Sphere (static or moving center: motion blur) and Quad (a parallelogram, + box() for six of them).
+// Both can be sampled as area lights through pdfValue()/random().
+// Follows RTIOW "Adding a Sphere", TNW "Motion Blur" and "Quadrilaterals", TROYL "Sampling Lights Directly";
+// pbrt-v4 §6.2, §6.5–6.6 (triangles arrive in technique 14).
+
 #include "glimpse/aggregates.h"
 #include "glimpse/interaction.h"
 #include "glimpse/util/vecmath.h"

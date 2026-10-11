@@ -1,5 +1,7 @@
 #pragma once
 
+// GLResources: the GLFW window and the GL texture the rendered Image is uploaded to.
+
 #include <vector>
 
 #include "glad/glad.h"

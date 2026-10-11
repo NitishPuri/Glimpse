@@ -1,5 +1,10 @@
 #pragma once
 
+// Materials: Lambertian, Metal, Dielectric, DiffuseLight, Isotropic. scatter() fills a ScatterRecord with either a pdf
+// to sample (diffuse) or a fixed ray (specular, skipPdf); scatteringPdf() is the BRDF's cosine-weighted density.
+// Follows RTIOW "Diffuse Materials", "Metal", "Dielectrics", TNW "Lights", TROYL "Cleaning Up PDF Management";
+// pbrt-v4 ch9 replaces it with BSDFs in technique 11.
+
 #include "glimpse/interaction.h"
 #include "glimpse/pdf.h"
 #include "glimpse/textures.h"

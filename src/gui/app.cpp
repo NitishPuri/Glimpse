@@ -1,3 +1,6 @@
+// Glimpse_gui entry point and frame loop: poll events, draw the ImGui panels, upload the render, swap. On close it
+// stops any running render and waits for it.
+
 #include "app.h"
 
 namespace glimpse::gui {

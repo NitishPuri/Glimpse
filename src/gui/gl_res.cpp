@@ -1,3 +1,4 @@
+// Window creation (80% of the monitor work area, centered) and texture upload.
 
 #include "gl_res.h"
 

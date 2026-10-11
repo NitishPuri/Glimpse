@@ -1,3 +1,5 @@
+// The scene table. Its order is the CLI's --scene index and the viewer's combo order: append new scenes at the end.
+
 #include "glimpse/scenes/registry.h"
 
 #include "glimpse/scenes/factories.h"

@@ -1,4 +1,8 @@
 #pragma once
+
+// Umbrella header: everything a scene file needs (math, geometry, materials, textures, camera, scenes).
+// Library code includes the specific headers instead.
+
 // clang-format off
 /*
  ░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓██████████████▓▒░░▒▓███████▓▒░ ░▒▓███████▓▒░▒▓████████▓▒░ 

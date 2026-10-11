@@ -1,5 +1,8 @@
 #pragma once
 
+// Perlin noise with random unit gradients and trilinear (Hermite-smoothed) interpolation, plus turbulence.
+// Follows TNW "Perlin Noise". Improved Perlin noise: Glint's 16_noise and GPU Gems 1 ch5.
+
 #include "glimpse/util/vecmath.h"
 
 namespace glimpse {

@@ -1,5 +1,7 @@
 #pragma once
 
+// sceneRegistry() / findScene(): the ordered list of every scene and a lookup by name.
+
 #include <string_view>
 #include <vector>
 

@@ -1,3 +1,5 @@
+// ImageTexture: loads an image file and looks up texels with (u, v) in [0,1]².
+
 #include "glimpse/textures.h"
 
 #include "glimpse/util/image.h"

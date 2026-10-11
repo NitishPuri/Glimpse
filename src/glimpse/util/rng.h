@@ -1,5 +1,8 @@
 #pragma once
 
+// Random: a thread-local mt19937 with an optional global seed (0 = random). randomDouble() and randomInt() wrap it.
+// A fixed seed is reproducible on one machine; per-pixel seeding (technique 03) makes it thread-count independent.
+
 #include <cstdint>
 #include <random>
 

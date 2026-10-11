@@ -1,5 +1,8 @@
 #pragma once
 
+// Image: an 8-bit RGB pixel buffer (row 0 = top, like image files) with stb_image read/write by file extension.
+// setFloat() clamps and quantises [0,1] floats. Float (PFM) output arrives with technique 01.
+
 #include <cmath>
 #include <memory>
 #include <string>

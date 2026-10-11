@@ -1,5 +1,9 @@
 #pragma once
 
+// PDFs over directions (solid angle measure): SpherePDF (uniform), CosinePDF (around a normal), HittablePDF
+// (toward a light's surface) and MixturePDF (50/50 blend: both strategies stay unbiased, see TROYL "Mixture
+// Densities"). Follows TROYL; pbrt-v4 §2.2 and technique 09 (MIS) replace the mixture with the power heuristic.
+
 //==============================================================================================
 // Originally written in 2016 by Peter Shirley <ptrshrl@gmail.com>
 //

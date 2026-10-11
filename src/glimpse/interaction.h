@@ -1,5 +1,9 @@
 #pragma once
 
+// HitRecord (the hit point, normal, uv, material) and Hittable, the interface every shape and aggregate implements.
+// HitRecord plays the role of pbrt's SurfaceInteraction (§3.11); Hittable combines pbrt's Shape and Primitive
+// (§6.1, §7.1). pdfValue()/random() let a hittable be sampled as a light (TROYL "Sampling Lights Directly").
+
 #include "glimpse/util/aabb.h"
 
 namespace glimpse {
