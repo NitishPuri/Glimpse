@@ -25,6 +25,7 @@ A physically-based path tracer that simulates light to reveal scenes with realis
 - Sibling project: [glint](../../glint), which follows GPU Gems in OpenGL and Vulkan.
 
 - Plan and progress: [docs/PLAN.md](docs/PLAN.md)
+- Architecture (mermaid diagrams and figures): [docs/architecture.md](docs/architecture.md)
 - Context for AI assistants / contributors: [CLAUDE.md](CLAUDE.md)
 - The 2025 roadmap (history): [ROADMAP.md](ROADMAP.md)
 
@@ -55,6 +56,9 @@ CLI flags:
 
 Tests: `./run.sh tests` (all), `./run.sh tests "camera*"` (boost.ut name filter), or
 `ctest --test-dir build/release`.
+
+Diagrams: `python3 -m venv tools/.venv && tools/.venv/bin/pip install -r tools/requirements.txt` once, then
+`tools/.venv/bin/python tools/diagrams.py` regenerates the figures in `docs/diagrams/`.
 
 Windows (the original 2025 setup, Visual Studio 2022): `configure.bat`, `build.bat`, `cli.bat`, `gui.bat`,
 `test.bat <filter>`.

@@ -50,7 +50,8 @@ Rules that come with it:
 - **Diagrams** (as in Glint), wherever a picture beats words: mermaid inline in the docs for flow and structure,
   and computed matplotlib figures from `tools/diagrams.py` (deterministic SVG in `docs/diagrams/`, using the same
   formulas as the code) for pdfs, warps, sample patterns, BSDF curves and convergence plots. See `docs/PLAN.md`,
-  "Diagrams".
+  "Diagrams". `docs/architecture.md` has the module graph, the render flow and the `rayColor` bounce as mermaid,
+  plus the first figures. Keep it current when a technique changes the picture.
 
 Obsidian vault (`/mnt/d/ObsidianVault`, use the obsidian-kb skill):
 - `1_TOPICS/Tech/Tech Projects/Glimpse/`: `Glimpse - Learning Path.md` and one `Glimpse - Stage N - <name>.md` per

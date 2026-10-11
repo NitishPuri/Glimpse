@@ -179,8 +179,9 @@ Each step is one reviewable chunk, and the tests stay green after each:
      skipped legacy render test removed. The clean build has 0 warnings.
    - D *(done 2026-10-11)*: a header comment at the top of every `src/` file (what it is, the RTIOW/TNW/TROYL
      chapter and pbrt-v4 section it follows, which technique replaces or extends it).
-   Then `tools/diagrams.py` with its first figures, and a mermaid architecture diagram (added 2026-10-11, as in
-   Glint). Each item
+   - E *(done 2026-10-11)*: `tools/diagrams.py` (venv, pinned matplotlib/numpy, deterministic SVG) with
+     `image_orientation`, `stratified_samples`, `cosine_hemisphere`; `docs/architecture.md` with mermaid diagrams
+     (modules, one render end to end, one `rayColor` bounce). Each item
    is decided in context; some are alternative scene setups.
 
 Behaviour changes found on the way (like the bugs in Stage 0) are listed separately, not mixed into the moves.
