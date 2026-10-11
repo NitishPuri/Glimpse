@@ -66,7 +66,7 @@ Obsidian vault (`/mnt/d/ObsidianVault`, use the obsidian-kb skill):
 - Build trees live under `build/` (gitignored): `build/release` and `build/debug` (Linux, `build.sh`) and
   `build/windows` (preset `win`, the `.bat` scripts, untested since the move to Linux).
 - `ext/`: boost.ut, stb, ImGui + ImPlot and glad are vendored. GLFW 3.4 is fetched by CMake (FetchContent,
-  pinned like Glint). `ext/ext.7z` and the prebuilt `glfw-3.4.bin.WIN64` are legacy.
+  pinned like Glint). The old prebuilt Windows GLFW is no longer used.
 
 ## Build & run
 
@@ -90,7 +90,7 @@ State (Stage 0, 2026-10-11): the library, CLI, viewer and tests build with GCC 1
 - Scenes declare their own `scene.lights`.
 - The viewer window opens at 80% of the screen. `src/gui/layout.h` pins a 420 px sidebar and an output panel
   every frame, and `imgui.ini` is not used.
-- The GitHub workflows are stale: `cpp-tests.yml` targets branch `main` and runs `test.bat` on Ubuntu.
+- No CI: it was skipped on purpose, and `ctest` runs locally.
 
 Style: `.clang-format` (Google base, 2-space indent, 120 columns). Everything is in `namespace glimpse`.
 
@@ -127,8 +127,10 @@ Materials (`material.h`) return a `scatter_record` holding either a pdf or a `sk
 (ImGui/ImPlot panels: scene choice, camera, SPP, depth, progress, plots, saving to `glimpse_results/`) and
 `RayTracer` (runs `render_scene` on a `std::async` future; the main thread polls `status`/`progress`).
 
-**Dormant code**: `ray_analysis.cpp`, `ray_visualizer.*` and `gui/ray_debug.h` are wrapped in `#if 0`.
-They are the start of the roadmap's per-ray path visualisation and instrumentation, and do not compile.
+**Structure:** `docs/structure.md` is the approved structure review (2026-10-11). It moves the library to
+`src/glimpse/` with a pbrt-like file split and pbrt/Glint naming (`PascalCase` types, `camelCase` functions and
+members), self-registering tests, and runtime output in `logs/` and `results/`. Follow it for new code, even
+while the move is in progress.
 
 ## Tests
 

@@ -84,7 +84,7 @@ reorder, drop or swap whatever turned out to be (un)interesting.
 - [x] Clean up the build: one `CMakePresets.json` preset for Linux/Ninja, `compile_commands.json`, and
       `.gitattributes` for line endings (`README.md`/`ROADMAP.md` are CRLF today, new files are LF). Add
       `refs/` and `results/` to `.gitignore` if they are missing.
-- [ ] Optional: re-enable a Linux CI job (build plus tests) in place of the stale workflows.
+- [x] ~~Optional: re-enable a Linux CI job~~ skipped (2026-10-11): local `ctest` is enough for now.
 - [ ] **Structure review** (added 2026-10-11). Glimpse was built by hand in 2025 without today's goals, while
       Glint was started fresh with them. Before Stage 1 builds on the current layout, check how well it fits:
   - **Folders and file names:** do `src/core`, `hittables/`, the header-heavy files and the scene registry
@@ -153,7 +153,8 @@ Read: pbrt §2.3–2.4, §8.1–8.8, §A.4–A.5; RTG1 ch16 *Sampling Transforma
 - [ ] **10 `path_inspector`**
   - Click a pixel in the viewer to record its path vertices, then draw them over the image and list the
     pdfs, weights and contributions at each bounce.
-  - Revives (or replaces) the dormant `ray_visualizer` / `ray_analysis` / `ray_debug` code.
+  - Written fresh. The dormant 2025 attempt (`ray_visualizer` / `ray_analysis` / `ray_debug`) was deleted in the
+    Stage 0 structure review; git history has it.
 
 Read: pbrt §13.1–13.4, §2.2 (MIS), §6.8 (rounding error); RTG1 ch6 *Avoiding Self-Intersection*, ch17
 *Ignoring the Inconvenient*; RTG2 ch14 *The Reference Path Tracer*, ch20 *Multiple Importance Sampling 101*.
