@@ -1,6 +1,6 @@
 #include <thread>
 
-#include "glimpse/util/common.h"
+#include "glimpse/util/rng.h"
 
 //
 #include "../test_cfg.h"

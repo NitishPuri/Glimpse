@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glimpse/ray.h"
+#include "glimpse/util/sampling.h"
 
 namespace glimpse {
 

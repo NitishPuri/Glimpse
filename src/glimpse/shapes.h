@@ -2,7 +2,7 @@
 
 #include "glimpse/aggregates.h"
 #include "glimpse/interaction.h"
-#include "glimpse/util/onb.h"
+#include "glimpse/util/vecmath.h"
 
 namespace glimpse {
 

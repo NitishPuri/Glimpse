@@ -1,45 +1,21 @@
 #pragma once
 
-#include <chrono>
-#include <iostream>
-#include <limits>
-#include <memory>
+#include <cstdint>
 #include <random>
 
 namespace glimpse {
-
-// Using
-using std::make_shared;
-using std::shared_ptr;
-using std::sqrt;
-
-namespace math {
-// Constants
-const double infinity = std::numeric_limits<double>::infinity();
-const double pi = 3.1415926535897932385;
-
-// Utility functions
-inline double degrees_to_radians(double degrees) { return degrees * pi / 180.0; }
-
-inline double clamp(double x, double min, double max) {
-  if (x < min) return min;
-  if (x > max) return max;
-  return x;
-}
-
-}  // namespace math
 
 // The heart of our engine!
 class Random {
  private:
   // Thread-local generator
-  static thread_local std::mt19937 generator;
+  static inline thread_local std::mt19937 generator;
 
   // Global seed value (0 means use random seed)
-  static uint32_t global_seed;
+  static inline uint32_t global_seed = 0;
 
   // Thread-local initialization flag
-  static thread_local bool initialized;
+  static inline thread_local bool initialized = false;
 
  public:
   // Set a specific seed for deterministic results (0 means use random seed)

@@ -5,7 +5,9 @@
 #include "glad/glad.h"
 //
 #include "GLFW/glfw3.h"
-#include "glimpse/util/logger.h"
+#include "glimpse/util/log.h"
+
+namespace glimpse::gui {
 
 struct GLResources {
   GLResources(Logger& logger) : logger(logger) {}
@@ -22,3 +24,5 @@ struct GLResources {
   bool checkGLError(const std::string& functionName);
   void updateFramebuffer(const std::vector<uint8_t>& imageData);
 };
+
+}  // namespace glimpse::gui

@@ -5,6 +5,8 @@
 #include "app.h"
 #include "layout.h"
 
+namespace glimpse::gui {
+
 namespace {
 // Pins the next ImGui window to a rect of the responsive layout (re-applied every frame, so it follows resizes).
 void place_next_window(const glimpse::gui::Rect& r) {
@@ -240,3 +242,5 @@ void UIRenderer::maybeRenderOnParamChange(RayTracer& raytracer) {
     raytracer.renderSceneAsync();
   }
 }
+
+}  // namespace glimpse::gui

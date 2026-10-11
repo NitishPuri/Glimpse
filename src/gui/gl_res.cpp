@@ -4,6 +4,8 @@
 #include "config.h"
 #include "layout.h"
 
+namespace glimpse::gui {
+
 int GLResources::initGL() {
   // Initialize GLFW and OpenGL
   if (!glfwInit()) {
@@ -66,3 +68,5 @@ void GLResources::updateFramebuffer(const std::vector<uint8_t>& imageData) {
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, renderWidth, renderHeight, GL_RGB, GL_UNSIGNED_BYTE, imageData.data());
   if (checkGLError("glTexSubImage2D")) return;
 }
+
+}  // namespace glimpse::gui

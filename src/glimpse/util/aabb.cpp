@@ -1,6 +1,6 @@
 #include "glimpse/util/aabb.h"
 
-using namespace glimpse;
+namespace glimpse {
 
 bool aabb::hit(const ray& r, interval ray_t) const {
   const point3& ray_orig = r.origin();
@@ -25,3 +25,5 @@ bool aabb::hit(const ray& r, interval ray_t) const {
   }
   return true;
 }
+
+}  // namespace glimpse

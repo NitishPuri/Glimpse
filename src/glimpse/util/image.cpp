@@ -1,8 +1,8 @@
 #include "glimpse/util/image.h"
 
-// #ifdef _MSC_VER
-#pragma warning(push, 0)
-// #endif
+#ifdef _MSC_VER
+#pragma warning(push, 0)  // stb is compiled here; GCC/Clang get it via -isystem
+#endif
 
 #include <algorithm>
 #include <iostream>
@@ -15,8 +15,6 @@
 // Include STB libraries
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
-
-using namespace glimpse;
 
 namespace glimpse {
 // Wrapper for STB image data
@@ -35,7 +33,6 @@ struct StbImageData {
   }
 };
 
-}  // namespace glimpse
 
 // Constructors
 Image::Image(int width, int height) { initialize(width, height); }
@@ -196,7 +193,8 @@ bool Image::write(const std::string& filename) const {
   return true;
 }
 
-// Restore MSVC compiler warnings
-// #ifdef _MSC_VER
+}  // namespace glimpse
+
+#ifdef _MSC_VER
 #pragma warning(pop)
-// #endif
+#endif

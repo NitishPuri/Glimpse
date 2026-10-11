@@ -59,6 +59,10 @@ class aabb {
   }
 };
 
+// C++17 inline definitions (formerly in glimpse.cpp).
+inline const aabb aabb::empty = aabb(interval::empty, interval::empty, interval::empty);
+inline const aabb aabb::universe = aabb(interval::universe, interval::universe, interval::universe);
+
 inline aabb operator+(const aabb& bbox, const vec3& offset) {
   return aabb(bbox.x + offset.x(), bbox.y + offset.y(), bbox.z + offset.z());
 }

@@ -9,7 +9,7 @@
 #include "glimpse/render.h"
 #include "glimpse/scenes.h"
 
-using namespace glimpse;
+namespace glimpse::gui {
 
 struct RayTracer {
   Scene scene;
@@ -95,3 +95,5 @@ struct RayTracer {
     }
   }
 };
+
+}  // namespace glimpse::gui

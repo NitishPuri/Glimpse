@@ -164,8 +164,10 @@ Each step is one reviewable chunk, and the tests stay green after each:
    - 3a *(done 2026-10-11)*: `src/core` → `src/glimpse` (+ `util/`), every include a full `"glimpse/..."` path.
    - 3b-i *(done 2026-10-11)*: `hittables/` → `interaction.h`, `instancing.h`, `shapes`, `aggregates`, `media.h`;
      `materials.h`, `textures`; `ray_color` → `integrators.{h,cpp}`.
-   - 3b-ii: util splits (`vecmath`, `sampling`, `rng`, `log`), `glimpse.cpp` statics to their types, namespace
-     hygiene (no global `using namespace`, `glimpse::gui`), `ext/` as system includes, the pre-existing warnings.
+   - 3b-ii *(done 2026-10-11)*: `common.h` → `math.h` + `rng.h`; `vec3.h` + `onb.h` → `vecmath.h` (warps → `sampling.h`);
+     `logger.h` → `log.h`; `glimpse.cpp` statics → C++17 inline definitions; no global `using namespace`; GUI in
+     `glimpse::gui`; `ext/` as system includes. The clean build is down to 1 warning (`scenes.cpp` unused `c`,
+     left for step 7: removing it changes `untitled_1`'s random sequence).
 4. **Scene registry** as a single ordered table; scene families split into files.
 5. **Tests self-register** (boost.ut suites); the manual list in `testing.cpp` goes.
 6. **Naming** per D1, as a mechanical rename. If D1 = keep, this step is dropped.

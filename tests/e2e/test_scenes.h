@@ -5,7 +5,7 @@
 #include "glimpse/shapes.h"
 #include "glimpse/materials.h"
 #include "glimpse/scenes.h"
-#include "glimpse/util/vec3.h"
+#include "glimpse/util/vecmath.h"
 
 // Simple scene with a single sphere
 inline Scene create_simple_sphere_scene() {

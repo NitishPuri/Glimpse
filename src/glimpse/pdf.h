@@ -13,7 +13,8 @@
 
 #include "glimpse/aggregates.h"
 #include "glimpse/shapes.h"
-#include "glimpse/util/onb.h"
+#include "glimpse/util/vecmath.h"
+#include "glimpse/util/sampling.h"
 
 namespace glimpse {
 

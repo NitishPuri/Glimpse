@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "glimpse/util/vec3.h"
+#include "glimpse/util/vecmath.h"
 
 namespace glimpse {
 

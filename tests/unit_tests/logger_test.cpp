@@ -1,4 +1,4 @@
-#include "glimpse/util/logger.h"
+#include "glimpse/util/log.h"
 
 #include <filesystem>
 #include <fstream>
@@ -6,6 +6,8 @@
 
 //
 #include "../test_cfg.h"
+
+using namespace glimpse;
 
 void logger_test() {
   using namespace boost::ut;

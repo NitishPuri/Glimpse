@@ -10,6 +10,8 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include "raytracer.h"
 
+namespace glimpse::gui {
+
 class AppWindow;
 
 class UIRenderer {
@@ -33,3 +35,5 @@ class UIRenderer {
 
   Logger& logger;
 };
+
+}  // namespace glimpse::gui

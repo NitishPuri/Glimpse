@@ -1,4 +1,4 @@
-#include "glimpse/util/vec3.h"
+#include "glimpse/util/vecmath.h"
 
 #include "../test_cfg.h"
 

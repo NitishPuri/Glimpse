@@ -3,7 +3,7 @@
 
 #include "glimpse/glimpse.h"
 
-using namespace glimpse;
+namespace glimpse {
 
 Scene random_scene() {
   hittable_list world;
@@ -515,3 +515,5 @@ std::vector<std::string> Scene::SceneNames = {"directions_test",    "two_diffuse
                                               "simple_light",       "cornell_box",
                                               "random_scene",       "cornell_smoke",
                                               "final_scene"};
+
+}  // namespace glimpse

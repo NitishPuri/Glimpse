@@ -112,12 +112,17 @@ Targets: `Glimpse` (static library, a recursive glob over `src/glimpse`), `Glimp
   Lights are a separate `hittable_list` that must duplicate emitter geometry from `world`.
 - `Film` keeps per-pixel sample counts and sums. The Welford mean/variance code exists but is commented
   out, so variance always reads zero. Adaptive sampling depends on it.
-- `Random` (`common.h`) uses a thread-local `mt19937` with a global seed (`Random::set_seed`, 0 = random).
+- `Random` (`util/rng.h`) uses a thread-local `mt19937` with a global seed (`Random::set_seed`, 0 = random).
   Determinism across thread counts is not guaranteed.
 
 **Scenes** (`scenes.cpp`): each scene is a free function that returns a `Scene` (world, lights,
 background, `camera`). It is registered in `Scene::SceneMap` (name → factory) **and** in `Scene::SceneNames`. The
 order of that vector is the CLI `--scene` index and the GUI's combo order. A new scene needs both entries.
+
+**Utilities** (`src/glimpse/util/`): `math.h` (constants, `degrees_to_radians`), `rng.h` (`Random`, `random_double`),
+`vecmath.h` (`vec3`/`point3`/`color`, `onb`), `sampling.h` (warps: `random_unit_vector`, `random_cosine_direction`,
+...), `interval.h`, `aabb`, `image`, `log.h` (`Logger`, `log_file_for`), `cli_options`. The viewer code is in
+`namespace glimpse::gui`. Nothing in `src/` has a global `using namespace`.
 
 **Geometry** (pbrt-like split): `interaction.h` (`hit_record` + the `hittable` interface), `shapes.{h,cpp}`
 (`sphere`, `moving_sphere`, `quad` + `box()`), `aggregates.{h,cpp}` (`hittable_list`, `bvh_node`), `instancing.h`

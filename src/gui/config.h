@@ -2,6 +2,8 @@
 
 #include <string>
 
+namespace glimpse::gui {
+
 // GL Window dimensions
 const int WINDOW_WIDTH = 1800;
 const int WINDOW_HEIGHT = 1600;
@@ -24,3 +26,5 @@ struct ImGuiParams {
   float lookFrom[3] = {13.0f, 2.0f, 3.0f};
   float lookAt[3] = {0.0f, 0.0f, 0.0f};
 };
+
+}  // namespace glimpse::gui

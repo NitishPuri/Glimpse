@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glimpse/util/common.h"
+#include "glimpse/util/math.h"
 
 namespace glimpse {
 
@@ -37,6 +37,10 @@ class interval {
 
   static const interval empty, universe;
 };
+
+// C++17 inline definitions (formerly in glimpse.cpp).
+inline const interval interval::empty = interval(+math::infinity, -math::infinity);
+inline const interval interval::universe = interval(-math::infinity, +math::infinity);
 
 inline interval operator+(const interval& ival, double displacement) {
   return interval(ival.min + displacement, ival.max + displacement);

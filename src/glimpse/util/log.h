@@ -14,6 +14,9 @@
 
 #define CONSOLE_LOG 1
 
+namespace glimpse {
+
+
 class Logger {
  public:
   Logger(const std::string &log_file_path) : log_file_path(log_file_path) {
@@ -72,3 +75,5 @@ inline std::string log_file_for(const std::string &app) {
   ss << "logs/" << app << '_' << std::put_time(std::localtime(&now), "%Y%m%d_%H%M%S") << ".log";
   return ss.str();
 }
+
+}  // namespace glimpse

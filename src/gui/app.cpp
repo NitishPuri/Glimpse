@@ -1,5 +1,7 @@
 #include "app.h"
 
+namespace glimpse::gui {
+
 int AppWindow::initApp() {
   if (gl_res.initGL() == -1) return -1;
 
@@ -63,9 +65,12 @@ void AppWindow::run() {
   glfwTerminate();
 }
 
+}  // namespace glimpse::gui
+
+
 int main() {
-  Logger logger(log_file_for("gui"));
-  AppWindow app(logger);
+  glimpse::Logger logger(glimpse::log_file_for("gui"));
+  glimpse::gui::AppWindow app(logger);
   if (app.initApp() != 0) {
     return -1;
   }

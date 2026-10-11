@@ -3,6 +3,7 @@
 #include "glimpse/interaction.h"
 #include "glimpse/pdf.h"
 #include "glimpse/textures.h"
+#include "glimpse/util/sampling.h"
 
 namespace glimpse {
 

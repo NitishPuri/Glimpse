@@ -1,6 +1,10 @@
 #pragma once
 
-#include "glimpse/util/common.h"
+#include <cmath>
+#include <iostream>
+
+#include "glimpse/util/math.h"
+#include "glimpse/util/rng.h"
 
 namespace glimpse {
 
@@ -91,32 +95,6 @@ inline vec3 unit_vector(const vec3& v) { return v / v.length(); }
 
 inline vec3 sqrt(vec3 v) { return vec3(sqrt(v.e[0]), sqrt(v.e[1]), sqrt(v.e[2])); }
 
-inline vec3 random_unit_vector() {
-  while (true) {
-    auto p = vec3::random(-1, 1);
-    auto lensq = p.length_squared();
-    if (1e-160 < lensq && lensq <= 1.0) return p / sqrt(lensq);
-  }
-}
-
-inline vec3 random_on_hemisphere(const vec3& normal) {
-  vec3 on_unit_sphere = random_unit_vector();
-  if (dot(on_unit_sphere, normal) > 0.0)  // In the same hemisphere as the normal
-    return on_unit_sphere;
-  else
-    return -on_unit_sphere;
-}
-
-inline vec3 random_in_unit_disk() {
-  while (true) {
-    auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0);
-    if (p.length_squared() < 1) return p;
-  }
-}
-
-// Generates a random point within a unit square centered at the origin
-inline vec3 sample_square() { return vec3(random_double() - 0.5, random_double() - 0.5, 0); }
-
 // Reflects vector v around normal vector n
 // project v onto n and subtract the result twice to get the reflected vector
 /*
@@ -138,16 +116,38 @@ inline vec3 refract(const vec3& uv, const vec3& n, double etai_over_etat) {
   return r_out_perp + r_out_parallel;
 }
 
-inline vec3 random_cosine_direction() {
-  auto r1 = random_double();
-  auto r2 = random_double();
+// onb: orthonormal basis (from Ray Tracing: The Rest of Your Life).
+//==============================================================================================
+// Originally written in 2016 by Peter Shirley <ptrshrl@gmail.com>
+//
+// To the extent possible under law, the author(s) have dedicated all copyright and related and
+// neighboring rights to this software to the public domain worldwide. This software is
+// distributed without any warranty.
+//
+// You should have received a copy (see file COPYING.txt) of the CC0 Public Domain Dedication
+// along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+//==============================================================================================
 
-  auto phi = 2 * math::pi * r1;
-  auto x = std::cos(phi) * std::sqrt(r2);
-  auto y = std::sin(phi) * std::sqrt(r2);
-  auto z = std::sqrt(1 - r2);
+class onb {
+ public:
+  onb(const vec3& n) {
+    axis[2] = unit_vector(n);
+    vec3 a = (std::fabs(axis[2].x()) > 0.9) ? vec3(0, 1, 0) : vec3(1, 0, 0);
+    axis[1] = unit_vector(cross(axis[2], a));
+    axis[0] = cross(axis[2], axis[1]);
+  }
 
-  return vec3(x, y, z);
-}
+  const vec3& u() const { return axis[0]; }
+  const vec3& v() const { return axis[1]; }
+  const vec3& w() const { return axis[2]; }
+
+  vec3 transform(const vec3& v) const {
+    // Transform from basis coordinates to local space.
+    return (v[0] * axis[0]) + (v[1] * axis[1]) + (v[2] * axis[2]);
+  }
+
+ private:
+  vec3 axis[3];
+};
 
 }  // namespace glimpse

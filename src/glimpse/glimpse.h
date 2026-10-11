@@ -10,7 +10,8 @@
  ░▒▓██████▓▒░░▒▓████████▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓███████▓▒░░▒▓████████▓▒░
  */
 
-#include "glimpse/util/vec3.h"
+#include "glimpse/util/vecmath.h"
+#include "glimpse/util/sampling.h"
 #include "glimpse/util/interval.h"
 #include "glimpse/ray.h"
 #include "glimpse/util/aabb.h"

@@ -7,13 +7,13 @@
 #endif
 
 #include "glimpse/camera.h"
-#include "glimpse/util/common.h"
+#include "glimpse/util/rng.h"
 #include "glimpse/aggregates.h"
 #include "glimpse/shapes.h"
 #include "glimpse/materials.h"
 #include "glimpse/integrators.h"
 #include "glimpse/render.h"
-#include "glimpse/util/vec3.h"
+#include "glimpse/util/vecmath.h"
 
 namespace glimpse {
 

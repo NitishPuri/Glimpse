@@ -5,7 +5,7 @@
 #include "glimpse/util/image.h"
 #include "glimpse/materials.h"
 #include "glimpse/ray.h"
-#include "glimpse/util/vec3.h"
+#include "glimpse/util/vecmath.h"
 
 //
 #include "../test_cfg.h"

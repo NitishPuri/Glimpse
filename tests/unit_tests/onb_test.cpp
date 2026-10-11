@@ -1,4 +1,4 @@
-#include "glimpse/util/onb.h"
+#include "glimpse/util/vecmath.h"
 
 #include "../test_cfg.h"
 

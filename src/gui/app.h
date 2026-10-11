@@ -1,10 +1,12 @@
 #pragma once
 
 #include "config.h"
-#include "glimpse/util/logger.h"
+#include "glimpse/util/log.h"
 #include "gl_res.h"
 #include "raytracer.h"
 #include "ui.h"
+
+namespace glimpse::gui {
 
 class AppWindow {
  public:
@@ -20,3 +22,5 @@ class AppWindow {
   GLResources gl_res;
   UIRenderer ui;
 };
+
+}  // namespace glimpse::gui

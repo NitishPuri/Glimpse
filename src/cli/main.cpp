@@ -4,12 +4,12 @@
 
 #include "glimpse/util/cli_options.h"
 #include "glimpse/glimpse.h"
-#include "glimpse/util/logger.h"
+#include "glimpse/util/log.h"
 #include "glimpse/render.h"
 
-using namespace glimpse;
-
 int main(int argc, char **argv) {
+  using namespace glimpse;
+
   const ParseResult parsed = parse_command_line(argc, argv);
   if (!parsed.ok()) {
     std::cerr << "error: " << parsed.error << "\n\n" << usage();

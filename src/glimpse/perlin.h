@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glimpse/util/vec3.h"
+#include "glimpse/util/vecmath.h"
 
 namespace glimpse {
 
