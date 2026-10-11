@@ -171,7 +171,8 @@ Each step is one reviewable chunk, and the tests stay green after each:
 4. **Scene registry** as a single ordered table; scene families split into files. *(done 2026-10-11)*
 5. **Tests self-register** (boost.ut suites); the manual list in `testing.cpp` goes. *(done 2026-10-11; CMake globs
    the test files too)*
-6. **Naming** per D1, as a mechanical rename. If D1 = keep, this step is dropped.
+6. **Naming** per D1, as a mechanical rename. *(done 2026-10-11, per the table in section 6: 431 identifiers +
+   36 types in 69 files; 13/13 scenes render byte-identical with `--seed 7`)*
 7. **File-header comments** across the tree, plus resolving the TODOs and the commented-out code. Each item
    is decided in context; some are alternative scene setups.
 
@@ -195,3 +196,61 @@ Behaviour changes found on the way (like the bugs in Stage 0) are listed separat
 - **D5 — Windows tooling.** Keep the `.bat` scripts and the `win` preset (untested), or drop Windows support
   until it's needed. *Recommendation: keep the `.bat` scripts, drop `CMakeSettings.json` and the stale
   workflows.*
+
+---
+
+## 6. Step 6 — rename table (D1), for review
+
+This is a mechanical, token-level rename (no clang tooling here). **String literals are never touched**, so scene
+names (`"cornell_box"`), CLI flags and test names stay as they are. Comments are updated along with the code. The
+check is that the build is clean, all 39 tests pass, and **all 13 scenes render byte-identical images** with a
+fixed `--seed`, before and after.
+
+### 6.1 Types → `PascalCase` (acronyms upper-case, as in pbrt: `BVHAggregate`, `BSDF`)
+
+| Now | New | Now | New | Now | New |
+|---|---|---|---|---|---|
+| `vec3` | `Vec3` | `point3` | `Point3` | `color` | `Color` |
+| `ray` | `Ray` | `interval` | `Interval` | `aabb` | `AABB` |
+| `onb` | `ONB` | `perlin` | `Perlin` | `camera` | `Camera` |
+| `hit_record` | `HitRecord` | `hittable` | `Hittable` | `hittable_list` | `HittableList` |
+| `bvh_node` | `BVHNode` | `sphere` | `Sphere` | `moving_sphere` | `MovingSphere` |
+| `quad` | `Quad` | `translate` | `Translate` | `rotate_y` | `RotateY` |
+| `constant_medium` | `ConstantMedium` | `material` | `Material` | `scatter_record` | `ScatterRecord` |
+| `lambertian` | `Lambertian` | `metal` | `Metal` | `dielectric` | `Dielectric` |
+| `diffuse_light` | `DiffuseLight` | `isotropic` | `Isotropic` | `texture` | `Texture` |
+| `solid_color` | `SolidColor` | `checker_texture` | `CheckerTexture` | `image_texture` | `ImageTexture` |
+| `noise_texture` | `NoiseTexture` | `pdf` | `PDF` | `sphere_pdf` | `SpherePDF` |
+| `cosine_pdf` | `CosinePDF` | `hittable_pdf` | `HittablePDF` | `mixture_pdf` | `MixturePDF` |
+
+These are already PascalCase and stay: `Film`, `Image`, `ImageColor`, `Random`, `Renderer`, `RenderSectionArgs`,
+`Scene`, `SceneEntry`, `Logger`, `CmdOptions`, `ParseResult`, `StbImageData`, and the GUI types. `uchar` stays (a
+primitive-like alias, as with `uint8_t`).
+
+### 6.2 Functions, members, locals and parameters → `camelCase`
+
+**Rule:** every snake_case identifier *defined in our code* is converted, `ray_color` → `rayColor`,
+`samples_per_pixel` → `samplesPerPixel`, `random_double` → `randomDouble`. That's about 420 identifiers, generated
+by scanning `src/` and `tests/`.
+- **Locals and parameters are included**, so a file never mixes styles. pbrt does the same.
+- **Not renamed:** names from the standard library or vendored code (`push_back`, `make_shared`, `shared_ptr`,
+  `c_str`, `stbi_*`, `uniform_real_distribution`, the boost.ut event names in a commented block, ...).
+- Our own names that merely *coincide* with library words (`aspect_ratio`, `inv_scale`, `bytes_per_pixel`,
+  `num_threads`, ...) are renamed.
+
+### 6.3 Special cases
+
+| Now | New | Why |
+|---|---|---|
+| `Renderer::stop_rendering` | `Renderer::stopRequested` | `stopRendering` is already `RayTracer::stopRendering()`, the method that sets it |
+| `Film::m_Width`, `m_Height` | `width`, `height` | pbrt-style plain members, no `m_` |
+| `image_texture::m_image` | `image` | same |
+| local `material`, `color`, `pdf`, `texture` variables (showcase scene, `Image::set` parameter, a few tests) | `mat`, `c`, `p`, `tex` | they'd otherwise be caught by the type rename |
+
+### 6.4 Unchanged
+
+- File names stay snake_case (as in Glint).
+- `namespace glimpse`, `glimpse::gui` and `math::` stay.
+- Enum constants (`NONE`/`FLY`/`ORBIT`, `IDLE`/`RENDERING`/`DONE`) and macros/constants (`WINDOW_WIDTH`,
+  `CONSOLE_LOG`) keep ALL_CAPS. `None` would also clash with X11's macro.
+- `tests/e2e/print_ascii_image.h` is renamed with everything else, even though Stage 1 deletes it.

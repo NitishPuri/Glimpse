@@ -30,7 +30,7 @@ as the work. `ROADMAP.md` is only the 2025 history.
 
 Rules that come with it:
 - **One new idea per technique; refactors only when a technique needs them.** The RTIOW-shaped core (recursive
-  `ray_color`, `material::scatter`, `shared_ptr`, `double`) changes only at the technique that requires it, and that
+  `rayColor`, `Material::scatter`, `shared_ptr`, `double`) changes only at the technique that requires it, and that
   refactor is written up in the technique note.
 - **Old methods stay selectable** behind flags (`--integrator`, `--sampler`, ...) so every technique can be
   compared at equal time against what it replaces.
@@ -81,10 +81,10 @@ Windows (old setup): `configure.bat` → `build.bat`; `cli.bat`, `gui.bat`, `tes
 
 State (Stage 0, 2026-10-11): the library, CLI, viewer and tests build with GCC 11, and the tests pass under ctest.
 - CLI flags: `--scene <name|index> --spp --width --depth --seed --out --list-scenes --help`.
-  - `--spp` is rounded down to a square (the stratified grid is `sqrt_spp × sqrt_spp`).
+  - `--spp` is rounded down to a square (the stratified grid is `sqrtSpp × sqrtSpp`).
   - `--seed` is reproducible on one machine, but not across thread counts (technique 03).
   - `--out` takes `.png/.jpg/.bmp/.tga` (PFM comes with technique 01).
-- `Renderer::render_scene` calls `cam.initialize()` itself, and the stop flag aborts capped renders too.
+- `Renderer::renderScene` calls `cam.initialize()` itself, and the stop flag aborts capped renders too.
 - `Image` rows are top-down, like image files: the renderer converts from camera `v` when writing, and the viewer
   doesn't flip.
 - Scenes declare their own `scene.lights`.
@@ -100,39 +100,39 @@ Targets: `Glimpse` (static library, a recursive glob over `src/glimpse`), `Glimp
 `Glimpse_gui` (`src/gui`) and `Glimpse_tests`.
 
 **Rendering pipeline** (`src/glimpse/render.cpp`, integrator in `integrators.cpp`):
-- `Renderer::render_scene(Scene, Image&, progress*)` builds a `bvh_node` from `scene.world` on every render.
+- `Renderer::renderScene(Scene, Image&, progress*)` builds a `BVHNode` from `scene.world` on every render.
   It then splits the image **by rows across `hardware_concurrency()` threads** using `std::async`.
-- Each thread loops over stratified sub-pixel cells (`cam.sqrt_spp`²), then over its rows and pixels. It calls
-  `ray_color(...)` and adds the sample to the shared `Film`. Then it writes the running mean, gamma-corrected
-  with `sqrt`, into `Image` via `set_float`. The GUI uploads that same buffer while rendering is still going.
-- `cam.uncapped_spp` switches to `render_section_uncap`, which repeats passes until the static
-  `Renderer::stop_rendering` flag is set (the GUI's stop button).
-- `ray_color` is recursive. Emission plus scatter: specular materials use `srec.skip_pdf`. Otherwise it
-  samples a `mixture_pdf` (light `hittable_pdf` + material pdf) **only if `scene.lights` is non-empty**.
-  Lights are a separate `hittable_list` that must duplicate emitter geometry from `world`.
+- Each thread loops over stratified sub-pixel cells (`cam.sqrtSpp`²), then over its rows and pixels. It calls
+  `rayColor(...)` and adds the sample to the shared `Film`. Then it writes the running mean, gamma-corrected
+  with `sqrt`, into `Image` via `setFloat`. The GUI uploads that same buffer while rendering is still going.
+- `cam.uncappedSpp` switches to `renderSectionUncap`, which repeats passes until the static
+  `Renderer::stopRequested` flag is set (the GUI's stop button).
+- `rayColor` is recursive. Emission plus scatter: specular materials use `srec.skipPdf`. Otherwise it
+  samples a `MixturePDF` (light `HittablePDF` + material pdf) **only if `scene.lights` is non-empty**.
+  Lights are a separate `HittableList` that must duplicate emitter geometry from `world`.
 - `Film` keeps per-pixel sample counts and sums. The Welford mean/variance code exists but is commented
   out, so variance always reads zero. Adaptive sampling depends on it.
-- `Random` (`util/rng.h`) uses a thread-local `mt19937` with a global seed (`Random::set_seed`, 0 = random).
+- `Random` (`util/rng.h`) uses a thread-local `mt19937` with a global seed (`Random::setSeed`, 0 = random).
   Determinism across thread counts is not guaranteed.
 
-**Scenes** (`src/glimpse/scenes/`): a `Scene` (`scene.h`) is world + lights + background + `camera`. Factories live in
+**Scenes** (`src/glimpse/scenes/`): a `Scene` (`scene.h`) is world + lights + background + `Camera`. Factories live in
 family files (`rtiow.cpp`, `cornell.cpp`, `showcase.cpp`), are declared in `factories.h`, and are listed once in
 `registry.cpp`. `sceneRegistry()` is an ordered table that the CLI index, `--list-scenes` and the viewer combo all
 read, so new scenes go at the end. `findScene(name)` looks one up by name.
 
-**Utilities** (`src/glimpse/util/`): `math.h` (constants, `degrees_to_radians`), `rng.h` (`Random`, `random_double`),
-`vecmath.h` (`vec3`/`point3`/`color`, `onb`), `sampling.h` (warps: `random_unit_vector`, `random_cosine_direction`,
-...), `interval.h`, `aabb`, `image`, `log.h` (`Logger`, `log_file_for`), `cli_options`. The viewer code is in
+**Utilities** (`src/glimpse/util/`): `math.h` (constants, `degreesToRadians`), `rng.h` (`Random`, `randomDouble`),
+`vecmath.h` (`Vec3`/`Point3`/`Color`, `ONB`), `sampling.h` (warps: `randomUnitVector`, `randomCosineDirection`,
+...), `interval.h`, `AABB`, `image`, `log.h` (`Logger`, `logFileFor`), `cli_options`. The viewer code is in
 `namespace glimpse::gui`. Nothing in `src/` has a global `using namespace`.
 
-**Geometry** (pbrt-like split): `interaction.h` (`hit_record` + the `hittable` interface), `shapes.{h,cpp}`
-(`sphere`, `moving_sphere`, `quad` + `box()`), `aggregates.{h,cpp}` (`hittable_list`, `bvh_node`), `instancing.h`
-(`translate`, `rotate_y`), `media.h` (`constant_medium`). Materials (`materials.h`) return a `scatter_record` holding
-either a pdf or a `skip_pdf_ray`; textures are in `textures.{h,cpp}`.
+**Geometry** (pbrt-like split): `interaction.h` (`HitRecord` + the `Hittable` interface), `shapes.{h,cpp}`
+(`Sphere`, `MovingSphere`, `Quad` + `box()`), `aggregates.{h,cpp}` (`HittableList`, `BVHNode`), `instancing.h`
+(`Translate`, `RotateY`), `media.h` (`ConstantMedium`). Materials (`materials.h`) return a `ScatterRecord` holding
+either a pdf or a `skipPdfRay`; textures are in `textures.{h,cpp}`.
 
 **GUI** (`src/gui`): `AppWindow` owns `GLResources` (GLFW window, GL texture that shows the `Image`), `UI`
 (ImGui/ImPlot panels: scene choice, camera, SPP, depth, progress, plots, saving to `glimpse_results/`) and
-`RayTracer` (runs `render_scene` on a `std::async` future; the main thread polls `status`/`progress`).
+`RayTracer` (runs `renderScene` on a `std::async` future; the main thread polls `status`/`progress`).
 
 **Structure:** `docs/structure.md` is the approved structure review (2026-10-11). It moves the library to
 `src/glimpse/` with a pbrt-like file split and pbrt/Glint naming (`PascalCase` types, `camelCase` functions and
@@ -144,7 +144,7 @@ while the move is in progress.
 - boost.ut (`ext/boost/ut.hpp`, header only, `BOOST_UT_DISABLE_MODULE`). Each file in `tests/unit_tests/` registers
   its own suites: `static ut::suite<"name"> name_suite = [] { using namespace boost::ut; ... };`. CMake globs the test
   files (re-run configure after adding one), and `tests/testing.cpp` only sets the filter and calls `run()`.
-- Tests that write files use `test_output_path("x.png")` (`build/<cfg>/test_output`).
+- Tests that write files use `testOutputPath("x.png")` (`build/<cfg>/test_output`).
 - `tests/e2e/` (compiled, but **not registered**, so it doesn't run) renders small scenes (`test_scenes.h`) with a fixed seed and compares them against
   `tests/e2e/reference_images/` (gitignored, so they must be generated locally) with a per-channel tolerance.
   The ROADMAP notes these comparisons are flaky because of 8-bit encoding loss and threading. The planned

@@ -6,19 +6,19 @@ namespace glimpse {
 
 const std::vector<SceneEntry>& sceneRegistry() {
   static const std::vector<SceneEntry> registry = {
-      {"directions_test", directions_test},
-      {"two_diffuse_spheres", two_diffuse_spheres},
-      {"two_spheres_check", two_spheres_check},
-      {"material_showcase", material_showcase},
-      {"untitled_1", untitled_1},
+      {"directions_test", directionsTest},
+      {"two_diffuse_spheres", twoDiffuseSpheres},
+      {"two_spheres_check", twoSpheresCheck},
+      {"material_showcase", materialShowcase},
+      {"untitled_1", untitled1},
       {"earth", earth},
-      {"two_perlin_spheres", two_perlin_spheres},
+      {"two_perlin_spheres", twoPerlinSpheres},
       {"quads", quads},
-      {"simple_light", simple_light},
-      {"cornell_box", cornell_box},
-      {"random_scene", random_scene},
-      {"cornell_smoke", cornell_smoke},
-      {"final_scene", final_scene},
+      {"simple_light", simpleLight},
+      {"cornell_box", cornellBox},
+      {"random_scene", randomScene},
+      {"cornell_smoke", cornellSmoke},
+      {"final_scene", finalScene},
   };
   return registry;
 }

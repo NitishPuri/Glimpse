@@ -14,9 +14,9 @@ struct CmdOptions {
   std::optional<int> spp;
   std::optional<int> width;  // height follows from the scene camera's aspect ratio
   std::optional<int> depth;
-  std::optional<uint32_t> seed;  // >= 1; 0 is reserved by Random::set_seed for "random"
-  std::string out;               // empty: default_output_path(scene)
-  bool list_scenes = false;
+  std::optional<uint32_t> seed;  // >= 1; 0 is reserved by Random::setSeed for "random"
+  std::string out;               // empty: defaultOutputPath(scene)
+  bool listScenes = false;
   bool help = false;
 };
 
@@ -26,15 +26,15 @@ struct ParseResult {
   bool ok() const { return error.empty(); }
 };
 
-ParseResult parse_command_line(int argc, const char* const argv[]);
+ParseResult parseCommandLine(int argc, const char* const argv[]);
 std::string usage();
 
 // Accepts a scene name or a decimal index into sceneRegistry().
-std::optional<std::string> resolve_scene_name(const std::string& name_or_index);
+std::optional<std::string> resolveSceneName(const std::string& nameOrIndex);
 
-// Applies the overrides to the scene's camera, then recomputes its derived fields (image_height, sqrt_spp, ...).
-void apply_options(const CmdOptions& options, Scene& scene);
+// Applies the overrides to the scene's camera, then recomputes its derived fields (imageHeight, sqrtSpp, ...).
+void applyOptions(const CmdOptions& options, Scene& scene);
 
-std::string default_output_path(const std::string& scene_name);
+std::string defaultOutputPath(const std::string& sceneName);
 
 }  // namespace glimpse

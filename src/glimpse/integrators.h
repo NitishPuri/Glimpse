@@ -5,8 +5,8 @@
 
 namespace glimpse {
 
-// The RTIOW-style recursive path tracer. Lights are sampled through a mixture pdf when `has_lights`.
-color ray_color(const ray &r, const color &background, const hittable &world,  //
-                int depth, const hittable &lights, bool has_lights);
+// The RTIOW-style recursive path tracer. Lights are sampled through a mixture pdf when `hasLights`.
+Color rayColor(const Ray &r, const Color &background, const Hittable &world,  //
+                int depth, const Hittable &lights, bool hasLights);
 
 }  // namespace glimpse

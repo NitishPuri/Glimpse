@@ -2,26 +2,26 @@
 
 namespace glimpse {
 
-bool aabb::hit(const ray& r, interval ray_t) const {
-  const point3& ray_orig = r.origin();
-  const vec3& ray_dir = r.direction();
+bool AABB::hit(const Ray& r, Interval rayT) const {
+  const Point3& rayOrig = r.origin();
+  const Vec3& rayDir = r.direction();
 
   for (int axis = 0; axis < 3; axis++) {
-    const interval& ax = axis_interval(axis);
-    const double adinv = 1.0 / ray_dir[axis];
+    const Interval& ax = axisInterval(axis);
+    const double adinv = 1.0 / rayDir[axis];
 
-    auto t0 = (ax.min - ray_orig[axis]) * adinv;
-    auto t1 = (ax.max - ray_orig[axis]) * adinv;
+    auto t0 = (ax.min - rayOrig[axis]) * adinv;
+    auto t1 = (ax.max - rayOrig[axis]) * adinv;
 
     if (t0 < t1) {
-      if (t0 > ray_t.min) ray_t.min = t0;
-      if (t1 < ray_t.max) ray_t.max = t1;
+      if (t0 > rayT.min) rayT.min = t0;
+      if (t1 < rayT.max) rayT.max = t1;
     } else {
-      if (t1 > ray_t.min) ray_t.min = t1;
-      if (t0 < ray_t.max) ray_t.max = t0;
+      if (t1 > rayT.min) rayT.min = t1;
+      if (t0 < rayT.max) rayT.max = t0;
     }
 
-    if (ray_t.max <= ray_t.min) return false;
+    if (rayT.max <= rayT.min) return false;
   }
   return true;
 }

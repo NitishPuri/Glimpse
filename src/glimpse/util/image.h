@@ -27,15 +27,15 @@ class ImageColor {
   // Add constructor from float values
   // ImageColor(float r, float g, float b) {
   ImageColor(float r, float g, float b) {
-    rgb[0] = float_to_byte(r);
-    rgb[1] = float_to_byte(g);
-    rgb[2] = float_to_byte(b);
+    rgb[0] = floatToByte(r);
+    rgb[1] = floatToByte(g);
+    rgb[2] = floatToByte(b);
   }
 
  private:
   // Helper function to convert float to byte
-  static uchar float_to_byte(float value) {
-    // value = linear_to_gamma(value);
+  static uchar floatToByte(float value) {
+    // value = linearToGamma(value);
     if (value <= 0.0f) return 0;
     if (value >= 1.0f) return 255;
     return static_cast<uchar>(256.0f * value);
@@ -60,32 +60,32 @@ class Image {
   void initialize(int w, int h);
 
   // clear to blank image
-  void clear() { std::fill(pixel_data.begin(), pixel_data.end(), uchar{0}); }
+  void clear() { std::fill(pixelData.begin(), pixelData.end(), uchar{0}); }
 
   // Whether the image has valid data
-  bool is_valid() const { return !pixel_data.empty(); }
+  bool isValid() const { return !pixelData.empty(); }
 
   // Get/set pixel methods (byte-based)
   ImageColor get(int x, int y) const;
-  void set(int x, int y, const ImageColor& color);
+  void set(int x, int y, const ImageColor& c);
 
   // Get pixel as float values [0.0, 1.0]
-  vec3 get_float(int x, int y) const;
+  Vec3 getFloat(int x, int y) const;
 
   // Set pixel from float values [0.0, 1.0]
-  void set_float(int x, int y, float r, float g, float b);
+  void setFloat(int x, int y, float r, float g, float b);
 
   // File I/O
   bool read(const std::string& filename);
   bool write(const std::string& filename) const;
 
   // Access raw data
-  std::vector<uchar>& data() { return pixel_data; }
-  const std::vector<uchar>& data() const { return pixel_data; }
+  std::vector<uchar>& data() { return pixelData; }
+  const std::vector<uchar>& data() const { return pixelData; }
 
  private:
   // Convert linear RGB [0,1] to sRGB [0,1]
-  static float linear_to_srgb(float linear) {
+  static float linearToSrgb(float linear) {
     if (linear <= 0.0031308f) {
       return linear * 12.92f;
     } else {
@@ -94,22 +94,22 @@ class Image {
   }
 
   // Convert sRGB [0,1] to linear RGB [0,1]
-  static float srgb_to_linear(float srgb) {
+  static float srgbToLinear(float srgb) {
     if (srgb <= 0.04045f) {
       return srgb / 12.92f;
     } else {
       return pow((srgb + 0.055f) / 1.055f, 2.4f);
     }
   }
-  std::vector<uchar> pixel_data;
-  const int bytes_per_pixel = 3;  // RGB format
+  std::vector<uchar> pixelData;
+  const int bytesPerPixel = 3;  // RGB format
 
   // Helper methods
-  int get_index(int x, int y) const;
-  void clamp_coordinates(int& x, int& y) const;
+  int getIndex(int x, int y) const;
+  void clampCoordinates(int& x, int& y) const;
 
   // For loading with STB
-  std::unique_ptr<StbImageData> load_stb_image(const std::string& filename);
+  std::unique_ptr<StbImageData> loadStbImage(const std::string& filename);
 };
 
 }  // namespace glimpse

@@ -4,38 +4,38 @@
 
 namespace glimpse {
 
-class material;
+class Material;
 
-class hit_record {
+class HitRecord {
  public:
-  point3 p;
-  vec3 normal;
-  shared_ptr<material> mat;
+  Point3 p;
+  Vec3 normal;
+  shared_ptr<Material> mat;
   double t{};
   double u{};
   double v{};
-  bool front_face;
+  bool frontFace;
 
-  void set_face_normal(const ray& r, const vec3& outward_normal) {
+  void setFaceNormal(const Ray& r, const Vec3& outwardNormal) {
     // Sets the hit record normal vector.
-    // NOTE: the parameter `outward_normal` is assumed to have unit length.
+    // NOTE: the parameter `outwardNormal` is assumed to have unit length.
 
-    front_face = dot(r.direction(), outward_normal) < 0;
-    normal = front_face ? outward_normal : -outward_normal;
+    frontFace = dot(r.direction(), outwardNormal) < 0;
+    normal = frontFace ? outwardNormal : -outwardNormal;
   }
 };
 
-class hittable {
+class Hittable {
  public:
-  virtual ~hittable() = default;
+  virtual ~Hittable() = default;
 
-  virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
+  virtual bool hit(const Ray& r, Interval rayT, HitRecord& rec) const = 0;
 
-  virtual aabb bounding_box() const = 0;
+  virtual AABB boundingBox() const = 0;
 
-  virtual double pdf_value(const point3& origin, const vec3& direction) const { return 0.0; }
+  virtual double pdfValue(const Point3& origin, const Vec3& direction) const { return 0.0; }
 
-  virtual vec3 random(const point3& origin) const { return vec3(1, 0, 0); }
+  virtual Vec3 random(const Point3& origin) const { return Vec3(1, 0, 0); }
 };
 
 }  // namespace glimpse

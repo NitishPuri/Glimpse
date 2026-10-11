@@ -14,7 +14,7 @@
 using namespace glimpse;
 
 // Setup console for Unicode output (for Windows)
-void setup_console_for_unicode() {
+void setupConsoleForUnicode() {
 #ifdef _WIN32
   // Set console code page to UTF-8
   SetConsoleOutputCP(CP_UTF8);
@@ -28,60 +28,60 @@ void setup_console_for_unicode() {
 }
 
 // Print an image to console using ASCII characters
-void print_ascii_image(const Image& img, int max_width = 80, int max_height = 40) {
+void printAsciiImage(const Image& img, int maxWidth = 80, int maxHeight = 40) {
   // If image is too large, we'll downsample it to fit terminal
-  int display_width = std::min(img.width, max_width);
-  int display_height = std::min(img.height, max_height);
+  int displayWidth = std::min(img.width, maxWidth);
+  int displayHeight = std::min(img.height, maxHeight);
 
   // Calculate sampling step (how many pixels to skip)
-  double x_step = static_cast<double>(img.width) / display_width;
-  double y_step = static_cast<double>(img.height) / display_height;
+  double xStep = static_cast<double>(img.width) / displayWidth;
+  double yStep = static_cast<double>(img.height) / displayHeight;
 
   // ASCII character set from dark to bright
   const std::string chars = " .:-=+*#%@";
 
-  std::cout << "\nASCII Image Preview (" << display_width << "x" << display_height << "):\n";
+  std::cout << "\nASCII Image Preview (" << displayWidth << "x" << displayHeight << "):\n";
 
   // Top border
   std::cout << "+";
-  for (int x = 0; x < display_width; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth; x++) std::cout << "-";
   std::cout << "+\n";
 
   // Print each row
-  for (int y = 0; y < display_height; y++) {
+  for (int y = 0; y < displayHeight; y++) {
     std::cout << "|";  // Left border
 
-    for (int x = 0; x < display_width; x++) {
+    for (int x = 0; x < displayWidth; x++) {
       // Sample the original image
-      int orig_x = static_cast<int>(x * x_step);
-      int orig_y = static_cast<int>(y * y_step);
+      int origX = static_cast<int>(x * xStep);
+      int origY = static_cast<int>(y * yStep);
 
       // Get pixel and calculate brightness
-      ImageColor pixel = img.get(orig_x, orig_y);
+      ImageColor pixel = img.get(origX, origY);
 
       // Calculate perceived brightness (human eye is more sensitive to green)
       double brightness = 0.299 * pixel.rgb[0] + 0.587 * pixel.rgb[1] + 0.114 * pixel.rgb[2];
       brightness /= 255.0;  // Normalize to 0-1
 
       // Map brightness to ASCII character
-      int char_index = static_cast<int>(brightness * (chars.length() - 1));
-      char_index = std::min(0, std::max(static_cast<int>(chars.length()) - 1, char_index));
+      int charIndex = static_cast<int>(brightness * (chars.length() - 1));
+      charIndex = std::min(0, std::max(static_cast<int>(chars.length()) - 1, charIndex));
 
       // TODO: Experiment with character sets for different images
       //  Get dominant color (R, G, B)
-      char color_code = ' ';
+      char colorCode = ' ';
       if (pixel.rgb[0] > pixel.rgb[1] && pixel.rgb[0] > pixel.rgb[2] && pixel.rgb[0] > 100)
-        color_code = 'R';
+        colorCode = 'R';
       else if (pixel.rgb[1] > pixel.rgb[0] && pixel.rgb[1] > pixel.rgb[2] && pixel.rgb[1] > 100)
-        color_code = 'G';
+        colorCode = 'G';
       else if (pixel.rgb[2] > pixel.rgb[0] && pixel.rgb[2] > pixel.rgb[1] && pixel.rgb[2] > 100)
-        color_code = 'B';
+        colorCode = 'B';
 
       // Alternative: use ASCII color code with brightness
-      if (color_code != ' ' && chars[char_index] != ' ') {
-        std::cout << color_code;
+      if (colorCode != ' ' && chars[charIndex] != ' ') {
+        std::cout << colorCode;
       } else {
-        std::cout << chars[char_index];
+        std::cout << chars[charIndex];
       }
     }
 
@@ -90,59 +90,59 @@ void print_ascii_image(const Image& img, int max_width = 80, int max_height = 40
 
   // Bottom border
   std::cout << "+";
-  for (int x = 0; x < display_width; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth; x++) std::cout << "-";
   std::cout << "+\n\n";
 }
 
 // Print an image to console using colored ASCII characters (with ANSI colors)
-void print_color_ascii_image(const Image& img, int max_width = 120, int max_height = 40) {
+void printColorAsciiImage(const Image& img, int maxWidth = 120, int maxHeight = 40) {
   // If image is too large, we'll downsample it to fit terminal
-  int display_width = std::min(img.width, max_width);
-  int display_height = std::min(img.height, max_height);
+  int displayWidth = std::min(img.width, maxWidth);
+  int displayHeight = std::min(img.height, maxHeight);
 
   // Calculate sampling step (how many pixels to skip)
-  double x_step = static_cast<double>(img.width) / display_width;
-  double y_step = static_cast<double>(img.height) / display_height;
+  double xStep = static_cast<double>(img.width) / displayWidth;
+  double yStep = static_cast<double>(img.height) / displayHeight;
 
   // Use characters that are more likely to work across different terminals
   // ASCII only version as fallback
-  const std::string ascii_chars = " .:-=+*#%@";
+  const std::string asciiChars = " .:-=+*#%@";
 
   // Block characters - using simple blocks more likely to be supported
-  const std::string block_chars = "\xDB\xDB";  // Space and full block
+  const std::string blockChars = "\xDB\xDB";  // Space and full block
 
   // ASCII character set from dark to bright
   //   const std::string chars = " .:-=+*#%@";
   //   const std::string chars = "■■■";                       // \u0444
-  // Choose character set (use ascii_chars if having problems with block_chars)
-  const std::string& chars = block_chars;
+  // Choose character set (use asciiChars if having problems with blockChars)
+  const std::string& chars = blockChars;
 
-  std::cout << "\nColored ASCII Image Preview (" << display_width << "x" << display_height << "):\n";
+  std::cout << "\nColored ASCII Image Preview (" << displayWidth << "x" << displayHeight << "):\n";
 
   // Top border
   std::cout << "+";
-  for (int x = 0; x < display_width; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth; x++) std::cout << "-";
   std::cout << "+\n";
 
   // Print each row
-  for (int y = 0; y < display_height; y++) {
+  for (int y = 0; y < displayHeight; y++) {
     std::cout << "|";  // Left border
 
-    for (int x = 0; x < display_width; x++) {
+    for (int x = 0; x < displayWidth; x++) {
       // Sample the original image
-      int orig_x = static_cast<int>(x * x_step);
-      int orig_y = static_cast<int>(y * y_step);
+      int origX = static_cast<int>(x * xStep);
+      int origY = static_cast<int>(y * yStep);
 
       // Get pixel/
       // TODO: Actually downsample around the pixel and calculate average color, or gaussian blur
-      ImageColor pixel = img.get(orig_x, orig_y);
+      ImageColor pixel = img.get(origX, origY);
 
       // Calculate brightness and select character
       double brightness = 0.299 * pixel.rgb[0] + 0.587 * pixel.rgb[1] + 0.114 * pixel.rgb[2];
       brightness /= 255.0;  // Normalize to 0-1
 
-      int char_index = static_cast<int>(brightness * (chars.length() - 1));
-      char_index = std::max(0, std::min(static_cast<int>(chars.length()) - 1, char_index));
+      int charIndex = static_cast<int>(brightness * (chars.length() - 1));
+      charIndex = std::max(0, std::min(static_cast<int>(chars.length()) - 1, charIndex));
 
       // More accurate color determination
       int r = pixel.rgb[0];
@@ -153,113 +153,113 @@ void print_color_ascii_image(const Image& img, int max_width = 120, int max_heig
       double total = r + g + b;
       if (total < 30) {
         // Very dark - just use black text
-        std::cout << "\033[30m" << chars[char_index] << "\033[0m";
+        std::cout << "\033[30m" << chars[charIndex] << "\033[0m";
         continue;
       }
 
-      double r_ratio = r / total;
-      double g_ratio = g / total;
-      double b_ratio = b / total;
+      double rRatio = r / total;
+      double gRatio = g / total;
+      double bRatio = b / total;
 
       // Set thresholds for color detection
-      const double color_threshold = 0.4;     // Color needs to be at least this % of the total
-      const double neutral_threshold = 0.32;  // If all colors are about this even, it's grayscale
+      const double colorThreshold = 0.4;     // Color needs to be at least this % of the total
+      const double neutralThreshold = 0.32;  // If all colors are about this even, it's grayscale
 
       // Determine ANSI color code (simplifying to 8 colors)
-      int ansi_color;
+      int ansiColor;
 #if 0
       // Simplified color mapping - prioritize the dominant color channel
       if (pixel.rgb[0] > pixel.rgb[1] && pixel.rgb[0] > pixel.rgb[2]) {
         // Red dominant
         if (pixel.rgb[1] > 128 && pixel.rgb[2] > 128)
-          ansi_color = 97;  // Bright white
+          ansiColor = 97;  // Bright white
         else if (pixel.rgb[1] > 128)
-          ansi_color = 93;  // Bright yellow
+          ansiColor = 93;  // Bright yellow
         else if (pixel.rgb[2] > 128)
-          ansi_color = 95;  // Bright magenta
+          ansiColor = 95;  // Bright magenta
         else
-          ansi_color = 91;  // Bright red
+          ansiColor = 91;  // Bright red
       } else if (pixel.rgb[1] > pixel.rgb[0] && pixel.rgb[1] > pixel.rgb[2]) {
         // Green dominant
         if (pixel.rgb[0] > 128 && pixel.rgb[2] > 128)
-          ansi_color = 97;  // Bright white
+          ansiColor = 97;  // Bright white
         else if (pixel.rgb[0] > 128)
-          ansi_color = 93;  // Bright yellow
+          ansiColor = 93;  // Bright yellow
         else if (pixel.rgb[2] > 128)
-          ansi_color = 96;  // Bright cyan
+          ansiColor = 96;  // Bright cyan
         else
-          ansi_color = 92;  // Bright green
+          ansiColor = 92;  // Bright green
       } else if (pixel.rgb[2] > pixel.rgb[0] && pixel.rgb[2] > pixel.rgb[1]) {
         // Blue dominant
         if (pixel.rgb[0] > 128 && pixel.rgb[1] > 128)
-          ansi_color = 97;  // Bright white
+          ansiColor = 97;  // Bright white
         else if (pixel.rgb[0] > 128)
-          ansi_color = 95;  // Bright magenta
+          ansiColor = 95;  // Bright magenta
         else if (pixel.rgb[1] > 128)
-          ansi_color = 96;  // Bright cyan
+          ansiColor = 96;  // Bright cyan
         else
-          ansi_color = 94;  // Bright blue
+          ansiColor = 94;  // Bright blue
       } else {
         // No clear dominant - grayscale
         if (brightness > 0.7)
-          ansi_color = 97;  // Bright white
+          ansiColor = 97;  // Bright white
         else if (brightness > 0.4)
-          ansi_color = 37;  // White
+          ansiColor = 37;  // White
         else if (brightness > 0.2)
-          ansi_color = 90;  // Bright black (gray)
+          ansiColor = 90;  // Bright black (gray)
         else
-          ansi_color = 30;  // Black
+          ansiColor = 30;  // Black
       }
 #endif
 
 #if 1
 
       // Check if it's grayscale (all colors relatively even)
-      if (r_ratio > neutral_threshold && g_ratio > neutral_threshold && b_ratio > neutral_threshold) {
+      if (rRatio > neutralThreshold && gRatio > neutralThreshold && bRatio > neutralThreshold) {
         // Grayscale - choose based on brightness
         if (brightness > 0.8)
-          ansi_color = 97;  // Bright white
+          ansiColor = 97;  // Bright white
         else if (brightness > 0.5)
-          ansi_color = 37;  // White
+          ansiColor = 37;  // White
         else if (brightness > 0.25)
-          ansi_color = 90;  // Bright black (gray)
+          ansiColor = 90;  // Bright black (gray)
         else
-          ansi_color = 30;  // Black
+          ansiColor = 30;  // Black
       }
       // Check for primary and secondary colors
-      else if (r_ratio > color_threshold && g_ratio > color_threshold && b_ratio < 0.2) {
+      else if (rRatio > colorThreshold && gRatio > colorThreshold && bRatio < 0.2) {
         // Yellow (red + green)
-        ansi_color = (brightness > 0.6) ? 93 : 33;
-      } else if (r_ratio > color_threshold && b_ratio > color_threshold && g_ratio < 0.2) {
+        ansiColor = (brightness > 0.6) ? 93 : 33;
+      } else if (rRatio > colorThreshold && bRatio > colorThreshold && gRatio < 0.2) {
         // Magenta (red + blue)
-        ansi_color = (brightness > 0.6) ? 95 : 35;
-      } else if (g_ratio > color_threshold && b_ratio > color_threshold && r_ratio < 0.2) {
+        ansiColor = (brightness > 0.6) ? 95 : 35;
+      } else if (gRatio > colorThreshold && bRatio > colorThreshold && rRatio < 0.2) {
         // Cyan (green + blue)
-        ansi_color = (brightness > 0.6) ? 96 : 36;
-      } else if (r_ratio > color_threshold && r_ratio > g_ratio && r_ratio > b_ratio) {
+        ansiColor = (brightness > 0.6) ? 96 : 36;
+      } else if (rRatio > colorThreshold && rRatio > gRatio && rRatio > bRatio) {
         // Red dominant
-        ansi_color = (brightness > 0.6) ? 91 : 31;
-      } else if (g_ratio > color_threshold && g_ratio > r_ratio && g_ratio > b_ratio) {
+        ansiColor = (brightness > 0.6) ? 91 : 31;
+      } else if (gRatio > colorThreshold && gRatio > rRatio && gRatio > bRatio) {
         // Green dominant
-        ansi_color = (brightness > 0.6) ? 92 : 32;
-      } else if (b_ratio > color_threshold && b_ratio > r_ratio && b_ratio > g_ratio) {
+        ansiColor = (brightness > 0.6) ? 92 : 32;
+      } else if (bRatio > colorThreshold && bRatio > rRatio && bRatio > gRatio) {
         // Blue dominant
-        ansi_color = (brightness > 0.6) ? 94 : 34;
+        ansiColor = (brightness > 0.6) ? 94 : 34;
       } else {
         // Fallback to grayscale
         if (brightness > 0.7)
-          ansi_color = 97;  // Bright white
+          ansiColor = 97;  // Bright white
         else if (brightness > 0.4)
-          ansi_color = 37;  // White
+          ansiColor = 37;  // White
         else if (brightness > 0.2)
-          ansi_color = 90;  // Bright black (gray)
+          ansiColor = 90;  // Bright black (gray)
         else
-          ansi_color = 30;  // Black
+          ansiColor = 30;  // Black
       }
 
 #endif
       // Print colored character using ANSI escape codes   ■
-      std::cout << "\033[" << ansi_color << "m" << chars[char_index] << "\033[0m";
+      std::cout << "\033[" << ansiColor << "m" << chars[charIndex] << "\033[0m";
     }
 
     std::cout << "|\n";  // Right border
@@ -267,33 +267,33 @@ void print_color_ascii_image(const Image& img, int max_width = 120, int max_heig
 
   // Bottom border
   std::cout << "+";
-  for (int x = 0; x < display_width; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth; x++) std::cout << "-";
   std::cout << "+\n\n";
 }
 
 // Print an image to console with enhanced contrast
-void print_enhanced_ascii_image(const Image& img, int max_width = 80, int max_height = 40) {
+void printEnhancedAsciiImage(const Image& img, int maxWidth = 80, int maxHeight = 40) {
   // If image is too large, we'll downsample it to fit terminal
-  int display_width = std::min(img.width, max_width);
-  int display_height = std::min(img.height, max_height);
+  int displayWidth = std::min(img.width, maxWidth);
+  int displayHeight = std::min(img.height, maxHeight);
 
   // Calculate sampling step (how many pixels to skip)
-  double x_step = static_cast<double>(img.width) / display_width;
-  double y_step = static_cast<double>(img.height) / display_height;
+  double xStep = static_cast<double>(img.width) / displayWidth;
+  double yStep = static_cast<double>(img.height) / displayHeight;
 
   // Analyze the image first to determine brightness range
-  double min_brightness = 1.0;
-  double max_brightness = 0.0;
+  double minBrightness = 1.0;
+  double maxBrightness = 0.0;
 
   // First pass - find brightness range
-  for (int y = 0; y < display_height; y++) {
-    for (int x = 0; x < display_width; x++) {
+  for (int y = 0; y < displayHeight; y++) {
+    for (int x = 0; x < displayWidth; x++) {
       // Sample the original image
-      int orig_x = static_cast<int>(x * x_step);
-      int orig_y = static_cast<int>(y * y_step);
+      int origX = static_cast<int>(x * xStep);
+      int origY = static_cast<int>(y * yStep);
 
       // Get pixel
-      ImageColor pixel = img.get(orig_x, orig_y);
+      ImageColor pixel = img.get(origX, origY);
 
       // Calculate brightness
       double brightness = 0.299 * pixel.rgb[0] + 0.587 * pixel.rgb[1] + 0.114 * pixel.rgb[2];
@@ -302,52 +302,52 @@ void print_enhanced_ascii_image(const Image& img, int max_width = 80, int max_he
       brightness /= 255.0;  // Normalize to 0-1
 
       // Update min/max
-      min_brightness = std::min(min_brightness, brightness);
-      max_brightness = std::max(max_brightness, brightness);
+      minBrightness = std::min(minBrightness, brightness);
+      maxBrightness = std::max(maxBrightness, brightness);
     }
   }
 
   // Prevent division by zero
-  double brightness_range = max_brightness - min_brightness;
-  if (brightness_range < 0.05) {
-    brightness_range = 1.0;
-    min_brightness = 0.0;
+  double brightnessRange = maxBrightness - minBrightness;
+  if (brightnessRange < 0.05) {
+    brightnessRange = 1.0;
+    minBrightness = 0.0;
   }
 
-  std::cout << "\nEnhanced ASCII Image Preview (" << display_width << "x" << display_height << ")\n";
-  std::cout << "Brightness range: " << min_brightness << " - " << max_brightness << "\n";
+  std::cout << "\nEnhanced ASCII Image Preview (" << displayWidth << "x" << displayHeight << ")\n";
+  std::cout << "Brightness range: " << minBrightness << " - " << maxBrightness << "\n";
 
   // Wider range of characters for better differentiation
   const std::string chars = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 
   // Top border
   std::cout << "+";
-  for (int x = 0; x < display_width; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth; x++) std::cout << "-";
   std::cout << "+\n";
 
   // Print each row
-  for (int y = 0; y < display_height; y++) {
+  for (int y = 0; y < displayHeight; y++) {
     std::cout << "|";  // Left border
 
-    for (int x = 0; x < display_width; x++) {
+    for (int x = 0; x < displayWidth; x++) {
       // Sample the original image
-      int orig_x = static_cast<int>(x * x_step);
-      int orig_y = static_cast<int>(y * y_step);
+      int origX = static_cast<int>(x * xStep);
+      int origY = static_cast<int>(y * yStep);
 
       // Get pixel
-      ImageColor pixel = img.get(orig_x, orig_y);
+      ImageColor pixel = img.get(origX, origY);
 
       // Calculate brightness with enhanced contrast
       double brightness = 0.299 * pixel.rgb[0] + 0.587 * pixel.rgb[1] + 0.114 * pixel.rgb[2];
       brightness /= 255.0;  // Normalize to 0-1
 
       // Apply contrast enhancement
-      double enhanced_brightness = (brightness - min_brightness) / brightness_range;
-      enhanced_brightness = std::max(0.0, std::min(1.0, enhanced_brightness));  // Clamp to 0-1
+      double enhancedBrightness = (brightness - minBrightness) / brightnessRange;
+      enhancedBrightness = std::max(0.0, std::min(1.0, enhancedBrightness));  // Clamp to 0-1
 
       // Map brightness to character
-      int char_index = static_cast<int>(enhanced_brightness * (chars.length() - 1));
-      char_index = std::max(0, std::min(static_cast<int>(chars.length() - 1), char_index));
+      int charIndex = static_cast<int>(enhancedBrightness * (chars.length() - 1));
+      charIndex = std::max(0, std::min(static_cast<int>(chars.length() - 1), charIndex));
 
       // Determine colors
       int r = pixel.rgb[0];
@@ -362,40 +362,40 @@ void print_enhanced_ascii_image(const Image& img, int max_width = 80, int max_he
         continue;
       }
 
-      double r_ratio = r / total;
-      double g_ratio = g / total;
-      double b_ratio = b / total;
+      double rRatio = r / total;
+      double gRatio = g / total;
+      double bRatio = b / total;
 
-      const double color_threshold = 0.4;
-      const double neutral_threshold = 0.3;
+      const double colorThreshold = 0.4;
+      const double neutralThreshold = 0.3;
 
       // Print character with color indication
-      if (r_ratio > neutral_threshold && g_ratio > neutral_threshold && b_ratio > neutral_threshold) {
+      if (rRatio > neutralThreshold && gRatio > neutralThreshold && bRatio > neutralThreshold) {
         // Grayscale - just use the character
-        std::cout << chars[char_index];
+        std::cout << chars[charIndex];
       } else {
         // Color-coding
-        char color_indicator;
-        if (r_ratio > color_threshold && g_ratio > color_threshold)
-          color_indicator = 'Y';
-        else if (r_ratio > color_threshold && b_ratio > color_threshold)
-          color_indicator = 'M';
-        else if (g_ratio > color_threshold && b_ratio > color_threshold)
-          color_indicator = 'C';
-        else if (r_ratio > color_threshold && r_ratio > g_ratio && r_ratio > b_ratio)
-          color_indicator = 'R';
-        else if (g_ratio > color_threshold && g_ratio > r_ratio && g_ratio > b_ratio)
-          color_indicator = 'G';
-        else if (b_ratio > color_threshold && b_ratio > r_ratio && b_ratio > g_ratio)
-          color_indicator = 'B';
+        char colorIndicator;
+        if (rRatio > colorThreshold && gRatio > colorThreshold)
+          colorIndicator = 'Y';
+        else if (rRatio > colorThreshold && bRatio > colorThreshold)
+          colorIndicator = 'M';
+        else if (gRatio > colorThreshold && bRatio > colorThreshold)
+          colorIndicator = 'C';
+        else if (rRatio > colorThreshold && rRatio > gRatio && rRatio > bRatio)
+          colorIndicator = 'R';
+        else if (gRatio > colorThreshold && gRatio > rRatio && gRatio > bRatio)
+          colorIndicator = 'G';
+        else if (bRatio > colorThreshold && bRatio > rRatio && bRatio > gRatio)
+          colorIndicator = 'B';
         else
-          color_indicator = chars[char_index];
+          colorIndicator = chars[charIndex];
 
         // Only replace with color code if the character has enough "weight"
-        if (chars[char_index] != ' ' && chars[char_index] != '.') {
-          std::cout << color_indicator;
+        if (chars[charIndex] != ' ' && chars[charIndex] != '.') {
+          std::cout << colorIndicator;
         } else {
-          std::cout << chars[char_index];
+          std::cout << chars[charIndex];
         }
       }
     }
@@ -405,40 +405,40 @@ void print_enhanced_ascii_image(const Image& img, int max_width = 80, int max_he
 
   // Bottom border
   std::cout << "+";
-  for (int x = 0; x < display_width; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth; x++) std::cout << "-";
   std::cout << "+\n\n";
 
   std::cout << "Color Legend: R=Red, G=Green, B=Blue, Y=Yellow, M=Magenta, C=Cyan\n\n";
 }
 
 // Print an image using true color (24-bit RGB) background colors
-void print_truecolor_image(const Image& img, int max_width = 60, int max_height = 30) {
+void printTruecolorImage(const Image& img, int maxWidth = 60, int maxHeight = 30) {
   // Background colors need more horizontal space, so we use smaller defaults
-  int display_width = std::min(img.width, max_width);
-  int display_height = std::min(img.height, max_height);
+  int displayWidth = std::min(img.width, maxWidth);
+  int displayHeight = std::min(img.height, maxHeight);
 
   // Calculate sampling step (how many pixels to skip)
-  double x_step = static_cast<double>(img.width) / display_width;
-  double y_step = static_cast<double>(img.height) / display_height;
+  double xStep = static_cast<double>(img.width) / displayWidth;
+  double yStep = static_cast<double>(img.height) / displayHeight;
 
-  std::cout << "\nTrue Color Image Preview (" << display_width << "x" << display_height << "):\n";
+  std::cout << "\nTrue Color Image Preview (" << displayWidth << "x" << displayHeight << "):\n";
 
   // Top border
   std::cout << "+";
-  for (int x = 0; x < display_width * 2; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth * 2; x++) std::cout << "-";
   std::cout << "+\n";
 
   // Print each row
-  for (int y = 0; y < display_height; y++) {
+  for (int y = 0; y < displayHeight; y++) {
     std::cout << "|";  // Left border
 
-    for (int x = 0; x < display_width; x++) {
+    for (int x = 0; x < displayWidth; x++) {
       // Sample the original image
-      int orig_x = static_cast<int>(x * x_step);
-      int orig_y = static_cast<int>(y * y_step);
+      int origX = static_cast<int>(x * xStep);
+      int origY = static_cast<int>(y * yStep);
 
       // Get pixel
-      ImageColor pixel = img.get(orig_x, orig_y);
+      ImageColor pixel = img.get(origX, origY);
       int r = pixel.rgb[0];
       int g = pixel.rgb[1];
       int b = pixel.rgb[2];
@@ -453,12 +453,12 @@ void print_truecolor_image(const Image& img, int max_width = 60, int max_height 
 
   // Bottom border
   std::cout << "+";
-  for (int x = 0; x < display_width * 2; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth * 2; x++) std::cout << "-";
   std::cout << "+\n\n";
 }
 
 // Enable Windows ANSI colors
-void enable_windows_ansi_colors() {
+void enableWindowsAnsiColors() {
 #ifdef _WIN32
   // For Windows 10+, enable ANSI processing
   HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -473,102 +473,102 @@ void enable_windows_ansi_colors() {
 }
 
 // Print an image using console background colors
-void print_pixel_image(const Image& img, int max_width = 60, int max_height = 30) {
+void printPixelImage(const Image& img, int maxWidth = 60, int maxHeight = 30) {
   // Background colors need more horizontal space, so we use smaller defaults
-  int display_width = std::min(img.width, max_width);
-  int display_height = std::min(img.height, max_height);
+  int displayWidth = std::min(img.width, maxWidth);
+  int displayHeight = std::min(img.height, maxHeight);
 
   // Calculate sampling step (how many pixels to skip)
-  double x_step = static_cast<double>(img.width) / display_width;
-  double y_step = static_cast<double>(img.height) / display_height;
+  double xStep = static_cast<double>(img.width) / displayWidth;
+  double yStep = static_cast<double>(img.height) / displayHeight;
 
-  std::cout << "\nPixel Image Preview (" << display_width << "x" << display_height << "):\n";
+  std::cout << "\nPixel Image Preview (" << displayWidth << "x" << displayHeight << "):\n";
 
   // Each console "pixel" is two spaces with background color to make it more square
   const std::string pixel = "  ";
 
   // Top border
   std::cout << "+";
-  for (int x = 0; x < display_width * 2; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth * 2; x++) std::cout << "-";
   std::cout << "+\n";
 
   // Print each row
-  for (int y = 0; y < display_height; y++) {
+  for (int y = 0; y < displayHeight; y++) {
     std::cout << "|";  // Left border
 
-    for (int x = 0; x < display_width; x++) {
+    for (int x = 0; x < displayWidth; x++) {
       // Sample the original image
-      int orig_x = static_cast<int>(x * x_step);
-      int orig_y = static_cast<int>(y * y_step);
+      int origX = static_cast<int>(x * xStep);
+      int origY = static_cast<int>(y * yStep);
 
       // Get pixel
-      ImageColor pixel_color = img.get(orig_x, orig_y);
-      int r = pixel_color.rgb[0];
-      int g = pixel_color.rgb[1];
-      int b = pixel_color.rgb[2];
+      ImageColor pixelColor = img.get(origX, origY);
+      int r = pixelColor.rgb[0];
+      int g = pixelColor.rgb[1];
+      int b = pixelColor.rgb[2];
 
       // We need to map RGB to console colors
       // This maps RGB to the closest ANSI background color
-      int bg_color;
+      int bgColor;
 
       // Very dark pixels - black background
       if (r < 30 && g < 30 && b < 30) {
-        bg_color = 40;  // Black background
+        bgColor = 40;  // Black background
       }
       // Bright white pixels
       else if (r > 200 && g > 200 && b > 200) {
-        bg_color = 47;  // White background
+        bgColor = 47;  // White background
       }
       // Determine dominant color and map to ANSI background code
       else {
         double total = r + g + b;
-        double r_ratio = r / total;
-        double g_ratio = g / total;
-        double b_ratio = b / total;
+        double rRatio = r / total;
+        double gRatio = g / total;
+        double bRatio = b / total;
 
-        const double color_threshold = 0.38;
+        const double colorThreshold = 0.38;
 
-        if (r_ratio > color_threshold && g_ratio > color_threshold && b_ratio < 0.2) {
-          bg_color = 43;  // Yellow background
-        } else if (r_ratio > color_threshold && b_ratio > color_threshold && g_ratio < 0.2) {
-          bg_color = 45;  // Magenta background
-        } else if (g_ratio > color_threshold && b_ratio > color_threshold && r_ratio < 0.2) {
-          bg_color = 46;  // Cyan background
-        } else if (r_ratio > color_threshold && r_ratio > g_ratio && r_ratio > b_ratio) {
-          bg_color = 41;  // Red background
-        } else if (g_ratio > color_threshold && g_ratio > r_ratio && g_ratio > b_ratio) {
-          bg_color = 42;  // Green background
-        } else if (b_ratio > color_threshold && b_ratio > r_ratio && b_ratio > g_ratio) {
-          bg_color = 44;  // Blue background
+        if (rRatio > colorThreshold && gRatio > colorThreshold && bRatio < 0.2) {
+          bgColor = 43;  // Yellow background
+        } else if (rRatio > colorThreshold && bRatio > colorThreshold && gRatio < 0.2) {
+          bgColor = 45;  // Magenta background
+        } else if (gRatio > colorThreshold && bRatio > colorThreshold && rRatio < 0.2) {
+          bgColor = 46;  // Cyan background
+        } else if (rRatio > colorThreshold && rRatio > gRatio && rRatio > bRatio) {
+          bgColor = 41;  // Red background
+        } else if (gRatio > colorThreshold && gRatio > rRatio && gRatio > bRatio) {
+          bgColor = 42;  // Green background
+        } else if (bRatio > colorThreshold && bRatio > rRatio && bRatio > gRatio) {
+          bgColor = 44;  // Blue background
         } else {
           // Fallback to grayscale
           double brightness = 0.299 * r + 0.587 * g + 0.114 * b;
           brightness /= 255.0;
 
           if (brightness > 0.7) {
-            bg_color = 47;  // White background
+            bgColor = 47;  // White background
           } else if (brightness > 0.4) {
-            bg_color = 47;  // White background (use same as above for simplicity)
+            bgColor = 47;  // White background (use same as above for simplicity)
           } else if (brightness > 0.2) {
-            bg_color = 100;  // Bright black (gray) background
+            bgColor = 100;  // Bright black (gray) background
           } else {
-            bg_color = 40;  // Black background
+            bgColor = 40;  // Black background
           }
         }
       }
 
       // Use bright background colors for more vibrant display
-      if (bg_color >= 40 && bg_color <= 47) {
+      if (bgColor >= 40 && bgColor <= 47) {
         double brightness = 0.299 * r + 0.587 * g + 0.114 * b;
         brightness /= 255.0;
 
-        if (brightness > 0.5 && bg_color != 47) {  // Not already white
-          bg_color += 60;                          // Convert to bright background color
+        if (brightness > 0.5 && bgColor != 47) {  // Not already white
+          bgColor += 60;                          // Convert to bright background color
         }
       }
 
       // Print a space with the selected background color
-      std::cout << "\033[" << bg_color << "m  \033[0m";
+      std::cout << "\033[" << bgColor << "m  \033[0m";
     }
 
     std::cout << "|\n";  // Right border
@@ -576,29 +576,29 @@ void print_pixel_image(const Image& img, int max_width = 60, int max_height = 30
 
   // Bottom border
   std::cout << "+";
-  for (int x = 0; x < display_width * 2; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth * 2; x++) std::cout << "-";
   std::cout << "+\n\n";
 }
 
 // Print image choosing the best method for the terminal
-void print_best_image(const Image& img, int max_width = 60, int max_height = 30) {
+void printBestImage(const Image& img, int maxWidth = 60, int maxHeight = 30) {
   // Enable ANSI colors for Windows
-  enable_windows_ansi_colors();
+  enableWindowsAnsiColors();
 
   // Attempt to determine terminal capabilities
-  bool supports_truecolor = false;
-  bool supports_ansi_colors = true;  // Assume basic ANSI colors are supported
+  bool supportsTruecolor = false;
+  bool supportsAnsiColors = true;  // Assume basic ANSI colors are supported
 
   // Check environment variables for true color support
   char* colorterm = getenv("COLORTERM");
   if (colorterm && (strcmp(colorterm, "truecolor") == 0 || strcmp(colorterm, "24bit") == 0)) {
-    supports_truecolor = true;
+    supportsTruecolor = true;
   }
 
   // Check for TERM variable indicating advanced terminal
   char* term = getenv("TERM");
   if (term && (strstr(term, "256color") != NULL || strstr(term, "xterm") != NULL || strstr(term, "konsole") != NULL)) {
-    supports_ansi_colors = true;  // Definitely supports ANSI colors
+    supportsAnsiColors = true;  // Definitely supports ANSI colors
   }
 
   // Windows Terminal and newer Windows 10+ consoles often support true color
@@ -611,23 +611,23 @@ void print_best_image(const Image& img, int max_width = 60, int max_height = 30)
   // Using the Windows Terminal app is a good indication of true color support
   char* wt = getenv("WT_SESSION");
   if (wt != NULL) {
-    supports_truecolor = true;
+    supportsTruecolor = true;
   }
 #endif
 
   // Choose the best rendering method
-  if (supports_truecolor) {
-    print_truecolor_image(img, max_width, max_height);
-  } else if (supports_ansi_colors) {
-    print_pixel_image(img, max_width, max_height);
+  if (supportsTruecolor) {
+    printTruecolorImage(img, maxWidth, maxHeight);
+  } else if (supportsAnsiColors) {
+    printPixelImage(img, maxWidth, maxHeight);
   } else {
     // Fallback to basic ASCII
-    print_enhanced_ascii_image(img, max_width * 2, max_height);
+    printEnhancedAsciiImage(img, maxWidth * 2, maxHeight);
   }
 }
 
 // High-resolution console renderer for Windows
-void print_highres_image(const Image& img, int max_width = 120, int max_height = 60) {
+void printHighresImage(const Image& img, int maxWidth = 120, int maxHeight = 60) {
 #ifdef _WIN32
   // Get console handle
   HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -644,36 +644,36 @@ void print_highres_image(const Image& img, int max_width = 120, int max_height =
   }
 
   // Calculate available space
-  int console_width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-  int console_height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+  int consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+  int consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 
   // Determine display dimensions (leave space for borders)
-  int display_width = std::min(img.width, std::min(max_width, console_width - 2));
-  int display_height = std::min(img.height, std::min(max_height, console_height - 3));
+  int displayWidth = std::min(img.width, std::min(maxWidth, consoleWidth - 2));
+  int displayHeight = std::min(img.height, std::min(maxHeight, consoleHeight - 3));
 
   // Calculate sampling step
-  double x_step = static_cast<double>(img.width) / display_width;
-  double y_step = static_cast<double>(img.height) / display_height;
+  double xStep = static_cast<double>(img.width) / displayWidth;
+  double yStep = static_cast<double>(img.height) / displayHeight;
 
-  std::cout << "\nHigh Resolution Console Image (" << display_width << "x" << display_height << "):\n";
+  std::cout << "\nHigh Resolution Console Image (" << displayWidth << "x" << displayHeight << "):\n";
 
   // Get current cursor position
   COORD cursorPos = csbi.dwCursorPosition;
   cursorPos.Y += 2;  // Move down two lines for the header
 
   // Create buffers for characters and attributes
-  std::vector<CHAR_INFO> buffer(display_width * display_height);
+  std::vector<CHAR_INFO> buffer(displayWidth * displayHeight);
 
   // Fill the buffer with pixels
-  for (int y = 0; y < display_height; y++) {
-    for (int x = 0; x < display_width; x++) {
+  for (int y = 0; y < displayHeight; y++) {
+    for (int x = 0; x < displayWidth; x++) {
       // Sample the original image
-      int orig_x = static_cast<int>(x * x_step);
-      int orig_y = static_cast<int>(y * y_step);
+      int origX = static_cast<int>(x * xStep);
+      int origY = static_cast<int>(y * yStep);
 
       // Get pixel
-      ImageColor pixel = img.get(orig_x, orig_y);
-      CHAR_INFO& charInfo = buffer[y * display_width + x];
+      ImageColor pixel = img.get(origX, origY);
+      CHAR_INFO& charInfo = buffer[y * displayWidth + x];
 
       // Calculate color indices (map 24-bit color to console colors)
       int r = pixel.rgb[0];
@@ -751,76 +751,76 @@ void print_highres_image(const Image& img, int max_width = 120, int max_height =
   SMALL_RECT writeRegion;
   writeRegion.Left = static_cast<SHORT>(cursorPos.X);
   writeRegion.Top = static_cast<SHORT>(cursorPos.Y);
-  writeRegion.Right = static_cast<SHORT>(cursorPos.X + display_width - 1);
-  writeRegion.Bottom = static_cast<SHORT>(cursorPos.Y + display_height - 1);
+  writeRegion.Right = static_cast<SHORT>(cursorPos.X + displayWidth - 1);
+  writeRegion.Bottom = static_cast<SHORT>(cursorPos.Y + displayHeight - 1);
 
   // Write the buffer to the console
   if (!WriteConsoleOutput(hConsole, buffer.data(),
-                          {static_cast<SHORT>(display_width), static_cast<SHORT>(display_height)}, {0, 0},
+                          {static_cast<SHORT>(displayWidth), static_cast<SHORT>(displayHeight)}, {0, 0},
                           &writeRegion)) {
     std::cerr << "Failed to write to console buffer" << std::endl;
   }
 
   // Move cursor below the image
-  cursorPos.Y += static_cast<SHORT>(display_height + 1);
+  cursorPos.Y += static_cast<SHORT>(displayHeight + 1);
   SetConsoleCursorPosition(hConsole, cursorPos);
   std::cout << std::endl;
 #else
   // Fallback for non-Windows platforms
   std::cout << "High-resolution console rendering is only supported on Windows" << std::endl;
-  print_truecolor_image(img, max_width, max_height);
+  printTruecolorImage(img, maxWidth, maxHeight);
 #endif
 }
 
 // Ultra-high resolution console renderer using half-block characters
-void print_ultrahd_console_image(const Image& img, int max_width = 80, int max_height = 40) {
+void printUltrahdConsoleImage(const Image& img, int maxWidth = 80, int maxHeight = 40) {
 #ifdef _WIN32
   // Enable ANSI colors first
-  enable_windows_ansi_colors();
+  enableWindowsAnsiColors();
 
   // Calculate dimensions
-  int display_width = std::min(img.width, max_width);
-  int display_height = std::min(img.height, max_height) * 2;  // Double vertical res with half-blocks
+  int displayWidth = std::min(img.width, maxWidth);
+  int displayHeight = std::min(img.height, maxHeight) * 2;  // Double vertical res with half-blocks
 
   // Calculate sampling step
-  double x_step = static_cast<double>(img.width) / display_width;
-  double y_step = static_cast<double>(img.height) / display_height;
+  double xStep = static_cast<double>(img.width) / displayWidth;
+  double yStep = static_cast<double>(img.height) / displayHeight;
 
-  std::cout << "\nUltra HD Console Image (" << display_width << "x" << (display_height / 2) << " doubled):\n";
+  std::cout << "\nUltra HD Console Image (" << displayWidth << "x" << (displayHeight / 2) << " doubled):\n";
 
   // Top border
   std::cout << "+";
-  for (int x = 0; x < display_width; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth; x++) std::cout << "-";
   std::cout << "+\n";
 
   // Process two rows at a time using upper and lower half blocks
-  //   for (int y = 0; y < display_height; y += 2) {
-  for (int y = display_height - 1; y >= 0; y -= 2) {
+  //   for (int y = 0; y < displayHeight; y += 2) {
+  for (int y = displayHeight - 1; y >= 0; y -= 2) {
     std::cout << "|";  // Left border
 
-    for (int x = 0; x < display_width; x++) {
+    for (int x = 0; x < displayWidth; x++) {
       // Get upper and lower pixels
-      int orig_x = static_cast<int>(x * x_step);
+      int origX = static_cast<int>(x * xStep);
 
-      int orig_y_upper = static_cast<int>(y * y_step);
-      int orig_y_lower = static_cast<int>((y + 1) * y_step);
+      int origYUpper = static_cast<int>(y * yStep);
+      int origYLower = static_cast<int>((y + 1) * yStep);
 
       // Handle edge case for odd height images
-      if (orig_y_lower >= img.height) {
-        orig_y_lower = img.height - 1;
+      if (origYLower >= img.height) {
+        origYLower = img.height - 1;
       }
 
-      ImageColor upper_pixel = img.get(orig_x, orig_y_upper);
-      ImageColor lower_pixel = img.get(orig_x, orig_y_lower);
+      ImageColor upperPixel = img.get(origX, origYUpper);
+      ImageColor lowerPixel = img.get(origX, origYLower);
 
       // Extract RGB values
-      int upper_r = upper_pixel.rgb[0];
-      int upper_g = upper_pixel.rgb[1];
-      int upper_b = upper_pixel.rgb[2];
+      int upperR = upperPixel.rgb[0];
+      int upperG = upperPixel.rgb[1];
+      int upperB = upperPixel.rgb[2];
 
-      int lower_r = lower_pixel.rgb[0];
-      int lower_g = lower_pixel.rgb[1];
-      int lower_b = lower_pixel.rgb[2];
+      int lowerR = lowerPixel.rgb[0];
+      int lowerG = lowerPixel.rgb[1];
+      int lowerB = lowerPixel.rgb[2];
 
       // Use half block characters and true color ANSI codes
       // ▀ (upper half block) for upper pixel
@@ -828,8 +828,8 @@ void print_ultrahd_console_image(const Image& img, int max_width = 80, int max_h
 
       // ESC[ 38;2;⟨r⟩;⟨g⟩;⟨b⟩ m - Set foreground to RGB color
       // ESC[ 48;2;⟨r⟩;⟨g⟩;⟨b⟩ m - Set background to RGB color
-      std::cout << "\033[38;2;" << upper_r << ";" << upper_g << ";" << upper_b << "m"
-                << "\033[48;2;" << lower_r << ";" << lower_g << ";" << lower_b << "m"
+      std::cout << "\033[38;2;" << upperR << ";" << upperG << ";" << upperB << "m"
+                << "\033[48;2;" << lowerR << ";" << lowerG << ";" << lowerB << "m"
                 << "▀"         // Upper half block character
                 << "\033[0m";  // Reset formatting
     }
@@ -839,11 +839,11 @@ void print_ultrahd_console_image(const Image& img, int max_width = 80, int max_h
 
   // Bottom border
   std::cout << "+";
-  for (int x = 0; x < display_width; x++) std::cout << "-";
+  for (int x = 0; x < displayWidth; x++) std::cout << "-";
   std::cout << "+\n\n";
 #else
   // Fallback for non-Windows platforms
   std::cout << "Ultra HD console rendering is using true color ANSI codes" << std::endl;
-  print_truecolor_image(img, max_width, max_height);
+  printTruecolorImage(img, maxWidth, maxHeight);
 #endif
 }

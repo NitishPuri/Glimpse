@@ -8,7 +8,7 @@
 
 using namespace glimpse;
 
-static ut::suite<"registry"> registry_suite = [] {
+static ut::suite<"registry"> registrySuite = [] {
   using namespace boost::ut;
 
   "scene_registry"_test = [] {
@@ -32,7 +32,7 @@ static ut::suite<"registry"> registry_suite = [] {
     "find_by_name"_test = [] {
       const SceneEntry* entry = findScene("cornell_box");
       expect(entry != nullptr);
-      if (entry) expect(entry->make().cam.image_width == 600_i);
+      if (entry) expect(entry->make().cam.imageWidth == 600_i);
       expect(findScene("no_such_scene") == nullptr);
     };
   };

@@ -5,42 +5,42 @@
 
 namespace glimpse {
 
-inline vec3 random_unit_vector() {
+inline Vec3 randomUnitVector() {
   while (true) {
-    auto p = vec3::random(-1, 1);
-    auto lensq = p.length_squared();
+    auto p = Vec3::random(-1, 1);
+    auto lensq = p.lengthSquared();
     if (1e-160 < lensq && lensq <= 1.0) return p / sqrt(lensq);
   }
 }
 
-inline vec3 random_on_hemisphere(const vec3& normal) {
-  vec3 on_unit_sphere = random_unit_vector();
-  if (dot(on_unit_sphere, normal) > 0.0)  // In the same hemisphere as the normal
-    return on_unit_sphere;
+inline Vec3 randomOnHemisphere(const Vec3& normal) {
+  Vec3 onUnitSphere = randomUnitVector();
+  if (dot(onUnitSphere, normal) > 0.0)  // In the same hemisphere as the normal
+    return onUnitSphere;
   else
-    return -on_unit_sphere;
+    return -onUnitSphere;
 }
 
-inline vec3 random_in_unit_disk() {
+inline Vec3 randomInUnitDisk() {
   while (true) {
-    auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0);
-    if (p.length_squared() < 1) return p;
+    auto p = Vec3(randomDouble(-1, 1), randomDouble(-1, 1), 0);
+    if (p.lengthSquared() < 1) return p;
   }
 }
 
 // Generates a random point within a unit square centered at the origin
-inline vec3 sample_square() { return vec3(random_double() - 0.5, random_double() - 0.5, 0); }
+inline Vec3 sampleSquare() { return Vec3(randomDouble() - 0.5, randomDouble() - 0.5, 0); }
 
-inline vec3 random_cosine_direction() {
-  auto r1 = random_double();
-  auto r2 = random_double();
+inline Vec3 randomCosineDirection() {
+  auto r1 = randomDouble();
+  auto r2 = randomDouble();
 
   auto phi = 2 * math::pi * r1;
   auto x = std::cos(phi) * std::sqrt(r2);
   auto y = std::sin(phi) * std::sqrt(r2);
   auto z = std::sqrt(1 - r2);
 
-  return vec3(x, y, z);
+  return Vec3(x, y, z);
 }
 
 }  // namespace glimpse

@@ -14,9 +14,9 @@ int GLResources::initGL() {
   }
 
   // Open at 80% of the monitor's work area, centered; the window stays resizable and the layout follows it.
-  int work_x = 0, work_y = 0, work_w = 0, work_h = 0;
-  if (GLFWmonitor* monitor = glfwGetPrimaryMonitor()) glfwGetMonitorWorkarea(monitor, &work_x, &work_y, &work_w, &work_h);
-  const auto size = glimpse::gui::initial_window_size(work_w, work_h, WINDOW_WIDTH, WINDOW_HEIGHT);
+  int workX = 0, workY = 0, workW = 0, workH = 0;
+  if (GLFWmonitor* monitor = glfwGetPrimaryMonitor()) glfwGetMonitorWorkarea(monitor, &workX, &workY, &workW, &workH);
+  const auto size = glimpse::gui::initialWindowSize(workW, workH, WINDOW_WIDTH, WINDOW_HEIGHT);
 
   window = glfwCreateWindow(size.w, size.h, "Glimpse", nullptr, nullptr);
   if (!window) {
@@ -26,7 +26,7 @@ int GLResources::initGL() {
     glfwTerminate();
     return -1;
   }
-  if (work_w > 0) glfwSetWindowPos(window, work_x + (work_w - size.w) / 2, work_y + (work_h - size.h) / 2);
+  if (workW > 0) glfwSetWindowPos(window, workX + (workW - size.w) / 2, workY + (workH - size.h) / 2);
 
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);  // Enable vsync

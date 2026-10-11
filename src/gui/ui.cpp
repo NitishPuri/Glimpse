@@ -9,26 +9,26 @@ namespace glimpse::gui {
 
 namespace {
 // Pins the next ImGui window to a rect of the responsive layout (re-applied every frame, so it follows resizes).
-void place_next_window(const glimpse::gui::Rect& r) {
+void placeNextWindow(const glimpse::gui::Rect& r) {
   ImGui::SetNextWindowPos(ImVec2(r.x, r.y), ImGuiCond_Always);
   ImGui::SetNextWindowSize(ImVec2(r.w, r.h), ImGuiCond_Always);
 }
 
-glimpse::gui::Layout current_layout() {
+glimpse::gui::Layout currentLayout() {
   const ImGuiViewport* vp = ImGui::GetMainViewport();
-  return glimpse::gui::compute_layout(vp->WorkPos.x, vp->WorkPos.y, vp->WorkSize.x, vp->WorkSize.y);
+  return glimpse::gui::computeLayout(vp->WorkPos.x, vp->WorkPos.y, vp->WorkSize.x, vp->WorkSize.y);
 }
 
 constexpr ImGuiWindowFlags kPinned = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 }  // namespace
 
-void UIRenderer::cameraUI(RayTracer& raytracer, GLResources& gl_res) {
+void UIRenderer::cameraUI(RayTracer& raytracer, GLResources& glRes) {
   // Render parameters
-  ImGui::Checkbox("Uncap SPP", &raytracer.scene.cam.uncapped_spp);
-  if (ImGui::SliderInt("Samples per Pixel", &raytracer.scene.cam.samples_per_pixel, 1, 1000)) {
+  ImGui::Checkbox("Uncap SPP", &raytracer.scene.cam.uncappedSpp);
+  if (ImGui::SliderInt("Samples per Pixel", &raytracer.scene.cam.samplesPerPixel, 1, 1000)) {
     maybeRenderOnParamChange(raytracer);
   }
-  if (ImGui::SliderInt("Max Depth", &raytracer.scene.cam.max_depth, 1, 100)) {
+  if (ImGui::SliderInt("Max Depth", &raytracer.scene.cam.maxDepth, 1, 100)) {
     maybeRenderOnParamChange(raytracer);
   }
 
@@ -36,85 +36,85 @@ void UIRenderer::cameraUI(RayTracer& raytracer, GLResources& gl_res) {
   if (ImGui::SliderFloat("Field of View", &raytracer.scene.cam.vfov, 1.0f, 180.0f)) {
     maybeRenderOnParamChange(raytracer);
   }
-  if (ImGui::SliderFloat("Defocus Angle", &raytracer.scene.cam.defocus_angle, 0.0f, 10.0f)) {
+  if (ImGui::SliderFloat("Defocus Angle", &raytracer.scene.cam.defocusAngle, 0.0f, 10.0f)) {
     maybeRenderOnParamChange(raytracer);
   }
-  if (ImGui::SliderFloat("Focus Distance", &raytracer.scene.cam.focus_distance, 0.0f, 50.0f)) {
+  if (ImGui::SliderFloat("Focus Distance", &raytracer.scene.cam.focusDistance, 0.0f, 50.0f)) {
     maybeRenderOnParamChange(raytracer);
   }
 
   if (ImGui::SliderFloat3("Look From", params.lookFrom, -10.0f, 10.0f)) {
-    raytracer.scene.cam.lookfrom = point3(params.lookFrom[0], params.lookFrom[1], params.lookFrom[2]);
+    raytracer.scene.cam.lookfrom = Point3(params.lookFrom[0], params.lookFrom[1], params.lookFrom[2]);
     maybeRenderOnParamChange(raytracer);
   }
   if (ImGui::SliderFloat3("Look At", params.lookAt, -10.0f, 10.0f)) {
-    raytracer.scene.cam.lookat = point3(params.lookAt[0], params.lookAt[1], params.lookAt[2]);
+    raytracer.scene.cam.lookat = Point3(params.lookAt[0], params.lookAt[1], params.lookAt[2]);
     maybeRenderOnParamChange(raytracer);
   }
 
   ImGui::Text("Camera Manip :: ");
   ImGui::SameLine();
-  if (ImGui::RadioButton("None", params.camera_mode == NONE)) {
-    params.camera_mode = CameraMode::NONE;
+  if (ImGui::RadioButton("None", params.cameraMode == NONE)) {
+    params.cameraMode = CameraMode::NONE;
   }
   ImGui::SameLine();
-  if (ImGui::RadioButton("Fly Mode", params.camera_mode == FLY)) {
-    params.camera_mode = CameraMode::FLY;
+  if (ImGui::RadioButton("Fly Mode", params.cameraMode == FLY)) {
+    params.cameraMode = CameraMode::FLY;
   }
   ImGui::SameLine();
-  if (ImGui::RadioButton("Orbit Mode", params.camera_mode == ORBIT)) {
-    params.camera_mode = CameraMode::ORBIT;
+  if (ImGui::RadioButton("Orbit Mode", params.cameraMode == ORBIT)) {
+    params.cameraMode = CameraMode::ORBIT;
   }
 }
 
-void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
+void UIRenderer::renderControl(RayTracer& raytracer, GLResources& glRes) {
   if (ImGui::Button("Render")) {
     raytracer.renderSceneAsync();
   }
 
   if (ImGui::Button("Save Image")) {
     auto now = std::chrono::system_clock::now();
-    auto now_time = std::chrono::system_clock::to_time_t(now);
+    auto nowTime = std::chrono::system_clock::to_time_t(now);
     // `renderer` is released once a render completes, so use the spp recorded when it finished.
-    const int spp = raytracer.last_spp.load();
+    const int spp = raytracer.lastSpp.load();
 
     // Same folder as the CLI's renders; lossless PNG like the CLI default.
     std::string dir = "results";
     std::filesystem::create_directories(dir);
 
     std::ostringstream ss;
-    ss << dir << "/" << std::put_time(std::localtime(&now_time), "%Y%m%d%H%M%S") << "_"
-       << sceneRegistry()[params.current_scene].name << "_samples_" << spp << ".png";
-    auto outfile_path = ss.str();
+    ss << dir << "/" << std::put_time(std::localtime(&nowTime), "%Y%m%d%H%M%S") << "_"
+       << sceneRegistry()[params.currentScene].name << "_samples_" << spp << ".png";
+    auto outfilePath = ss.str();
 
-    if (raytracer.image.write(outfile_path)) {
-      logger.log("Image written to ", outfile_path);
+    if (raytracer.image.write(outfilePath)) {
+      logger.log("Image written to ", outfilePath);
     } else {
-      logger.log("Failed to write image to ", outfile_path);
+      logger.log("Failed to write image to ", outfilePath);
     }
   }
 
   if (raytracer.status == RayTracer::RENDERING) {
-    if (raytracer.scene.cam.uncapped_spp) {
+    if (raytracer.scene.cam.uncappedSpp) {
       // TODO: Implement this, add more stats
-      auto avg_spp = raytracer.renderer->film.get_average_sample_count();
-      ImGui::Text("Average SPP ... %d", avg_spp);
+      auto avgSpp = raytracer.renderer->film.getAverageSampleCount();
+      ImGui::Text("Average SPP ... %d", avgSpp);
       ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(0.0f, 0.0f), "Progress..");
     } else {
-      // The stratified grid renders sqrt_spp^2 samples (e.g. 10 requested -> 9), so count against that.
-      const int spp = raytracer.scene.cam.sqrt_spp * raytracer.scene.cam.sqrt_spp;
-      const int pixels = gl_res.renderWidth * gl_res.renderHeight;
-      const int samples_done = raytracer.progress.load();
-      ImGui::Text("Rendering...%d/%d", samples_done / pixels, spp);
-      float progress = float(samples_done) / float(pixels * spp);
+      // The stratified grid renders sqrtSpp^2 samples (e.g. 10 requested -> 9), so count against that.
+      const int spp = raytracer.scene.cam.sqrtSpp * raytracer.scene.cam.sqrtSpp;
+      const int pixels = glRes.renderWidth * glRes.renderHeight;
+      const int samplesDone = raytracer.progress.load();
+      ImGui::Text("Rendering...%d/%d", samplesDone / pixels, spp);
+      float progress = float(samplesDone) / float(pixels * spp);
       ImGui::ProgressBar(progress, ImVec2(-1, 0), "Progress");
     }
 
     // TODO: Should we conmtrol how frequent this happens?
-    gl_res.updateFramebuffer(raytracer.image.data());
+    glRes.updateFramebuffer(raytracer.image.data());
 
   } else if (raytracer.status == RayTracer::DONE) {
-    gl_res.updateFramebuffer(raytracer.image.data());
+    glRes.updateFramebuffer(raytracer.image.data());
     ImGui::Text("Done");
     raytracer.reset();
   } else {
@@ -122,36 +122,36 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
   }
 }
 
-void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
+void UIRenderer::renderUI(RayTracer& raytracer, GLResources& glRes) {
   bool controlsEnabled = (raytracer.status == RayTracer::IDLE);
-  place_next_window(current_layout().controls);
+  placeNextWindow(currentLayout().controls);
   ImGui::Begin("Control Panel", nullptr, kPinned);
 
   if (!controlsEnabled) {
     ImGui::BeginDisabled();
   }
 
-  if (ImGui::BeginCombo("Scene", sceneRegistry()[params.current_scene].name)) {
+  if (ImGui::BeginCombo("Scene", sceneRegistry()[params.currentScene].name)) {
     for (int n = 0; n < static_cast<int>(sceneRegistry().size()); n++) {
-      const bool is_selected = (params.current_scene == n);
-      if (ImGui::Selectable(sceneRegistry()[n].name, is_selected)) {
-        params.current_scene = n;
-        raytracer.setupScene(gl_res, params.current_scene, params.lookFrom, params.lookAt);
+      const bool isSelected = (params.currentScene == n);
+      if (ImGui::Selectable(sceneRegistry()[n].name, isSelected)) {
+        params.currentScene = n;
+        raytracer.setupScene(glRes, params.currentScene, params.lookFrom, params.lookAt);
         maybeRenderOnParamChange(raytracer);
       }
-      if (is_selected) ImGui::SetItemDefaultFocus();
+      if (isSelected) ImGui::SetItemDefaultFocus();
     }
     ImGui::EndCombo();
   }
   // Scene parameters
   if (ImGui::ColorEdit3("Background Color", params.backgroundColor)) {
-    raytracer.scene.background = color(params.backgroundColor[0], params.backgroundColor[1], params.backgroundColor[2]);
+    raytracer.scene.background = Color(params.backgroundColor[0], params.backgroundColor[1], params.backgroundColor[2]);
     maybeRenderOnParamChange(raytracer);
   }
 
   // Camera parameters
-  cameraUI(raytracer, gl_res);
-  renderControl(raytracer, gl_res);
+  cameraUI(raytracer, glRes);
+  renderControl(raytracer, glRes);
 
   if (!controlsEnabled) {
     ImGui::EndDisabled();
@@ -161,84 +161,84 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
     }
   }
 
-  ImGui::Checkbox("Auto Render", &params.auto_render);
+  ImGui::Checkbox("Auto Render", &params.autoRender);
 
-  //   static bool plot_pdf = true;
+  //   static bool plotPdf = true;
   //   if (ImGui::Button("Plot PDF")) {
-  //     plot_pdf = true;
+  //     plotPdf = true;
   //   }
 
   ImGui::End();
 
-  // if (plot_pdf) {
+  // if (plotPdf) {
   //   plotPdf();
   //   //estimatePi();
   // }
 }
 
-void UIRenderer::renderOutput(GLResources& gl_res, RayTracer& raytracer) {
-  place_next_window(current_layout().output);
+void UIRenderer::renderOutput(GLResources& glRes, RayTracer& raytracer) {
+  placeNextWindow(currentLayout().output);
   ImGui::Begin("Render Output", nullptr, kPinned);
   // Image rows are top-down and so is ImGui's default uv (0,0) -> (1,1): no flip needed.
-  ImGui::Image(ImTextureID(gl_res.framebufferTexture), calculatePanelSize(gl_res));
+  ImGui::Image(ImTextureID(glRes.framebufferTexture), calculatePanelSize(glRes));
 
   // Camera drag: cheap preview renders (2 spp, depth 2) while dragging keep it interactive. On release the
   // user's quality comes back and one full render follows.
   auto& cam = raytracer.scene.cam;
-  const bool dragging = params.camera_mode != NONE && ImGui::IsWindowHovered() &&
+  const bool dragging = params.cameraMode != NONE && ImGui::IsWindowHovered() &&
                         ImGui::IsMouseDragging(ImGuiMouseButton_Right);
   if (dragging) {
-    if (!drag_saved_quality) drag_saved_quality = {cam.samples_per_pixel, cam.max_depth};
+    if (!dragSavedQuality) dragSavedQuality = {cam.samplesPerPixel, cam.maxDepth};
 
     ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
     ImGui::SetWindowFocus();
 
-    ImVec2 mouse_delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
+    ImVec2 mouseDelta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
     ImGui::ResetMouseDragDelta(ImGuiMouseButton_Right);
-    float dx = mouse_delta.x * 0.005f;
-    float dy = mouse_delta.y * 0.005f;
+    float dx = mouseDelta.x * 0.005f;
+    float dy = mouseDelta.y * 0.005f;
 
-    if (params.camera_mode == FLY) {
+    if (params.cameraMode == FLY) {
       cam.fly(dx, dy);
     } else {
       cam.orbit(dx, dy);
     }
-    cam.samples_per_pixel = 2;
-    cam.max_depth = 2;
+    cam.samplesPerPixel = 2;
+    cam.maxDepth = 2;
     maybeRenderOnParamChange(raytracer);
-  } else if (drag_saved_quality && !ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
-    cam.samples_per_pixel = drag_saved_quality->first;
-    cam.max_depth = drag_saved_quality->second;
-    drag_saved_quality.reset();
+  } else if (dragSavedQuality && !ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+    cam.samplesPerPixel = dragSavedQuality->first;
+    cam.maxDepth = dragSavedQuality->second;
+    dragSavedQuality.reset();
     // The last preview may still be running (renderSceneAsync ignores requests while busy): render once idle.
-    render_when_idle = params.auto_render;
+    renderWhenIdle = params.autoRender;
   }
-  if (render_when_idle && raytracer.status == RayTracer::IDLE) {
-    render_when_idle = false;
+  if (renderWhenIdle && raytracer.status == RayTracer::IDLE) {
+    renderWhenIdle = false;
     raytracer.renderSceneAsync();
   }
 
   ImGui::End();
 }
 
-ImVec2 UIRenderer::calculatePanelSize(GLResources& gl_res) {
-  ImVec2 available_size = ImGui::GetContentRegionAvail();
-  float aspect_ratio = static_cast<float>(gl_res.renderWidth) / gl_res.renderHeight;
-  ImVec2 image_size;
+ImVec2 UIRenderer::calculatePanelSize(GLResources& glRes) {
+  ImVec2 availableSize = ImGui::GetContentRegionAvail();
+  float aspectRatio = static_cast<float>(glRes.renderWidth) / glRes.renderHeight;
+  ImVec2 imageSize;
 
-  if (available_size.x / aspect_ratio <= available_size.y) {
-    image_size.x = available_size.x;
-    image_size.y = available_size.x / aspect_ratio;
+  if (availableSize.x / aspectRatio <= availableSize.y) {
+    imageSize.x = availableSize.x;
+    imageSize.y = availableSize.x / aspectRatio;
   } else {
-    image_size.x = available_size.y * aspect_ratio;
-    image_size.y = available_size.y;
+    imageSize.x = availableSize.y * aspectRatio;
+    imageSize.y = availableSize.y;
   }
 
-  return image_size;
+  return imageSize;
 }
 
 void UIRenderer::maybeRenderOnParamChange(RayTracer& raytracer) {
-  if (params.auto_render) {
+  if (params.autoRender) {
     raytracer.renderSceneAsync();
   }
 }

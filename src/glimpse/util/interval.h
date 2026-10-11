@@ -4,15 +4,15 @@
 
 namespace glimpse {
 
-class interval {
+class Interval {
  public:
   double min, max;
 
-  interval() : min(+math::infinity), max(-math::infinity) {}  // Default interval is empty
+  Interval() : min(+math::infinity), max(-math::infinity) {}  // Default interval is empty
 
-  interval(double min, double max) : min(min), max(max) {}
+  Interval(double min, double max) : min(min), max(max) {}
 
-  interval(const interval& a, const interval& b) {
+  Interval(const Interval& a, const Interval& b) {
     // Create the interval tightly enclosing the two input intervals.
     min = a.min <= b.min ? a.min : b.min;
     max = a.max >= b.max ? a.max : b.max;
@@ -30,22 +30,22 @@ class interval {
     return x;
   }
 
-  interval expand(double delta) const {
+  Interval expand(double delta) const {
     auto padding = delta / 2;
-    return interval(min - padding, max + padding);
+    return Interval(min - padding, max + padding);
   }
 
-  static const interval empty, universe;
+  static const Interval empty, universe;
 };
 
 // C++17 inline definitions (formerly in glimpse.cpp).
-inline const interval interval::empty = interval(+math::infinity, -math::infinity);
-inline const interval interval::universe = interval(-math::infinity, +math::infinity);
+inline const Interval Interval::empty = Interval(+math::infinity, -math::infinity);
+inline const Interval Interval::universe = Interval(-math::infinity, +math::infinity);
 
-inline interval operator+(const interval& ival, double displacement) {
-  return interval(ival.min + displacement, ival.max + displacement);
+inline Interval operator+(const Interval& ival, double displacement) {
+  return Interval(ival.min + displacement, ival.max + displacement);
 }
 
-inline interval operator+(double displacement, const interval& ival) { return ival + displacement; }
+inline Interval operator+(double displacement, const Interval& ival) { return ival + displacement; }
 
 }  // namespace glimpse

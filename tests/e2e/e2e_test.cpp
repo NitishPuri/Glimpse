@@ -13,10 +13,10 @@
 #include "../test_cfg.h"
 
 namespace fs = std::filesystem;
-constexpr const char* ext_for_testing = ".png";
+constexpr const char* extForTesting = ".png";
 
 // Compares two images pixel by pixel with optional tolerance
-bool compare_images(const Image& img1, const Image& img2, int tolerance = 1, Image* diff_image = nullptr) {
+bool compareImages(const Image& img1, const Image& img2, int tolerance = 1, Image* diffImage = nullptr) {
   if (img1.width != img2.width || img1.height != img2.height) {
     std::cout << "Image dimensions don't match: "
               << "(" << img1.width << "x" << img1.height << ") vs "
@@ -24,47 +24,47 @@ bool compare_images(const Image& img1, const Image& img2, int tolerance = 1, Ima
     return false;
   }
 
-  int total_diff = 0;
-  int max_diff = 0;
+  int totalDiff = 0;
+  int maxDiff = 0;
 
   for (int y = 0; y < img1.height; y++) {
     for (int x = 0; x < img1.width; x++) {
       ImageColor c1 = img1.get(x, y);
       ImageColor c2 = img2.get(x, y);
 
-      int r_diff = std::abs(static_cast<int>(c1.rgb[0]) - static_cast<int>(c2.rgb[0]));
-      int g_diff = std::abs(static_cast<int>(c1.rgb[1]) - static_cast<int>(c2.rgb[1]));
-      int b_diff = std::abs(static_cast<int>(c1.rgb[2]) - static_cast<int>(c2.rgb[2]));
+      int rDiff = std::abs(static_cast<int>(c1.rgb[0]) - static_cast<int>(c2.rgb[0]));
+      int gDiff = std::abs(static_cast<int>(c1.rgb[1]) - static_cast<int>(c2.rgb[1]));
+      int bDiff = std::abs(static_cast<int>(c1.rgb[2]) - static_cast<int>(c2.rgb[2]));
 
-      int pixel_diff = std::max({r_diff, g_diff, b_diff});
-      max_diff = std::max(max_diff, pixel_diff);
+      int pixelDiff = std::max({rDiff, gDiff, bDiff});
+      maxDiff = std::max(maxDiff, pixelDiff);
 
-      if (pixel_diff > tolerance) {
-        // std::cout << "Pixel (" << x << "," << y << ") differs by " << pixel_diff << " (max: " << tolerance << ")"
+      if (pixelDiff > tolerance) {
+        // std::cout << "Pixel (" << x << "," << y << ") differs by " << pixelDiff << " (max: " << tolerance << ")"
         //           << std::endl;
         // std::cout << "  Expected: [" << static_cast<int>(c1.rgb[0]) << "," << static_cast<int>(c1.rgb[1]) << ","
         //           << static_cast<int>(c1.rgb[2]) << "]" << std::endl;
         // std::cout << "  Actual  : [" << static_cast<int>(c2.rgb[0]) << "," << static_cast<int>(c2.rgb[1]) << ","
         //           << static_cast<int>(c2.rgb[2]) << "]" << std::endl;
-        total_diff++;
+        totalDiff++;
       }
 
-      if (diff_image != nullptr) {
-        if (pixel_diff > tolerance) {
+      if (diffImage != nullptr) {
+        if (pixelDiff > tolerance) {
           // Highlight differences in red, with intensity proportional to difference
-          int intensity = std::min(255, pixel_diff * 4);  // Amplify differences for visibility
-          diff_image->set(x, y, ImageColor(intensity, 0, 0));
+          int intensity = std::min(255, pixelDiff * 4);  // Amplify differences for visibility
+          diffImage->set(x, y, ImageColor(intensity, 0, 0));
         } else {
           // Use grayscale for pixels that are similar enough
           unsigned char gray = static_cast<unsigned char>((c1.rgb[0] + c1.rgb[1] + c1.rgb[2]) / 3);
-          diff_image->set(x, y, ImageColor(gray, gray, gray));
+          diffImage->set(x, y, ImageColor(gray, gray, gray));
         }
       }
     }
   }
 
-  if (total_diff > 0) {
-    std::cout << "Images differ by " << total_diff << " pixels (max diff: " << max_diff << ")" << std::endl;
+  if (totalDiff > 0) {
+    std::cout << "Images differ by " << totalDiff << " pixels (max diff: " << maxDiff << ")" << std::endl;
     return false;
   }
 
@@ -72,164 +72,164 @@ bool compare_images(const Image& img1, const Image& img2, int tolerance = 1, Ima
 }
 
 // Creates directory if it doesn't exist
-void ensure_directory_exists(const std::string& path) {
+void ensureDirectoryExists(const std::string& path) {
   if (!fs::exists(path)) {
     fs::create_directories(path);
   }
 }
 
 // Run end-to-end test for a scene with uncapped samples per pixel
-void test_scene_uncapped(const std::string& name, Scene (*create_scene_fn)(), int width = 200, int height = 0,
-                         int run_time_seconds = 5, int seed = 42) {
+void testSceneUncapped(const std::string& name, Scene (*createSceneFn)(), int width = 200, int height = 0,
+                         int runTimeSeconds = 5, int seed = 42) {
   using namespace boost::ut;
 
   // Set the random seed for deterministic rendering
-  Random::set_seed(seed);
+  Random::setSeed(seed);
 
-  const std::string test_output_dir = test_output_path("");
-  const std::string reference_dir = "./tests/e2e/reference_images/";
+  const std::string testOutputDir = testOutputPath("");
+  const std::string referenceDir = "./tests/e2e/reference_images/";
 
-  ensure_directory_exists(test_output_dir);
+  ensureDirectoryExists(testOutputDir);
 
   // Create test image filename
-  std::string output_filename = test_output_dir + name + "_uncapped" + ext_for_testing;
-  std::string diff_filename = test_output_dir + name + "_uncapped_diff" + ext_for_testing;
-  std::string reference_filename = reference_dir + name + "_uncapped" + ext_for_testing;
+  std::string outputFilename = testOutputDir + name + "_uncapped" + extForTesting;
+  std::string diffFilename = testOutputDir + name + "_uncapped_diff" + extForTesting;
+  std::string referenceFilename = referenceDir + name + "_uncapped" + extForTesting;
 
-  test("e2e_" + name + "_uncapped_render") = [&, run_time_seconds] {
+  test("e2e_" + name + "_uncapped_render") = [&, runTimeSeconds] {
     // Create scene
-    Scene scene = create_scene_fn();
+    Scene scene = createSceneFn();
 
     // Setup for uncapped SPP mode
-    scene.cam.uncapped_spp = true;
+    scene.cam.uncappedSpp = true;
 
     // Override dimensions for testing
-    scene.cam.image_width = width;
+    scene.cam.imageWidth = width;
     if (height > 0) {
-      scene.cam.image_height = height;
+      scene.cam.imageHeight = height;
     } else {
       // Calculate height from aspect ratio
-      scene.cam.image_height = static_cast<int>(width / scene.cam.aspect_ratio);
+      scene.cam.imageHeight = static_cast<int>(width / scene.cam.aspectRatio);
     }
 
     // Lower depth for testing
-    scene.cam.max_depth = 4;
+    scene.cam.maxDepth = 4;
 
     scene.cam.initialize();
 
     // Create and initialize image
-    Image rendered_image(scene.cam.image_width, scene.cam.image_height);
+    Image renderedImage(scene.cam.imageWidth, scene.cam.imageHeight);
 
     // Render for specified duration
-    std::cout << "Rendering uncapped test scene: " << name << " (" << scene.cam.image_width << "x"
-              << scene.cam.image_height << ")"
-              << " for " << run_time_seconds << " seconds" << std::endl;
+    std::cout << "Rendering uncapped test scene: " << name << " (" << scene.cam.imageWidth << "x"
+              << scene.cam.imageHeight << ")"
+              << " for " << runTimeSeconds << " seconds" << std::endl;
 
     std::atomic<int> progress = 0;
     Renderer renderer;
 
     // Start rendering in a separate thread
-    auto render_future =
-        std::async(std::launch::async, [&]() { renderer.render_scene(scene, rendered_image, &progress); });
+    auto renderFuture =
+        std::async(std::launch::async, [&]() { renderer.renderScene(scene, renderedImage, &progress); });
 
     // Let it run for specified time
-    std::this_thread::sleep_for(std::chrono::seconds(run_time_seconds));
+    std::this_thread::sleep_for(std::chrono::seconds(runTimeSeconds));
 
     // Signal renderer to stop
-    Renderer::stop_rendering = true;
+    Renderer::stopRequested = true;
 
     // Wait for renderer to finish
-    render_future.wait();
+    renderFuture.wait();
 
     // Reset flag for future tests
-    Renderer::stop_rendering = false;
+    Renderer::stopRequested = false;
 
     // Save rendered image
-    bool write_success = rendered_image.write(output_filename);
-    expect(write_success) << "Failed to write uncapped output image to " << output_filename;
+    bool writeSuccess = renderedImage.write(outputFilename);
+    expect(writeSuccess) << "Failed to write uncapped output image to " << outputFilename;
 
-    if (fs::exists(reference_filename)) {
+    if (fs::exists(referenceFilename)) {
       // Load reference image
-      Image reference_image(reference_filename);
+      Image referenceImage(referenceFilename);
 
       // Compare images
-      bool images_match = compare_images(rendered_image, reference_image, 10);
+      bool imagesMatch = compareImages(renderedImage, referenceImage, 10);
 
       // If they don't match, create a diff image
-      if (!images_match) {
-        Image diff_image(scene.cam.image_width, scene.cam.image_height);
-        compare_images(rendered_image, reference_image, 10, &diff_image);
-        diff_image.write(diff_filename);
+      if (!imagesMatch) {
+        Image diffImage(scene.cam.imageWidth, scene.cam.imageHeight);
+        compareImages(renderedImage, referenceImage, 10, &diffImage);
+        diffImage.write(diffFilename);
       }
     } else {
-      std::cout << "Reference image not found for comparison: " << reference_filename << std::endl;
+      std::cout << "Reference image not found for comparison: " << referenceFilename << std::endl;
     }
 
     std::cout << "Completed uncapped rendering test for " << name << std::endl;
   };
 }
 
-void test_debug_scene() {
+void testDebugScene() {
   using namespace boost::ut;
 
-  const std::string test_output_dir = test_output_path("");
-  ensure_directory_exists(test_output_dir);
-  std::string output_filename = test_output_dir + "debug_scene" + ext_for_testing;
+  const std::string testOutputDir = testOutputPath("");
+  ensureDirectoryExists(testOutputDir);
+  std::string outputFilename = testOutputDir + "debug_scene" + extForTesting;
 
   test("e2e_debug_scene") = [&] {
     // Create the debug scene
-    Scene scene = create_debug_scene();
+    Scene scene = createDebugScene();
 
     // Create and initialize image
-    Image rendered_image(scene.cam.image_width, scene.cam.image_height);
+    Image renderedImage(scene.cam.imageWidth, scene.cam.imageHeight);
 
-    std::cout << "Rendering debug scene (" << scene.cam.image_width << "x" << scene.cam.image_height << ")"
+    std::cout << "Rendering debug scene (" << scene.cam.imageWidth << "x" << scene.cam.imageHeight << ")"
               << std::endl;
 
     // Render synchronously (no need for async with tiny image)
     std::atomic<int> progress = 0;
     Renderer renderer;
-    renderer.render_scene(scene, rendered_image, &progress);
+    renderer.renderScene(scene, renderedImage, &progress);
 
     // Save rendered image
-    bool write_success = rendered_image.write(output_filename);
-    expect(write_success) << "Failed to write debug scene image";
+    bool writeSuccess = renderedImage.write(outputFilename);
+    expect(writeSuccess) << "Failed to write debug scene image";
 
     // Print the pixel values for manual verification
     std::cout << "Debug scene pixel values:" << std::endl;
-    for (int y = 0; y < scene.cam.image_height; y++) {
-      for (int x = 0; x < scene.cam.image_width; x++) {
-        ImageColor c = rendered_image.get(x, y);
+    for (int y = 0; y < scene.cam.imageHeight; y++) {
+      for (int x = 0; x < scene.cam.imageWidth; x++) {
+        ImageColor c = renderedImage.get(x, y);
         std::cout << "Pixel (" << x << "," << y << "): [" << static_cast<int>(c.rgb[0]) << ","
                   << static_cast<int>(c.rgb[1]) << "," << static_cast<int>(c.rgb[2]) << "]" << std::endl;
       }
     }
 
-    // print_ascii_image(rendered_image);
-    print_color_ascii_image(rendered_image);
-    // print_enhanced_ascii_image(rendered_image);
-    // print_feature_visualization(rendered_image);
+    // printAsciiImage(renderedImage);
+    printColorAsciiImage(renderedImage);
+    // printEnhancedAsciiImage(renderedImage);
+    // printFeatureVisualization(renderedImage);
 
     // Create a known reference image manually for comparison
-    Image reference_image(scene.cam.image_width, scene.cam.image_height);
+    Image referenceImage(scene.cam.imageWidth, scene.cam.imageHeight);
 
     // Center pixels should be red from the sphere, outer pixels should be blue background
     // We'll estimate a basic pattern
-    for (int y = 0; y < scene.cam.image_height; y++) {
-      for (int x = 0; x < scene.cam.image_width; x++) {
+    for (int y = 0; y < scene.cam.imageHeight; y++) {
+      for (int x = 0; x < scene.cam.imageWidth; x++) {
         // Simplified: Center pixels are red, outer pixels are blue
-        double center_x = scene.cam.image_width / 2.0 - 0.5;
-        double center_y = scene.cam.image_height / 2.0 - 0.5;
-        double distance = sqrt(pow(x - center_x, 2) + pow(y - center_y, 2));
+        double centerX = scene.cam.imageWidth / 2.0 - 0.5;
+        double centerY = scene.cam.imageHeight / 2.0 - 0.5;
+        double distance = sqrt(pow(x - centerX, 2) + pow(y - centerY, 2));
 
         if (distance < 1.5) {
           // Red sphere at the center
-          reference_image.set(x, y,
+          referenceImage.set(x, y,
                               ImageColor(static_cast<unsigned char>(255), static_cast<unsigned char>(0),
                                          static_cast<unsigned char>(0)));
         } else {
           // Blue background
-          reference_image.set(x, y,
+          referenceImage.set(x, y,
                               ImageColor(static_cast<unsigned char>(128), static_cast<unsigned char>(179),
                                          static_cast<unsigned char>(255)));  // Approximate blue background
         }
@@ -237,25 +237,25 @@ void test_debug_scene() {
     }
 
     // Save reference image
-    std::string ref_output = test_output_dir + "debug_scene_reference" + ext_for_testing;
-    reference_image.write(ref_output);
+    std::string refOutput = testOutputDir + "debug_scene_reference" + extForTesting;
+    referenceImage.write(refOutput);
 
     // Compare images
-    bool images_match = compare_images(rendered_image, reference_image, 100);  // Higher tolerance for this test
+    bool imagesMatch = compareImages(renderedImage, referenceImage, 100);  // Higher tolerance for this test
 
     // If they don't match, print specific differences
-    if (!images_match) {
+    if (!imagesMatch) {
       std::cout << "Debug scene pixel differences:" << std::endl;
-      for (int y = 0; y < scene.cam.image_height; y++) {
-        for (int x = 0; x < scene.cam.image_width; x++) {
-          ImageColor rendered = rendered_image.get(x, y);
-          ImageColor reference = reference_image.get(x, y);
+      for (int y = 0; y < scene.cam.imageHeight; y++) {
+        for (int x = 0; x < scene.cam.imageWidth; x++) {
+          ImageColor rendered = renderedImage.get(x, y);
+          ImageColor reference = referenceImage.get(x, y);
 
-          int r_diff = abs(static_cast<int>(rendered.rgb[0]) - static_cast<int>(reference.rgb[0]));
-          int g_diff = abs(static_cast<int>(rendered.rgb[1]) - static_cast<int>(reference.rgb[1]));
-          int b_diff = abs(static_cast<int>(rendered.rgb[2]) - static_cast<int>(reference.rgb[2]));
+          int rDiff = abs(static_cast<int>(rendered.rgb[0]) - static_cast<int>(reference.rgb[0]));
+          int gDiff = abs(static_cast<int>(rendered.rgb[1]) - static_cast<int>(reference.rgb[1]));
+          int bDiff = abs(static_cast<int>(rendered.rgb[2]) - static_cast<int>(reference.rgb[2]));
 
-          if (r_diff > 10 || g_diff > 10 || b_diff > 10) {
+          if (rDiff > 10 || gDiff > 10 || bDiff > 10) {
             std::cout << "Pixel (" << x << "," << y << ") - Rendered: [" << static_cast<int>(rendered.rgb[0]) << ","
                       << static_cast<int>(rendered.rgb[1]) << "," << static_cast<int>(rendered.rgb[2])
                       << "] Reference: [" << static_cast<int>(reference.rgb[0]) << ","
@@ -269,78 +269,78 @@ void test_debug_scene() {
 }
 
 // Run end-to-end test for a single scene
-void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width = 200, int height = 0,
+void testScene(const std::string& name, Scene (*createSceneFn)(), int width = 200, int height = 0,
                 unsigned int seed = 42) {
   using namespace boost::ut;
 
   // Set the random seed for deterministic rendering
-  Random::set_seed(seed);
+  Random::setSeed(seed);
 
-  const std::string test_output_dir = test_output_path("");
-  const std::string reference_dir = "./tests/e2e/reference_images/";
+  const std::string testOutputDir = testOutputPath("");
+  const std::string referenceDir = "./tests/e2e/reference_images/";
 
-  ensure_directory_exists(test_output_dir);
+  ensureDirectoryExists(testOutputDir);
 
   // Create test image filename
-  std::string output_filename = test_output_dir + name + ext_for_testing;
-  std::string reference_filename = reference_dir + name + ext_for_testing;
-  std::string diff_filename = test_output_dir + name + "_diff" + ext_for_testing;
+  std::string outputFilename = testOutputDir + name + extForTesting;
+  std::string referenceFilename = referenceDir + name + extForTesting;
+  std::string diffFilename = testOutputDir + name + "_diff" + extForTesting;
 
-  // std::string test_name = ;
+  // std::string testName = ;
   test("e2e_" + name + "_render") = [&] {
     // Create scene
-    Scene scene = create_scene_fn();
+    Scene scene = createSceneFn();
 
     // Override dimensions for testing
-    scene.cam.image_width = width;
+    scene.cam.imageWidth = width;
     if (height > 0) {
-      scene.cam.image_height = height;
+      scene.cam.imageHeight = height;
     } else {
       // Calculate height from aspect ratio
-      scene.cam.image_height = static_cast<int>(width / scene.cam.aspect_ratio);
+      scene.cam.imageHeight = static_cast<int>(width / scene.cam.aspectRatio);
     }
 
     // Reduce samples for faster testing
-    scene.cam.samples_per_pixel = 100;  // Low number for quick tests
-    scene.cam.max_depth = 4;            // Reduced bounce depth
+    scene.cam.samplesPerPixel = 100;  // Low number for quick tests
+    scene.cam.maxDepth = 4;            // Reduced bounce depth
 
     scene.cam.initialize();
 
     // Create and initialize image
-    Image rendered_image(scene.cam.image_width, scene.cam.image_height);
+    Image renderedImage(scene.cam.imageWidth, scene.cam.imageHeight);
 
     // Render
-    std::cout << "Rendering test scene: " << name << " (" << scene.cam.image_width << "x" << scene.cam.image_height
+    std::cout << "Rendering test scene: " << name << " (" << scene.cam.imageWidth << "x" << scene.cam.imageHeight
               << ")"
-              << " with " << scene.cam.samples_per_pixel << " samples" << std::endl;
+              << " with " << scene.cam.samplesPerPixel << " samples" << std::endl;
 
     std::atomic<int> progress = 0;
-    std::atomic<bool> render_completed = false;
+    std::atomic<bool> renderCompleted = false;
     Renderer renderer;
-    renderer.render_scene(scene, rendered_image, &progress);
+    renderer.renderScene(scene, renderedImage, &progress);
 
     // start render in a sperate thread!
-    auto render_future = std::async(std::launch::async, [&]() {
-      renderer.render_scene(scene, rendered_image, &progress);
-      render_completed = true;
+    auto renderFuture = std::async(std::launch::async, [&]() {
+      renderer.renderScene(scene, renderedImage, &progress);
+      renderCompleted = true;
     });
 
     // Wait for rendering to complete with a timeout
     // TODO: Find a reasonable timeout value, 10 is too much
-    const int timeout_seconds = 10;
-    auto start_time = std::chrono::steady_clock::now();
-    bool timed_out = false;
-    while (!render_completed) {
+    const int timeoutSeconds = 10;
+    auto startTime = std::chrono::steady_clock::now();
+    bool timedOut = false;
+    while (!renderCompleted) {
       // wait...
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-      auto elapsed_seconds =
-          std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start_time).count();
-      if (elapsed_seconds > timeout_seconds) {
-        timed_out = true;
-        std::cout << "Rendering timed out after " << timeout_seconds << " seconds" << std::endl;
+      auto elapsedSeconds =
+          std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - startTime).count();
+      if (elapsedSeconds > timeoutSeconds) {
+        timedOut = true;
+        std::cout << "Rendering timed out after " << timeoutSeconds << " seconds" << std::endl;
 
-        Renderer::stop_rendering = true;  // Stop rendering
+        Renderer::stopRequested = true;  // Stop rendering
 
         break;
       }
@@ -349,47 +349,47 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
     // TODO: correct image flip behaviour
     //  TODO: find a way to fix random seed to check for correctness!!
 
-    if (!timed_out) {
+    if (!timedOut) {
       // Wait for rendering to finish if it hasnt already,
       // TODO, maybe this should be an assert? since we expect the render to finish
       // TODO, also compare the total elapsed time with a reference value to compare changes in performance
-      render_future.wait();
+      renderFuture.wait();
       std::cout << "Rendering completed succesfully." << std::endl;
     } else {
       // Force wait for the rendering thread to clean up
-      render_future.wait();
+      renderFuture.wait();
       std::cout << "Proceeding with comparison after forced stop." << std::endl;
     }
 
     // Reset the global stop flag for future tests!
     // TODO: Maybe this shouldnt be a global state afterall,
     // or maybe it should be reset in the renderer instance destructor itself
-    Renderer::stop_rendering = false;
+    Renderer::stopRequested = false;
 
     // Save rendered image
-    bool write_success = rendered_image.write(output_filename);
-    expect(write_success) << "Failed to write output image to " << output_filename;
+    bool writeSuccess = renderedImage.write(outputFilename);
+    expect(writeSuccess) << "Failed to write output image to " << outputFilename;
 
     // std::cout << "ASCII preview of rendered image:" << std::endl;
-    // print_color_ascii_image(rendered_image);
-    // print_truecolor_image(rendered_image);
-    // print_pixel_image(rendered_image);
-    // print_best_image(rendered_image);
-    // print_highres_image(rendered_image);
-    // print_ultrahd_console_image(rendered_image, 60, 30);
-    // print_enhanced_ascii_image(rendered_image);
+    // printColorAsciiImage(renderedImage);
+    // printTruecolorImage(renderedImage);
+    // printPixelImage(renderedImage);
+    // printBestImage(renderedImage);
+    // printHighresImage(renderedImage);
+    // printUltrahdConsoleImage(renderedImage, 60, 30);
+    // printEnhancedAsciiImage(renderedImage);
 
     // If reference image exists, compare
-    if (fs::exists(reference_filename)) {
-      Image reference_image(reference_filename);
+    if (fs::exists(referenceFilename)) {
+      Image referenceImage(referenceFilename);
 
       // create diff image
-      Image diff_image(scene.cam.image_width, scene.cam.image_height);
-      bool images_match = compare_images(rendered_image, reference_image, 10, &diff_image);
-      diff_image.write(diff_filename);
-      expect(images_match) << "Rendered image doesn't match reference for scene: " << name;
+      Image diffImage(scene.cam.imageWidth, scene.cam.imageHeight);
+      bool imagesMatch = compareImages(renderedImage, referenceImage, 10, &diffImage);
+      diffImage.write(diffFilename);
+      expect(imagesMatch) << "Rendered image doesn't match reference for scene: " << name;
     } else {
-      std::cout << "No reference image found at: " << reference_filename
+      std::cout << "No reference image found at: " << referenceFilename
                 << ". Created new output as potential reference." << std::endl;
     }
   };
@@ -397,16 +397,16 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
 
 // TODO: Test the uncapped spp render branch
 
-void e2e_test() {
-  // test_debug_scene();
+void e2eTest() {
+  // testDebugScene();
 
   // Test each scene
-  test_scene("simple_sphere", create_simple_sphere_scene);
-  test_scene("cornell_box", create_cornell_box_scene, 200, 200);  // Square aspect ratio
-  test_scene("reflective_sphere", create_reflective_sphere_scene);
+  testScene("simple_sphere", createSimpleSphereScene);
+  testScene("cornell_box", createCornellBoxScene, 200, 200);  // Square aspect ratio
+  testScene("reflective_sphere", createReflectiveSphereScene);
   // Add more scenes as needed
 
-  test_scene_uncapped("simple_sphere", create_simple_sphere_scene, 200, 0, 3);
-  test_scene_uncapped("cornell_box", create_cornell_box_scene, 200, 0, 3);
-  test_scene_uncapped("reflective_sphere", create_reflective_sphere_scene);
+  testSceneUncapped("simple_sphere", createSimpleSphereScene, 200, 0, 3);
+  testSceneUncapped("cornell_box", createCornellBoxScene, 200, 0, 3);
+  testSceneUncapped("reflective_sphere", createReflectiveSphereScene);
 }

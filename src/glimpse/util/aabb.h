@@ -4,40 +4,40 @@
 #include "glimpse/ray.h"
 
 namespace glimpse {
-class aabb {
+class AABB {
  public:
-  interval x, y, z;
+  Interval x, y, z;
 
-  aabb() {}  // The default AABB is empty, since intervals are empty by default.
+  AABB() {}  // The default AABB is empty, since intervals are empty by default.
 
-  aabb(const interval& x, const interval& y, const interval& z) : x(x), y(y), z(z) { pad_to_minimums(); }
+  AABB(const Interval& x, const Interval& y, const Interval& z) : x(x), y(y), z(z) { padToMinimums(); }
 
-  aabb(const point3& a, const point3& b) {
+  AABB(const Point3& a, const Point3& b) {
     // Treat the two points a and b as extrema for the bounding box, so we don't require a
     // particular minimum/maximum coordinate order.
 
-    x = (a[0] <= b[0]) ? interval(a[0], b[0]) : interval(b[0], a[0]);
-    y = (a[1] <= b[1]) ? interval(a[1], b[1]) : interval(b[1], a[1]);
-    z = (a[2] <= b[2]) ? interval(a[2], b[2]) : interval(b[2], a[2]);
+    x = (a[0] <= b[0]) ? Interval(a[0], b[0]) : Interval(b[0], a[0]);
+    y = (a[1] <= b[1]) ? Interval(a[1], b[1]) : Interval(b[1], a[1]);
+    z = (a[2] <= b[2]) ? Interval(a[2], b[2]) : Interval(b[2], a[2]);
 
-    pad_to_minimums();
+    padToMinimums();
   }
 
-  aabb(const aabb& box0, const aabb& box1) {
-    x = interval(box0.x, box1.x);
-    y = interval(box0.y, box1.y);
-    z = interval(box0.z, box1.z);
+  AABB(const AABB& box0, const AABB& box1) {
+    x = Interval(box0.x, box1.x);
+    y = Interval(box0.y, box1.y);
+    z = Interval(box0.z, box1.z);
   }
 
-  const interval& axis_interval(int n) const {
+  const Interval& axisInterval(int n) const {
     if (n == 1) return y;
     if (n == 2) return z;
     return x;
   }
 
-  bool hit(const ray& r, interval ray_t) const;
+  bool hit(const Ray& r, Interval rayT) const;
 
-  int longest_axis() const {
+  int longestAxis() const {
     // Returns the index of the longest axis of the bounding box.
 
     if (x.size() > y.size())
@@ -46,10 +46,10 @@ class aabb {
       return y.size() > z.size() ? 1 : 2;
   }
 
-  static const aabb empty, universe;
+  static const AABB empty, universe;
 
  private:
-  void pad_to_minimums() {
+  void padToMinimums() {
     // Adjust the AABB so that no side is narrower than some delta, padding if necessary.
 
     double delta = 0.0001;
@@ -60,13 +60,13 @@ class aabb {
 };
 
 // C++17 inline definitions (formerly in glimpse.cpp).
-inline const aabb aabb::empty = aabb(interval::empty, interval::empty, interval::empty);
-inline const aabb aabb::universe = aabb(interval::universe, interval::universe, interval::universe);
+inline const AABB AABB::empty = AABB(Interval::empty, Interval::empty, Interval::empty);
+inline const AABB AABB::universe = AABB(Interval::universe, Interval::universe, Interval::universe);
 
-inline aabb operator+(const aabb& bbox, const vec3& offset) {
-  return aabb(bbox.x + offset.x(), bbox.y + offset.y(), bbox.z + offset.z());
+inline AABB operator+(const AABB& bbox, const Vec3& offset) {
+  return AABB(bbox.x + offset.x(), bbox.y + offset.y(), bbox.z + offset.z());
 }
 
-inline aabb operator+(const vec3& offset, const aabb& bbox) { return bbox + offset; }
+inline AABB operator+(const Vec3& offset, const AABB& bbox) { return bbox + offset; }
 
 }  // namespace glimpse

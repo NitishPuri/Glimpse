@@ -7,14 +7,14 @@ namespace glimpse {
 
 struct Scene {
   // world
-  hittable_list world;
+  HittableList world;
 
-  hittable_list lights;
+  HittableList lights;
 
   // env
-  color background = color(0.7, 0.8, 1.0);
+  Color background = Color(0.7, 0.8, 1.0);
 
-  camera cam;
+  Camera cam;
 };
 
 }  // namespace glimpse

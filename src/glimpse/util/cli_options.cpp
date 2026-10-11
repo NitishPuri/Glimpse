@@ -15,7 +15,7 @@ namespace {
 
 // The whole string must be a base-10 integer in [min, max]: rejects "", "12abc", out-of-range and overflow.
 template <class T>
-std::optional<T> parse_int(std::string_view text, long long min, long long max) {
+std::optional<T> parseInt(std::string_view text, long long min, long long max) {
   long long value = 0;
   const char* end = text.data() + text.size();
   auto [ptr, ec] = std::from_chars(text.data(), end, value);
@@ -24,7 +24,7 @@ std::optional<T> parse_int(std::string_view text, long long min, long long max) 
 }
 
 // Formats Image::write can produce today. PFM arrives with technique 01 (float_output).
-bool is_writable_extension(std::string_view path) {
+bool isWritableExtension(std::string_view path) {
   auto dot = path.find_last_of('.');
   auto slash = path.find_last_of('/');
   if (dot == std::string_view::npos || (slash != std::string_view::npos && dot < slash)) return false;
@@ -35,7 +35,7 @@ bool is_writable_extension(std::string_view path) {
 
 }  // namespace
 
-ParseResult parse_command_line(int argc, const char* const argv[]) {
+ParseResult parseCommandLine(int argc, const char* const argv[]) {
   ParseResult result;
   CmdOptions& o = result.options;
 
@@ -46,7 +46,7 @@ ParseResult parse_command_line(int argc, const char* const argv[]) {
       continue;
     }
     if (arg == "--list-scenes") {
-      o.list_scenes = true;
+      o.listScenes = true;
       continue;
     }
     if (arg != "--scene" && arg != "--spp" && arg != "--width" && arg != "--depth" && arg != "--seed" &&
@@ -64,13 +64,13 @@ ParseResult parse_command_line(int argc, const char* const argv[]) {
     if (arg == "--scene") {
       o.scene = value;
     } else if (arg == "--out") {
-      if (!is_writable_extension(value)) {
+      if (!isWritableExtension(value)) {
         result.error = invalid + " (supported: .png .jpg .jpeg .bmp .tga)";
         return result;
       }
       o.out = value;
     } else if (arg == "--seed") {
-      o.seed = parse_int<uint32_t>(value, 1, std::numeric_limits<uint32_t>::max());
+      o.seed = parseInt<uint32_t>(value, 1, std::numeric_limits<uint32_t>::max());
       if (!o.seed) {
         result.error = invalid + " (1 .. 4294967295)";
         return result;
@@ -78,7 +78,7 @@ ParseResult parse_command_line(int argc, const char* const argv[]) {
     } else {
       // Generous upper bounds: they only catch typos, not taste.
       const long long max = arg == "--width" ? 16384 : arg == "--spp" ? 1'000'000 : 10'000;
-      auto v = parse_int<int>(value, 1, max);
+      auto v = parseInt<int>(value, 1, max);
       if (!v) {
         result.error = invalid + " (1 .. " + std::to_string(max) + ")";
         return result;
@@ -102,20 +102,20 @@ std::string usage() {
   return ss.str();
 }
 
-std::optional<std::string> resolve_scene_name(const std::string& name_or_index) {
-  if (findScene(name_or_index)) return name_or_index;
-  auto index = parse_int<size_t>(name_or_index, 0, static_cast<long long>(sceneRegistry().size()) - 1);
+std::optional<std::string> resolveSceneName(const std::string& nameOrIndex) {
+  if (findScene(nameOrIndex)) return nameOrIndex;
+  auto index = parseInt<size_t>(nameOrIndex, 0, static_cast<long long>(sceneRegistry().size()) - 1);
   if (index) return sceneRegistry()[*index].name;
   return std::nullopt;
 }
 
-void apply_options(const CmdOptions& options, Scene& scene) {
-  if (options.spp) scene.cam.samples_per_pixel = *options.spp;
-  if (options.width) scene.cam.image_width = *options.width;
-  if (options.depth) scene.cam.max_depth = *options.depth;
+void applyOptions(const CmdOptions& options, Scene& scene) {
+  if (options.spp) scene.cam.samplesPerPixel = *options.spp;
+  if (options.width) scene.cam.imageWidth = *options.width;
+  if (options.depth) scene.cam.maxDepth = *options.depth;
   scene.cam.initialize();
 }
 
-std::string default_output_path(const std::string& scene_name) { return "results/" + scene_name + ".png"; }
+std::string defaultOutputPath(const std::string& sceneName) { return "results/" + sceneName + ".png"; }
 
 }  // namespace glimpse

@@ -16,8 +16,8 @@ struct Layout {
 
 // (x, y, w, h) is the usable area (ImGui main viewport work area). The sidebar keeps a fixed width but never
 // takes more than a third of a narrow window.
-inline Layout compute_layout(float x, float y, float w, float h, float sidebar_w = 420.0f) {
-  const float side = std::min(sidebar_w, w / 3.0f);
+inline Layout computeLayout(float x, float y, float w, float h, float sidebarW = 420.0f) {
+  const float side = std::min(sidebarW, w / 3.0f);
   return {{x, y, side, h}, {x + side, y, w - side, h}};
 }
 
@@ -27,10 +27,10 @@ struct WindowSize {
 
 // Opening size: 80% of the monitor work area, at least 640x480 but never larger than the work area itself.
 // Without monitor information (work area <= 0) fall back to the configured size.
-inline WindowSize initial_window_size(int work_w, int work_h, int fallback_w, int fallback_h) {
-  if (work_w <= 0 || work_h <= 0) return {fallback_w, fallback_h};
-  const int w = std::min(work_w, std::max(640, static_cast<int>(work_w * 0.8f)));
-  const int h = std::min(work_h, std::max(480, static_cast<int>(work_h * 0.8f)));
+inline WindowSize initialWindowSize(int workW, int workH, int fallbackW, int fallbackH) {
+  if (workW <= 0 || workH <= 0) return {fallbackW, fallbackH};
+  const int w = std::min(workW, std::max(640, static_cast<int>(workW * 0.8f)));
+  const int h = std::min(workH, std::max(480, static_cast<int>(workH * 0.8f)));
   return {w, h};
 }
 

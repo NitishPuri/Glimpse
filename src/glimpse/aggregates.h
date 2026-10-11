@@ -8,93 +8,93 @@
 
 namespace glimpse {
 
-class hittable_list : public hittable {
+class HittableList : public Hittable {
  public:
-  std::vector<shared_ptr<hittable>> objects;
+  std::vector<shared_ptr<Hittable>> objects;
 
-  hittable_list() {}
-  hittable_list(shared_ptr<hittable> object) { add(object); }
+  HittableList() {}
+  HittableList(shared_ptr<Hittable> object) { add(object); }
 
   void clear() { objects.clear(); }
 
-  void add(shared_ptr<hittable> object) {
+  void add(shared_ptr<Hittable> object) {
     objects.push_back(object);
-    bbox = aabb(bbox, object->bounding_box());
+    bbox = AABB(bbox, object->boundingBox());
   }
 
-  bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
-    hit_record temp_rec;
-    bool hit_anything = false;
-    auto closest_so_far = ray_t.max;
+  bool hit(const Ray& r, Interval rayT, HitRecord& rec) const override {
+    HitRecord tempRec;
+    bool hitAnything = false;
+    auto closestSoFar = rayT.max;
 
     for (const auto& object : objects) {
-      if (object->hit(r, interval(ray_t.min, closest_so_far), temp_rec)) {
-        hit_anything = true;
-        closest_so_far = temp_rec.t;
-        rec = temp_rec;
+      if (object->hit(r, Interval(rayT.min, closestSoFar), tempRec)) {
+        hitAnything = true;
+        closestSoFar = tempRec.t;
+        rec = tempRec;
       }
     }
 
-    return hit_anything;
+    return hitAnything;
   }
 
-  aabb bounding_box() const override { return bbox; }
+  AABB boundingBox() const override { return bbox; }
 
-  double pdf_value(const point3& origin, const vec3& direction) const override {
+  double pdfValue(const Point3& origin, const Vec3& direction) const override {
     // ASSERT(objects.size() > 0);
     if (objects.empty()) return 0.0;
     auto weight = 1.0 / objects.size();
     auto sum = 0.0;
 
-    for (const auto& object : objects) sum += weight * object->pdf_value(origin, direction);
+    for (const auto& object : objects) sum += weight * object->pdfValue(origin, direction);
 
     return sum;
   }
 
-  vec3 random(const point3& origin) const override {
+  Vec3 random(const Point3& origin) const override {
     // ASSERT(objects.size() > 0);
-    if (objects.empty()) return vec3(1, 0, 0);
+    if (objects.empty()) return Vec3(1, 0, 0);
     // if (objects.empty()) return vec3(0, 0, 0);
-    auto int_size = int(objects.size());
-    return objects[random_int(0, int_size - 1)]->random(origin);
+    auto intSize = int(objects.size());
+    return objects[randomInt(0, intSize - 1)]->random(origin);
   }
 
  private:
-  aabb bbox;
+  AABB bbox;
 };
 
-class bvh_node : public hittable {
+class BVHNode : public Hittable {
  public:
-  bvh_node(hittable_list list) : bvh_node(list.objects, 0, list.objects.size()) {
+  BVHNode(HittableList list) : BVHNode(list.objects, 0, list.objects.size()) {
     // There's a C++ subtlety here. This constructor (without span indices) creates an
     // implicit copy of the hittable list, which we will modify. The lifetime of the copied
     // list only extends until this constructor exits. That's OK, because we only need to
     // persist the resulting bounding volume hierarchy.
   }
 
-  bvh_node(std::vector<shared_ptr<hittable>>& objects, size_t start, size_t end);
+  BVHNode(std::vector<shared_ptr<Hittable>>& objects, size_t start, size_t end);
 
-  bool hit(const ray& r, interval ray_t, hit_record& rec) const override;
+  bool hit(const Ray& r, Interval rayT, HitRecord& rec) const override;
 
-  aabb bounding_box() const override { return bbox; }
+  AABB boundingBox() const override { return bbox; }
 
  private:
-  shared_ptr<hittable> left;
-  shared_ptr<hittable> right;
-  aabb bbox;
+  shared_ptr<Hittable> left;
+  shared_ptr<Hittable> right;
+  AABB bbox;
 
  protected:
-  static bool box_compare(const shared_ptr<hittable> a, const shared_ptr<hittable> b, int axis_index) {
-    auto a_axis_interval = a->bounding_box().axis_interval(axis_index);
-    auto b_axis_interval = b->bounding_box().axis_interval(axis_index);
-    return a_axis_interval.min < b_axis_interval.min;
+  static bool boxCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b, int axisIndex) {
+    auto aAxisInterval = a->boundingBox().axisInterval(axisIndex);
+    auto bAxisInterval = b->boundingBox().axisInterval(axisIndex);
+    return aAxisInterval.min < bAxisInterval.min;
   }
 
-  static bool box_x_compare(const shared_ptr<hittable> a, const shared_ptr<hittable> b) { return box_compare(a, b, 0); }
+  static bool boxXCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return boxCompare(a, b, 0); }
 
-  static bool box_y_compare(const shared_ptr<hittable> a, const shared_ptr<hittable> b) { return box_compare(a, b, 1); }
+  static bool boxYCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return boxCompare(a, b, 1); }
 
-  static bool box_z_compare(const shared_ptr<hittable> a, const shared_ptr<hittable> b) { return box_compare(a, b, 2); }
+  static bool boxZCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return boxCompare(a, b, 2); }
 };
 
 }  // namespace glimpse

@@ -4,13 +4,13 @@
 
 using namespace glimpse;
 
-static ut::suite<"perlin"> perlin_suite = [] {
+static ut::suite<"perlin"> perlinSuite = [] {
   using namespace boost::ut;
 
   "perlin"_test = [] {
     "construction"_test = [] {
       // Test basic construction
-      perlin noise;
+      Perlin noise;
 
       // This is primarily to verify the constructor doesn't crash
       // We can't test specific values of random vectors, but we can test
@@ -19,11 +19,11 @@ static ut::suite<"perlin"> perlin_suite = [] {
     };
 
     "noise_basic"_test = [] {
-      perlin noise;
+      Perlin noise;
 
       // Test that noise returns values in expected range [-1, 1]
       for (int i = 0; i < 100; i++) {
-        point3 p(i * 0.1, i * 0.2, i * 0.3);
+        Point3 p(i * 0.1, i * 0.2, i * 0.3);
         double n = noise.noise(p);
         expect(n >= -1.0_d);
         expect(n <= 1.0_d);
@@ -31,44 +31,44 @@ static ut::suite<"perlin"> perlin_suite = [] {
     };
 
     "noise_consistency"_test = [] {
-      perlin noise;
+      Perlin noise;
 
       // Test that the same point always gives the same noise value
-      point3 p(1.2, 3.4, 5.6);
-      double first_value = noise.noise(p);
+      Point3 p(1.2, 3.4, 5.6);
+      double firstValue = noise.noise(p);
 
       for (int i = 0; i < 5; i++) {
-        expect(noise.noise(p) == first_value);
+        expect(noise.noise(p) == firstValue);
       }
     };
 
     skip / "noise_different_points"_test = [] {
-      perlin noise;
+      Perlin noise;
 
       // Test that different points typically give different noise values
-      double prev = noise.noise(point3(0, 0, 0));
-      int different_count = 0;
+      double prev = noise.noise(Point3(0, 0, 0));
+      int differentCount = 0;
 
       std::cout << prev << std::endl;
 
       for (int i = 1; i < 10; i++) {
-        double current = noise.noise(point3(i, i, i));
+        double current = noise.noise(Point3(i, i, i));
         std::cout << current << std::endl;
         if (std::abs(current - prev) > 0.001) {
-          different_count++;
+          differentCount++;
         }
         prev = current;
       }
 
       // At least some values should be different
-      expect(different_count > 0_i);
+      expect(differentCount > 0_i);
     };
 
     "turbulence"_test = [] {
-      perlin noise;
+      Perlin noise;
 
       // Test that turbulence returns positive values (since it uses fabs)
-      point3 p(1.2, 3.4, 5.6);
+      Point3 p(1.2, 3.4, 5.6);
 
       for (int depth = 1; depth <= 10; depth++) {
         double t = noise.turb(p, depth);
@@ -77,8 +77,8 @@ static ut::suite<"perlin"> perlin_suite = [] {
     };
 
     "turbulence_depth"_test = [] {
-      perlin noise;
-      point3 p(1.2, 3.4, 5.6);
+      Perlin noise;
+      Point3 p(1.2, 3.4, 5.6);
 
       // As depth increases, turbulence typically accumulates more detail
       // Higher depth should generally give non-zero values that are different from lower depths
@@ -91,12 +91,12 @@ static ut::suite<"perlin"> perlin_suite = [] {
     };
 
     "noise_interpolation"_test = [] {
-      perlin noise;
+      Perlin noise;
 
       // Test that nearby points have somewhat similar noise values
-      point3 p1(1.0, 1.0, 1.0);
-      point3 p2(1.001, 1.0, 1.0);  // Very close to p1
-      point3 p3(1.5, 1.5, 1.5);    // Further from p1
+      Point3 p1(1.0, 1.0, 1.0);
+      Point3 p2(1.001, 1.0, 1.0);  // Very close to p1
+      Point3 p3(1.5, 1.5, 1.5);    // Further from p1
 
       double n1 = noise.noise(p1);
       double n2 = noise.noise(p2);
@@ -108,7 +108,7 @@ static ut::suite<"perlin"> perlin_suite = [] {
     };
 
     "noise_periodicity"_test = [] {
-      perlin noise;
+      Perlin noise;
 
       // Test that integer steps create a pattern
       // Because of how permutation works with & 255, points separated by 256 units
@@ -117,8 +117,8 @@ static ut::suite<"perlin"> perlin_suite = [] {
       int count = 0;
 
       for (int i = 0; i < 10; i++) {
-        point3 p1(i, i, i);
-        point3 p2(i + 256, i, i);
+        Point3 p1(i, i, i);
+        Point3 p2(i + 256, i, i);
 
         double n1 = noise.noise(p1);
         double n2 = noise.noise(p2);
@@ -138,23 +138,23 @@ static ut::suite<"perlin"> perlin_suite = [] {
     "noise_zero_at_integers"_test = [] {
       // In many Perlin implementations, noise is closer to zero at integer coordinates
       // due to the gradient interpolation. Test if this pattern appears in our implementation
-      perlin noise;
-      double avg_integer = 0.0;
-      double avg_halfpoint = 0.0;
+      Perlin noise;
+      double avgInteger = 0.0;
+      double avgHalfpoint = 0.0;
       int samples = 10;
 
       for (int i = 0; i < samples; i++) {
         // Integer coordinates
-        point3 p_int(i, i, i);
+        Point3 pInt(i, i, i);
         // Points halfway between integers
-        point3 p_half(i + 0.5, i + 0.5, i + 0.5);
+        Point3 pHalf(i + 0.5, i + 0.5, i + 0.5);
 
-        avg_integer += std::abs(noise.noise(p_int));
-        avg_halfpoint += std::abs(noise.noise(p_half));
+        avgInteger += std::abs(noise.noise(pInt));
+        avgHalfpoint += std::abs(noise.noise(pHalf));
       }
 
-      avg_integer /= samples;
-      avg_halfpoint /= samples;
+      avgInteger /= samples;
+      avgHalfpoint /= samples;
 
       // This is a statistical test, not a strict rule
       // Typically, noise magnitudes at integer coordinates would be

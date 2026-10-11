@@ -3,23 +3,23 @@
 namespace glimpse::gui {
 
 int AppWindow::initApp() {
-  if (gl_res.initGL() == -1) return -1;
+  if (glRes.initGL() == -1) return -1;
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   // The layout is computed every frame (layout.h); a saved imgui.ini would only fight it.
   ImGui::GetIO().IniFilename = nullptr;
-  ImGui_ImplGlfw_InitForOpenGL(gl_res.window, true);
+  ImGui_ImplGlfw_InitForOpenGL(glRes.window, true);
   ImGui_ImplOpenGL3_Init("#version 330");
 
   // Setup Raytracer
-  if (glfwGetCurrentContext() == gl_res.window) {
+  if (glfwGetCurrentContext() == glRes.window) {
     // An unknown start scene keeps the default index (it used to become size(), one past the end).
     if (const SceneEntry* start = findScene(ui.params.startScene)) {
-      ui.params.current_scene = static_cast<int>(start - sceneRegistry().data());
+      ui.params.currentScene = static_cast<int>(start - sceneRegistry().data());
     }
-    raytracer.setupScene(gl_res, ui.params.current_scene, ui.params.lookFrom, ui.params.lookAt);
+    raytracer.setupScene(glRes, ui.params.currentScene, ui.params.lookFrom, ui.params.lookAt);
   } else {
     logger.log("Failed to initialize OpenGL context");
     return -1;
@@ -30,16 +30,16 @@ int AppWindow::initApp() {
 
 void AppWindow::run() {
   bool firstFrame = true;
-  while (!glfwWindowShouldClose(gl_res.window)) {
+  while (!glfwWindowShouldClose(glRes.window)) {
     glfwPollEvents();
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ui.renderUI(raytracer, gl_res);
+    ui.renderUI(raytracer, glRes);
 
-    if (firstFrame && ui.params.auto_render) {
+    if (firstFrame && ui.params.autoRender) {
       firstFrame = false;
       raytracer.renderSceneAsync();
     }
@@ -47,20 +47,20 @@ void AppWindow::run() {
     glClearColor(.1f, .1f, .1f, 1.0f);  // Set background color to dark gray
     glClear(GL_COLOR_BUFFER_BIT);
 
-    ui.renderOutput(gl_res, raytracer);
+    ui.renderOutput(glRes, raytracer);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    glfwSwapBuffers(gl_res.window);
+    glfwSwapBuffers(glRes.window);
   }
 
   // A render still running would block forever in the std::async future's destructor (uncapped renders never
   // finish on their own). Ask it to stop and wait for the worker threads before tearing down the window.
   raytracer.stopRendering();
-  if (raytracer.trace_future) raytracer.trace_future->wait();
+  if (raytracer.traceFuture) raytracer.traceFuture->wait();
 
-  glfwDestroyWindow(gl_res.window);
+  glfwDestroyWindow(glRes.window);
   glfwTerminate();
 }
 
@@ -68,7 +68,7 @@ void AppWindow::run() {
 
 
 int main() {
-  glimpse::Logger logger(glimpse::log_file_for("gui"));
+  glimpse::Logger logger(glimpse::logFileFor("gui"));
   glimpse::gui::AppWindow app(logger);
   if (app.initApp() != 0) {
     return -1;

@@ -8,9 +8,9 @@ using namespace glimpse;
 
 // Add a helper function for approximate comparisons of floating point values
 bool approximately(float a, float b, float epsilon = 0.01f) { return std::abs(a - b) <= epsilon; }
-constexpr bool log_to_console = false;
+constexpr bool logToConsole = false;
 
-static ut::suite<"image"> image_suite = [] {
+static ut::suite<"image"> imageSuite = [] {
   using namespace boost::ut;
 
   "Image.construction"_test = [] {
@@ -53,22 +53,22 @@ static ut::suite<"image"> image_suite = [] {
     img.clear();
 
     // Verify all bytes are now 0
-    bool all_cleared = true;
+    bool allCleared = true;
     for (auto byte : img.data()) {
       if (byte != 0) {
-        all_cleared = false;
+        allCleared = false;
         break;
       }
     }
-    expect(all_cleared);
+    expect(allCleared);
   };
 
   "Image.set"_test = [] {
     Image img(10, 10);
 
     // Test normal case
-    ImageColor color(128, 64, 32);
-    img.set(5, 5, color);
+    ImageColor c(128, 64, 32);
+    img.set(5, 5, c);
 
     size_t offset = (5 + 5 * 10) * 3;
     expect(img.data()[offset] == 128_uc);
@@ -100,27 +100,27 @@ static ut::suite<"image"> image_suite = [] {
     }
 
     // Verify center pixel
-    size_t center_offset = (1 + 1 * 3) * 3;
-    expect(img.data()[center_offset] == 50_uc);
-    expect(img.data()[center_offset + 1] == 50_uc);
-    expect(img.data()[center_offset + 2] == 50_uc);
+    size_t centerOffset = (1 + 1 * 3) * 3;
+    expect(img.data()[centerOffset] == 50_uc);
+    expect(img.data()[centerOffset + 1] == 50_uc);
+    expect(img.data()[centerOffset + 2] == 50_uc);
 
     // Verify corner pixel
-    size_t corner_offset = (2 + 2 * 3) * 3;
-    expect(img.data()[corner_offset] == 100_uc);
-    expect(img.data()[corner_offset + 1] == 100_uc);
-    expect(img.data()[corner_offset + 2] == 100_uc);
+    size_t cornerOffset = (2 + 2 * 3) * 3;
+    expect(img.data()[cornerOffset] == 100_uc);
+    expect(img.data()[cornerOffset + 1] == 100_uc);
+    expect(img.data()[cornerOffset + 2] == 100_uc);
   };
 };
 
-static ut::suite<"image_roundtrip"> image_roundtrip_suite = [] {
+static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
   using namespace boost::ut;
 
   test("image_initialization") = [] {
     Image img(100, 100);
     expect(img.width == 100_i);
     expect(img.height == 100_i);
-    expect(img.is_valid());
+    expect(img.isValid());
   };
 
   test("image_set_get") = [] {
@@ -128,15 +128,15 @@ static ut::suite<"image_roundtrip"> image_roundtrip_suite = [] {
 
     // Test byte-based set/get
     img.set(5, 5, ImageColor(123, 45, 67));
-    auto color = img.get(5, 5);
-    expect(color.rgb[0] == 123_i);
-    expect(color.rgb[1] == 45_i);
-    expect(color.rgb[2] == 67_i);
+    auto px = img.get(5, 5);
+    expect(px.rgb[0] == 123_i);
+    expect(px.rgb[1] == 45_i);
+    expect(px.rgb[2] == 67_i);
 
     // Test float-based set/get
-    img.set_float(2, 3, 0.5f, 0.25f, 0.75f);
+    img.setFloat(2, 3, 0.5f, 0.25f, 0.75f);
     // float r, g, b;
-    auto c = img.get_float(2, 3);
+    auto c = img.getFloat(2, 3);
     expect(approximately(static_cast<float>(c[0]), 0.5f)) << "Expected r ≈ 0.5";
     expect(approximately(static_cast<float>(c[1]), 0.25f)) << "Expected g ≈ 0.25";
     expect(approximately(static_cast<float>(c[2]), 0.75f)) << "Expected b ≈ 0.75";
@@ -151,47 +151,47 @@ static ut::suite<"image_roundtrip"> image_roundtrip_suite = [] {
         float r = static_cast<float>(x) / original.width;
         float g = static_cast<float>(y) / original.height;
         float b = static_cast<float>(x + y) / (original.width + original.height);
-        original.set_float(x, y, r, g, b);
+        original.setFloat(x, y, r, g, b);
       }
     }
 
     // Write the image
-    std::string test_file = test_output_path("roundtrip_test.tga");
-    bool write_success = original.write(test_file);
-    expect(write_success) << "Failed to write test image";
+    std::string testFile = testOutputPath("roundtrip_test.tga");
+    bool writeSuccess = original.write(testFile);
+    expect(writeSuccess) << "Failed to write test image";
 
     // Read it back
-    Image loaded(test_file);
-    expect(loaded.is_valid()) << "Failed to load image";
+    Image loaded(testFile);
+    expect(loaded.isValid()) << "Failed to load image";
     expect(loaded.width == original.width) << "Width mismatch";
     expect(loaded.height == original.height) << "Height mismatch";
 
     // Compare with tolerance
-    int diff_count = 0;
+    int diffCount = 0;
     for (int y = 0; y < original.height; y++) {
       for (int x = 0; x < original.width; x++) {
-        auto orig_color = original.get(x, y);
-        auto loaded_color = loaded.get(x, y);
+        auto origColor = original.get(x, y);
+        auto loadedColor = loaded.get(x, y);
 
         // Allow for small rounding differences due to compression
         const int tolerance = 50;
-        if (abs(static_cast<int>(orig_color.rgb[0]) - static_cast<int>(loaded_color.rgb[0])) > tolerance ||
-            abs(static_cast<int>(orig_color.rgb[1]) - static_cast<int>(loaded_color.rgb[1])) > tolerance ||
-            abs(static_cast<int>(orig_color.rgb[2]) - static_cast<int>(loaded_color.rgb[2])) > tolerance) {
-          std::cout << "Pixel (" << x << "," << y << ") - Original: [" << static_cast<int>(orig_color.rgb[0]) << ","
-                    << static_cast<int>(orig_color.rgb[1]) << "," << static_cast<int>(orig_color.rgb[2])
-                    << "] Loaded: [" << static_cast<int>(loaded_color.rgb[0]) << ","
-                    << static_cast<int>(loaded_color.rgb[1]) << "," << static_cast<int>(loaded_color.rgb[2]) << "]"
+        if (abs(static_cast<int>(origColor.rgb[0]) - static_cast<int>(loadedColor.rgb[0])) > tolerance ||
+            abs(static_cast<int>(origColor.rgb[1]) - static_cast<int>(loadedColor.rgb[1])) > tolerance ||
+            abs(static_cast<int>(origColor.rgb[2]) - static_cast<int>(loadedColor.rgb[2])) > tolerance) {
+          std::cout << "Pixel (" << x << "," << y << ") - Original: [" << static_cast<int>(origColor.rgb[0]) << ","
+                    << static_cast<int>(origColor.rgb[1]) << "," << static_cast<int>(origColor.rgb[2])
+                    << "] Loaded: [" << static_cast<int>(loadedColor.rgb[0]) << ","
+                    << static_cast<int>(loadedColor.rgb[1]) << "," << static_cast<int>(loadedColor.rgb[2]) << "]"
                     << std::endl;
-          diff_count++;
-          if (diff_count > 10) {
+          diffCount++;
+          if (diffCount > 10) {
             break;
           }
         }
       }
     }
     // Expect minimal differences
-    expect(diff_count < 10_i) << "Too many pixel differences: " << diff_count;
+    expect(diffCount < 10_i) << "Too many pixel differences: " << diffCount;
   };
 
   test("image_roundtrip_precision_debug") = [] {
@@ -202,10 +202,10 @@ static ut::suite<"image_roundtrip"> image_roundtrip_suite = [] {
     for (int y = 0; y < original.height; y++) {
       for (int x = 0; x < original.width; x++) {
         // Use exact values rather than gradients
-        uchar r_val = static_cast<uchar>(x * 25);  // 0, 25, 50, 75...
-        uchar g_val = static_cast<uchar>(y * 25);  // 0, 25, 50, 75...
-        uchar b_val = 128;                         // Constant middle value
-        original.set(x, y, ImageColor(r_val, g_val, b_val));
+        uchar rVal = static_cast<uchar>(x * 25);  // 0, 25, 50, 75...
+        uchar gVal = static_cast<uchar>(y * 25);  // 0, 25, 50, 75...
+        uchar bVal = 128;                         // Constant middle value
+        original.set(x, y, ImageColor(rVal, gVal, bVal));
       }
     }
 
@@ -213,41 +213,41 @@ static ut::suite<"image_roundtrip"> image_roundtrip_suite = [] {
     std::vector<std::string> formats = {"png", "bmp", "tga", "jpg"};
 
     for (const auto& format : formats) {
-      if (log_to_console) std::cout << "\n===== Testing format: " << format << " =====\n";
+      if (logToConsole) std::cout << "\n===== Testing format: " << format << " =====\n";
 
-      std::string test_file = test_output_path("roundtrip_test." + format);
-      bool write_success = original.write(test_file);
-      expect(write_success) << "Failed to write test image";
+      std::string testFile = testOutputPath("roundtrip_test." + format);
+      bool writeSuccess = original.write(testFile);
+      expect(writeSuccess) << "Failed to write test image";
 
       // Read it back
-      Image loaded(test_file);
-      expect(loaded.is_valid()) << "Failed to load image";
+      Image loaded(testFile);
+      expect(loaded.isValid()) << "Failed to load image";
 
       // Check a few specific pixels to see exactly what's happening
-      std::vector<std::pair<int, int>> test_points = {{0, 0}, {5, 5}, {9, 9}};
+      std::vector<std::pair<int, int>> testPoints = {{0, 0}, {5, 5}, {9, 9}};
 
-      for (auto [x, y] : test_points) {
-        auto orig_color = original.get(x, y);
-        auto loaded_color = loaded.get(x, y);
+      for (auto [x, y] : testPoints) {
+        auto origColor = original.get(x, y);
+        auto loadedColor = loaded.get(x, y);
 
-        if (log_to_console) {
+        if (logToConsole) {
           std::cout << "Pixel (" << x << "," << y << ")\n";
-          std::cout << "  Original: [" << static_cast<int>(orig_color.rgb[0]) << ","
-                    << static_cast<int>(orig_color.rgb[1]) << "," << static_cast<int>(orig_color.rgb[2]) << "]\n";
-          std::cout << "  Loaded:   [" << static_cast<int>(loaded_color.rgb[0]) << ","
-                    << static_cast<int>(loaded_color.rgb[1]) << "," << static_cast<int>(loaded_color.rgb[2]) << "]\n";
+          std::cout << "  Original: [" << static_cast<int>(origColor.rgb[0]) << ","
+                    << static_cast<int>(origColor.rgb[1]) << "," << static_cast<int>(origColor.rgb[2]) << "]\n";
+          std::cout << "  Loaded:   [" << static_cast<int>(loadedColor.rgb[0]) << ","
+                    << static_cast<int>(loadedColor.rgb[1]) << "," << static_cast<int>(loadedColor.rgb[2]) << "]\n";
         }
 
         // Calculate percentage difference
         for (int c = 0; c < 3; c++) {
-          float orig_val = static_cast<float>(orig_color.rgb[c]);
-          float loaded_val = static_cast<float>(loaded_color.rgb[c]);
+          float origVal = static_cast<float>(origColor.rgb[c]);
+          float loadedVal = static_cast<float>(loadedColor.rgb[c]);
 
-          if (orig_val > 0) {
-            float pct_diff = 100.0f * std::abs(orig_val - loaded_val) / orig_val;
+          if (origVal > 0) {
+            float pctDiff = 100.0f * std::abs(origVal - loadedVal) / origVal;
             auto threshold = (format == "jpg") ? 5.0f : 1.0f;
-            expect(pct_diff < threshold) << "Pixel (" << x << "," << y << ") component " << c
-                                         << " difference exceeds 1%: " << pct_diff << "%";
+            expect(pctDiff < threshold) << "Pixel (" << x << "," << y << ") component " << c
+                                         << " difference exceeds 1%: " << pctDiff << "%";
           }
         }
       }
@@ -255,78 +255,78 @@ static ut::suite<"image_roundtrip"> image_roundtrip_suite = [] {
   };
 
   test("rgb_order_test") = [] {
-    Image test_img(3, 1);
+    Image testImg(3, 1);
 
     // Set a pure red, pure green, and pure blue pixel
-    test_img.set(0, 0, ImageColor(255, 0, 0));  // Red
-    test_img.set(1, 0, ImageColor(0, 255, 0));  // Green
-    test_img.set(2, 0, ImageColor(0, 0, 255));  // Blue
+    testImg.set(0, 0, ImageColor(255, 0, 0));  // Red
+    testImg.set(1, 0, ImageColor(0, 255, 0));  // Green
+    testImg.set(2, 0, ImageColor(0, 0, 255));  // Blue
 
     std::vector<std::string> formats = {"png", "bmp", "tga", "jpg"};
 
     for (const auto& format : formats) {
-      if (log_to_console) std::cout << "\n===== Testing format: " << format << " =====\n";
+      if (logToConsole) std::cout << "\n===== Testing format: " << format << " =====\n";
 
-      std::string test_file = test_output_path("rgb_test." + format);
-      bool write_success = test_img.write(test_file);
-      expect(write_success) << "Failed to write test image";
+      std::string testFile = testOutputPath("rgb_test." + format);
+      bool writeSuccess = testImg.write(testFile);
+      expect(writeSuccess) << "Failed to write test image";
 
-      Image loaded(test_file);
+      Image loaded(testFile);
 
       // Check each pixel
-      auto red_pixel = loaded.get(0, 0);
-      auto green_pixel = loaded.get(1, 0);
-      auto blue_pixel = loaded.get(2, 0);
+      auto redPixel = loaded.get(0, 0);
+      auto greenPixel = loaded.get(1, 0);
+      auto bluePixel = loaded.get(2, 0);
 
-      if (log_to_console)
-        std::cout << "Red pixel loaded as: [" << static_cast<int>(red_pixel.rgb[0]) << ","
-                  << static_cast<int>(red_pixel.rgb[1]) << "," << static_cast<int>(red_pixel.rgb[2]) << "]\n";
+      if (logToConsole)
+        std::cout << "Red pixel loaded as: [" << static_cast<int>(redPixel.rgb[0]) << ","
+                  << static_cast<int>(redPixel.rgb[1]) << "," << static_cast<int>(redPixel.rgb[2]) << "]\n";
 
-      if (log_to_console)
-        std::cout << "Green pixel loaded as: [" << static_cast<int>(green_pixel.rgb[0]) << ","
-                  << static_cast<int>(green_pixel.rgb[1]) << "," << static_cast<int>(green_pixel.rgb[2]) << "]\n";
+      if (logToConsole)
+        std::cout << "Green pixel loaded as: [" << static_cast<int>(greenPixel.rgb[0]) << ","
+                  << static_cast<int>(greenPixel.rgb[1]) << "," << static_cast<int>(greenPixel.rgb[2]) << "]\n";
 
-      if (log_to_console)
-        std::cout << "Blue pixel loaded as: [" << static_cast<int>(blue_pixel.rgb[0]) << ","
-                  << static_cast<int>(blue_pixel.rgb[1]) << "," << static_cast<int>(blue_pixel.rgb[2]) << "]\n";
+      if (logToConsole)
+        std::cout << "Blue pixel loaded as: [" << static_cast<int>(bluePixel.rgb[0]) << ","
+                  << static_cast<int>(bluePixel.rgb[1]) << "," << static_cast<int>(bluePixel.rgb[2]) << "]\n";
     }
   };
 
   test("vertical_flip_test") = [] {
     // Create a test image with a vertical gradient pattern
     const int height = 10;
-    Image test_img(1, height);
+    Image testImg(1, height);
 
     // Create a gradient from top to bottom (white to black)
     for (int y = 0; y < height; y++) {
       // Set brightness based on y position (top is white, bottom is black)
       unsigned char value = static_cast<unsigned char>(255 - (y * 255 / (height - 1)));
-      test_img.set(0, y, ImageColor(value, value, value));
+      testImg.set(0, y, ImageColor(value, value, value));
 
       // Debug: print what we're setting
-      if (log_to_console) std::cout << "Setting y=" << y << " to value: " << static_cast<int>(value) << std::endl;
+      if (logToConsole) std::cout << "Setting y=" << y << " to value: " << static_cast<int>(value) << std::endl;
     }
 
     // Write/read test for each format
     std::vector<std::string> formats = {"png", "bmp", "tga"};  // Skip jpg due to compression
 
     for (const auto& format : formats) {
-      if (log_to_console) std::cout << "\n===== Testing format: " << format << " for vertical flip =====\n";
+      if (logToConsole) std::cout << "\n===== Testing format: " << format << " for vertical flip =====\n";
 
-      std::string test_file = test_output_path("vertical_flip_test." + format);
-      test_img.write(test_file);
+      std::string testFile = testOutputPath("vertical_flip_test." + format);
+      testImg.write(testFile);
 
-      Image loaded(test_file);
-      expect(loaded.is_valid());
+      Image loaded(testFile);
+      expect(loaded.isValid());
 
       // Check each row's value
       for (int y = 0; y < height; y++) {
-        auto color = loaded.get(0, y);
+        auto c = loaded.get(0, y);
         // Average the channels for simplicity
-        int avg_value = (color.rgb[0] + color.rgb[1] + color.rgb[2]) / 3;
+        int avgValue = (c.rgb[0] + c.rgb[1] + c.rgb[2]) / 3;
 
-        if (log_to_console)
-          std::cout << "Row " << y << " loaded with value: " << avg_value
+        if (logToConsole)
+          std::cout << "Row " << y << " loaded with value: " << avgValue
                     << " (expected: " << 255 - (y * 255 / (height - 1)) << ")" << std::endl;
       }
     }
@@ -335,47 +335,47 @@ static ut::suite<"image_roundtrip"> image_roundtrip_suite = [] {
   test("gamma_correction_test") = [] {
     // Test a range of gray values
     const int size = 11;  // 0, 25, 50, ... 250
-    Image test_img(size, 1);
+    Image testImg(size, 1);
 
     // Set grayscale values from 0 to 250 in steps of 25
     for (int x = 0; x < size; x++) {
       unsigned char value = static_cast<unsigned char>(x * 25);
-      test_img.set(x, 0, ImageColor(value, value, value));
-      if (log_to_console) std::cout << "Setting x=" << x << " to value: " << static_cast<int>(value) << std::endl;
+      testImg.set(x, 0, ImageColor(value, value, value));
+      if (logToConsole) std::cout << "Setting x=" << x << " to value: " << static_cast<int>(value) << std::endl;
     }
 
     // Test with PNG (most reliable format)
-    std::string test_file = test_output_path("gamma_test.png");
-    test_img.write(test_file);
+    std::string testFile = testOutputPath("gamma_test.png");
+    testImg.write(testFile);
 
-    Image loaded(test_file);
-    expect(loaded.is_valid());
+    Image loaded(testFile);
+    expect(loaded.isValid());
 
-    if (log_to_console) {
+    if (logToConsole) {
       // Check each value and the difference
       std::cout << "\nGamma correction results:\n";
       std::cout << "Original | Loaded | Difference\n";
       std::cout << "-----------------------------\n";
     }
 
-    auto diff_count = 0, threshold = 1;
+    auto diffCount = 0, threshold = 1;
     for (int x = 0; x < size; x++) {
-      auto orig_color = test_img.get(x, 0);
-      auto loaded_color = loaded.get(x, 0);
-      int orig_val = static_cast<int>(orig_color.rgb[0]);
-      int loaded_val = static_cast<int>(loaded_color.rgb[0]);
-      int diff = loaded_val - orig_val;
+      auto origColor = testImg.get(x, 0);
+      auto loadedColor = loaded.get(x, 0);
+      int origVal = static_cast<int>(origColor.rgb[0]);
+      int loadedVal = static_cast<int>(loadedColor.rgb[0]);
+      int diff = loadedVal - origVal;
       if (diff > threshold) {
-        diff_count++;
+        diffCount++;
       }
 
-      if (log_to_console) {
-        std::cout << std::setw(8) << orig_val << " | " << std::setw(6) << loaded_val << " | " << std::setw(10) << diff
+      if (logToConsole) {
+        std::cout << std::setw(8) << origVal << " | " << std::setw(6) << loadedVal << " | " << std::setw(10) << diff
                   << std::endl;
       }
     }
 
-    expect(loaded.is_valid());
-    expect(diff_count < 1_i) << "Too many pixel differences: " << diff_count;
+    expect(loaded.isValid());
+    expect(diffCount < 1_i) << "Too many pixel differences: " << diffCount;
   };
 };

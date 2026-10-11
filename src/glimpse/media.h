@@ -6,50 +6,50 @@
 
 namespace glimpse {
 
-class constant_medium : public hittable {
+class ConstantMedium : public Hittable {
  public:
-  constant_medium(shared_ptr<hittable> boundary, double density, shared_ptr<texture> tex)
-      : boundary(boundary), neg_inv_density(-1 / density), phase_function(make_shared<isotropic>(tex)) {}
+  ConstantMedium(shared_ptr<Hittable> boundary, double density, shared_ptr<Texture> tex)
+      : boundary(boundary), negInvDensity(-1 / density), phaseFunction(make_shared<Isotropic>(tex)) {}
 
-  constant_medium(shared_ptr<hittable> boundary, double density, const color& albedo)
-      : boundary(boundary), neg_inv_density(-1 / density), phase_function(make_shared<isotropic>(albedo)) {}
+  ConstantMedium(shared_ptr<Hittable> boundary, double density, const Color& albedo)
+      : boundary(boundary), negInvDensity(-1 / density), phaseFunction(make_shared<Isotropic>(albedo)) {}
 
-  bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
-    hit_record rec1, rec2;
+  bool hit(const Ray& r, Interval rayT, HitRecord& rec) const override {
+    HitRecord rec1, rec2;
 
-    if (!boundary->hit(r, interval::universe, rec1)) return false;
+    if (!boundary->hit(r, Interval::universe, rec1)) return false;
 
-    if (!boundary->hit(r, interval(rec1.t + 0.0001, math::infinity), rec2)) return false;
+    if (!boundary->hit(r, Interval(rec1.t + 0.0001, math::infinity), rec2)) return false;
 
-    if (rec1.t < ray_t.min) rec1.t = ray_t.min;
-    if (rec2.t > ray_t.max) rec2.t = ray_t.max;
+    if (rec1.t < rayT.min) rec1.t = rayT.min;
+    if (rec2.t > rayT.max) rec2.t = rayT.max;
 
     if (rec1.t >= rec2.t) return false;
 
     if (rec1.t < 0) rec1.t = 0;
 
-    auto ray_length = r.direction().length();
-    auto distance_inside_boundary = (rec2.t - rec1.t) * ray_length;
-    auto hit_distance = neg_inv_density * std::log(random_double());
+    auto rayLength = r.direction().length();
+    auto distanceInsideBoundary = (rec2.t - rec1.t) * rayLength;
+    auto hitDistance = negInvDensity * std::log(randomDouble());
 
-    if (hit_distance > distance_inside_boundary) return false;
+    if (hitDistance > distanceInsideBoundary) return false;
 
-    rec.t = rec1.t + hit_distance / ray_length;
+    rec.t = rec1.t + hitDistance / rayLength;
     rec.p = r.at(rec.t);
 
-    rec.normal = vec3(1, 0, 0);  // arbitrary
-    rec.front_face = true;       // also arbitrary
-    rec.mat = phase_function;
+    rec.normal = Vec3(1, 0, 0);  // arbitrary
+    rec.frontFace = true;       // also arbitrary
+    rec.mat = phaseFunction;
 
     return true;
   }
 
-  aabb bounding_box() const override { return boundary->bounding_box(); }
+  AABB boundingBox() const override { return boundary->boundingBox(); }
 
  private:
-  shared_ptr<hittable> boundary;
-  double neg_inv_density;
-  shared_ptr<material> phase_function;
+  shared_ptr<Hittable> boundary;
+  double negInvDensity;
+  shared_ptr<Material> phaseFunction;
 };
 
 }  // namespace glimpse

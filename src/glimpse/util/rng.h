@@ -12,15 +12,15 @@ class Random {
   static inline thread_local std::mt19937 generator;
 
   // Global seed value (0 means use random seed)
-  static inline uint32_t global_seed = 0;
+  static inline uint32_t globalSeed = 0;
 
   // Thread-local initialization flag
   static inline thread_local bool initialized = false;
 
  public:
   // Set a specific seed for deterministic results (0 means use random seed)
-  static void set_seed(uint32_t seed) {
-    global_seed = seed;
+  static void setSeed(uint32_t seed) {
+    globalSeed = seed;
 
     // If already initialized, re-seed the generator
     if (initialized) {
@@ -29,28 +29,28 @@ class Random {
   }
 
   // Get the current seed
-  static uint32_t get_seed() { return global_seed; }
+  static uint32_t getSeed() { return globalSeed; }
 
   // Initialize or re-initialize the generator if needed
   static void initialize() {
     if (!initialized) {
-      generator.seed(global_seed != 0 ? global_seed : std::random_device{}());
+      generator.seed(globalSeed != 0 ? globalSeed : std::random_device{}());
       initialized = true;
     }
   }
 
   // Returns a random double in range [0, 1)
-  static double double_value() {
+  static double doubleValue() {
     initialize();
     std::uniform_real_distribution<double> distribution(0.0, 1.0);
     return distribution(generator);
   }
 
   // Returns a random double in range [min, max)
-  static double double_value(double min, double max) { return min + (max - min) * double_value(); }
+  static double doubleValue(double min, double max) { return min + (max - min) * doubleValue(); }
 
   // Returns a random integer in range [min, max]
-  static int int_value(int min, int max) {
+  static int intValue(int min, int max) {
     initialize();
     std::uniform_int_distribution<int> distribution(min, max);
     return distribution(generator);
@@ -58,10 +58,10 @@ class Random {
 };
 
 // Replace old functions with the new class methods for backward compatibility
-inline double random_double() { return Random::double_value(); }
+inline double randomDouble() { return Random::doubleValue(); }
 
-inline double random_double(double min, double max) { return Random::double_value(min, max); }
+inline double randomDouble(double min, double max) { return Random::doubleValue(min, max); }
 
-inline int random_int(int min, int max) { return Random::int_value(min, max); }
+inline int randomInt(int min, int max) { return Random::intValue(min, max); }
 
 }  // namespace glimpse

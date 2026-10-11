@@ -10,7 +10,7 @@ namespace glimpse::gui {
 
 class AppWindow {
  public:
-  AppWindow(Logger& logger_) : logger(logger_), ui(logger_), gl_res(logger_), raytracer(logger_) {}
+  AppWindow(Logger& logger_) : logger(logger_), ui(logger_), glRes(logger_), raytracer(logger_) {}
 
   int initApp();
   void run();
@@ -19,7 +19,7 @@ class AppWindow {
   Logger& logger;
 
   RayTracer raytracer;
-  GLResources gl_res;
+  GLResources glRes;
   UIRenderer ui;
 };
 

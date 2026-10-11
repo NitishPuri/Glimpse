@@ -17,152 +17,152 @@
 
 namespace glimpse {
 
-std::atomic<bool> Renderer::stop_rendering(false);
+std::atomic<bool> Renderer::stopRequested(false);
 
-vec3 sample_square_stratified(int s_i, int s_j, double recip_sqrt_spp) {
+Vec3 sampleSquareStratified(int sI, int sJ, double recipSqrtSpp) {
   // Returns the vector to a random point in the square sub-pixel specified by grid
-  // indices s_i and s_j, for an idealized unit square pixel [-.5,-.5] to [+.5,+.5].
+  // indices sI and sJ, for an idealized unit square pixel [-.5,-.5] to [+.5,+.5].
 
-  auto px = ((s_i + random_double()) * recip_sqrt_spp) - 0.5;
-  auto py = ((s_j + random_double()) * recip_sqrt_spp) - 0.5;
+  auto px = ((sI + randomDouble()) * recipSqrtSpp) - 0.5;
+  auto py = ((sJ + randomDouble()) * recipSqrtSpp) - 0.5;
 
-  return vec3(px, py, 0);
+  return Vec3(px, py, 0);
 }
 
 struct RenderSectionArgs {
   Image &image;  // Image output, filled with rgb values
   Film &film;    // Intermediate buffer, accumulates samples and computes variance.
-  int start_row;
-  int end_row;
+  int startRow;
+  int endRow;
   const Scene &scene;
-  const bvh_node &world_bvh;
+  const BVHNode &worldBvh;
   std::atomic<int> *progress;
 };
 
-void render_section(RenderSectionArgs &args) {
+void renderSection(RenderSectionArgs &args) {
   auto &image = args.image;
   auto &cam = args.scene.cam;
-  auto &start_row = args.start_row;
-  auto &end_row = args.end_row;
-  auto &world_bvh = args.world_bvh;
+  auto &startRow = args.startRow;
+  auto &endRow = args.endRow;
+  auto &worldBvh = args.worldBvh;
   auto &scene = args.scene;
   auto progress = args.progress;
   auto &film = args.film;
 
-  for (int s_j = 0; s_j < cam.sqrt_spp; ++s_j) {
-    for (int s_i = 0; s_i < cam.sqrt_spp; ++s_i) {
-      for (int j = end_row - 1; j >= start_row; --j) {
+  for (int sJ = 0; sJ < cam.sqrtSpp; ++sJ) {
+    for (int sI = 0; sI < cam.sqrtSpp; ++sI) {
+      for (int j = endRow - 1; j >= startRow; --j) {
         // Checked once per row: cheap, and a stop (viewer closing, Stop button) takes effect within a row.
-        if (Renderer::stop_rendering.load()) return;
-        for (int i = 0; i < cam.image_width; ++i) {
-          // color pixel_color(0, 0, 0);
-          color pixel_color(0, 0, 0);
+        if (Renderer::stopRequested.load()) return;
+        for (int i = 0; i < cam.imageWidth; ++i) {
+          // color pixelColor(0, 0, 0);
+          Color pixelColor(0, 0, 0);
 
-          auto offset = sample_square_stratified(s_i, s_j, cam.recip_sqrt_spp);
-          auto u = (i + offset.x()) / (cam.image_width - 1);
-          auto v = (j + offset.y()) / (cam.image_height - 1);
-          ray r = cam.get_ray(u, v);
-          pixel_color +=
-              ray_color(r, scene.background, world_bvh, cam.max_depth, scene.lights, !scene.lights.objects.empty());
+          auto offset = sampleSquareStratified(sI, sJ, cam.recipSqrtSpp);
+          auto u = (i + offset.x()) / (cam.imageWidth - 1);
+          auto v = (j + offset.y()) / (cam.imageHeight - 1);
+          Ray r = cam.getRay(u, v);
+          pixelColor +=
+              rayColor(r, scene.background, worldBvh, cam.maxDepth, scene.lights, !scene.lights.objects.empty());
           if (progress) (*progress)++;
 
-          film.add_sample(i, j, pixel_color);
-          pixel_color = film.get_sample(i, j);
-          pixel_color = sqrt(pixel_color);  // gamma correction!
-          // image.set(i, j, ImageColor{float(pixel_color.x()), float(pixel_color.y()), float(pixel_color.z())});
+          film.addSample(i, j, pixelColor);
+          pixelColor = film.getSample(i, j);
+          pixelColor = sqrt(pixelColor);  // gamma correction!
+          // image.set(i, j, ImageColor{float(pixelColor.x()), float(pixelColor.y()), float(pixelColor.z())});
           // j counts up from the bottom (camera v); Image rows count down from the top, like image files.
-          image.set_float(i, cam.image_height - 1 - j, static_cast<float>(pixel_color.x()),
-                          static_cast<float>(pixel_color.y()), static_cast<float>(pixel_color.z()));
+          image.setFloat(i, cam.imageHeight - 1 - j, static_cast<float>(pixelColor.x()),
+                          static_cast<float>(pixelColor.y()), static_cast<float>(pixelColor.z()));
         }
       }
     }
   }
-  std::cout << "Section done ... rows[" << start_row << ", " << end_row << "] thread " << std::this_thread::get_id()
+  std::cout << "Section done ... rows[" << startRow << ", " << endRow << "] thread " << std::this_thread::get_id()
             << std::endl;
 }
 
-void render_section_uncap(RenderSectionArgs &args) {
+void renderSectionUncap(RenderSectionArgs &args) {
   auto &image = args.image;
   auto &cam = args.scene.cam;
-  auto &start_row = args.start_row;
-  auto &end_row = args.end_row;
-  auto &world_bvh = args.world_bvh;
+  auto &startRow = args.startRow;
+  auto &endRow = args.endRow;
+  auto &worldBvh = args.worldBvh;
   auto &scene = args.scene;
   auto progress = args.progress;
   auto &film = args.film;
 
-  while (!Renderer::stop_rendering.load()) {
-    for (int s_j = 0; s_j < cam.sqrt_spp; ++s_j) {
-      for (int s_i = 0; s_i < cam.sqrt_spp; ++s_i) {
-        for (int j = end_row - 1; j >= start_row; --j) {
-          for (int i = 0; i < cam.image_width; ++i) {
-            // color pixel_color(0, 0, 0);
-            color pixel_color(0, 0, 0);
+  while (!Renderer::stopRequested.load()) {
+    for (int sJ = 0; sJ < cam.sqrtSpp; ++sJ) {
+      for (int sI = 0; sI < cam.sqrtSpp; ++sI) {
+        for (int j = endRow - 1; j >= startRow; --j) {
+          for (int i = 0; i < cam.imageWidth; ++i) {
+            // color pixelColor(0, 0, 0);
+            Color pixelColor(0, 0, 0);
 
-            auto offset = sample_square_stratified(s_i, s_j, cam.recip_sqrt_spp);
-            auto u = (i + offset.x()) / (cam.image_width - 1);
-            auto v = (j + offset.y()) / (cam.image_height - 1);
-            ray r = cam.get_ray(u, v);
-            pixel_color +=
-                ray_color(r, scene.background, world_bvh, cam.max_depth, scene.lights, !scene.lights.objects.empty());
+            auto offset = sampleSquareStratified(sI, sJ, cam.recipSqrtSpp);
+            auto u = (i + offset.x()) / (cam.imageWidth - 1);
+            auto v = (j + offset.y()) / (cam.imageHeight - 1);
+            Ray r = cam.getRay(u, v);
+            pixelColor +=
+                rayColor(r, scene.background, worldBvh, cam.maxDepth, scene.lights, !scene.lights.objects.empty());
             if (progress) (*progress)++;
 
-            film.add_sample(i, j, pixel_color);
-            pixel_color = film.get_sample(i, j);
-            pixel_color = sqrt(pixel_color);  // gamma correction!
-            // image.set(i, j, ImageColor{float(pixel_color.x()), float(pixel_color.y()), float(pixel_color.z())});
+            film.addSample(i, j, pixelColor);
+            pixelColor = film.getSample(i, j);
+            pixelColor = sqrt(pixelColor);  // gamma correction!
+            // image.set(i, j, ImageColor{float(pixelColor.x()), float(pixelColor.y()), float(pixelColor.z())});
             // j counts up from the bottom (camera v); Image rows count down from the top, like image files.
-            image.set_float(i, cam.image_height - 1 - j, static_cast<float>(pixel_color.x()),
-                            static_cast<float>(pixel_color.y()), static_cast<float>(pixel_color.z()));
+            image.setFloat(i, cam.imageHeight - 1 - j, static_cast<float>(pixelColor.x()),
+                            static_cast<float>(pixelColor.y()), static_cast<float>(pixelColor.z()));
           }
         }
       }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
-  std::cout << "Stopping section ... rows[" << start_row << ", " << end_row << "] thread " << std::this_thread::get_id()
+  std::cout << "Stopping section ... rows[" << startRow << ", " << endRow << "] thread " << std::this_thread::get_id()
             << std::endl;
 }
 
-void Renderer::render_scene(Scene scene, Image &image, std::atomic<int> *progress) {
-  // Derived camera fields (image_height, sqrt_spp, viewport) must be current. Callers set public fields and
+void Renderer::renderScene(Scene scene, Image &image, std::atomic<int> *progress) {
+  // Derived camera fields (imageHeight, sqrtSpp, viewport) must be current. Callers set public fields and
   // may forget initialize(); it only recomputes, so calling it again is harmless.
   scene.cam.initialize();
 
-  auto world_bvh = bvh_node(scene.world);
+  auto worldBvh = BVHNode(scene.world);
 
-  film.initialize(scene.cam.image_width, scene.cam.image_height);
+  film.initialize(scene.cam.imageWidth, scene.cam.imageHeight);
 
   // Fixed seed!
-  // Random::set_seed(42);
+  // Random::setSeed(42);
 
 #ifdef MULTITHREADED
-  const int num_threads = std::thread::hardware_concurrency();
+  const int numThreads = std::thread::hardware_concurrency();
   std::vector<std::future<void>> futures;
-  int rows_per_thread = scene.cam.image_height / num_threads;
+  int rowsPerThread = scene.cam.imageHeight / numThreads;
 
-  for (int t = 0; t < num_threads; ++t) {
-    int start_row = t * rows_per_thread;
-    int end_row = (t == num_threads - 1) ? scene.cam.image_height : start_row + rows_per_thread;
+  for (int t = 0; t < numThreads; ++t) {
+    int startRow = t * rowsPerThread;
+    int endRow = (t == numThreads - 1) ? scene.cam.imageHeight : startRow + rowsPerThread;
 
-    RenderSectionArgs args{image, film, start_row, end_row, scene, world_bvh, progress};
-    if (scene.cam.uncapped_spp) {
+    RenderSectionArgs args{image, film, startRow, endRow, scene, worldBvh, progress};
+    if (scene.cam.uncappedSpp) {
       futures.push_back(                  //
           std::async(std::launch::async,  //
                      [args]() mutable {   //
-                       render_section_uncap(args);
+                       renderSectionUncap(args);
                      }));
     } else {
       futures.push_back(                  //
           std::async(std::launch::async,  //
                      [args]() mutable {   //
-                       render_section(args);
+                       renderSection(args);
                      }));
     }
   }
 
   // Wait for a signal to stop rendering before waiting for threaads to finish.
-  // while (!stop_rendering.load()) {
+  // while (!stopRequested.load()) {
   //   std::this_thread::sleep_for(std::chrono::milliseconds(10));
   // }
 
@@ -173,12 +173,12 @@ void Renderer::render_scene(Scene scene, Image &image, std::atomic<int> *progres
   // TODO: Implement __FUNCTION__ logging with logger!?..
   // control logging from the logger class
   std::cout << __FUNCTION__ << " : All threads finished rendering..." << std::endl;
-  Renderer::stop_rendering = false;
+  Renderer::stopRequested = false;
 #else  // SINGLETHREADED
 
-  // Image image(image_width, image_height);
-  render_section(image, 0, image_height, image_width, image_height, samples_per_pixel, cam, background, world_bvh,
-                 max_depth);
+  // Image image(imageWidth, imageHeight);
+  renderSection(image, 0, imageHeight, imageWidth, imageHeight, samplesPerPixel, cam, background, worldBvh,
+                 maxDepth);
 
 #endif
 }

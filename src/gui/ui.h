@@ -24,14 +24,14 @@ class UIRenderer {
 
  private:
   void maybeRenderOnParamChange(RayTracer& raytracer);
-  void cameraUI(RayTracer& raytracer, GLResources& gl_res);
-  void renderControl(RayTracer& raytracer, GLResources& gl_res);
+  void cameraUI(RayTracer& raytracer, GLResources& glRes);
+  void renderControl(RayTracer& raytracer, GLResources& glRes);
 
   ImVec2 calculatePanelSize(GLResources& GLResources);
 
-  // Camera drag: the user's {samples_per_pixel, max_depth} while preview quality is in use.
-  std::optional<std::pair<int, int>> drag_saved_quality;
-  bool render_when_idle = false;
+  // Camera drag: the user's {samplesPerPixel, maxDepth} while preview quality is in use.
+  std::optional<std::pair<int, int>> dragSavedQuality;
+  bool renderWhenIdle = false;
 
   Logger& logger;
 };

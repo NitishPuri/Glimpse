@@ -16,11 +16,11 @@ struct RayTracer {
   Image image;
   enum Status { IDLE, RENDERING, DONE };
   std::atomic<Status> status{IDLE};
-  std::optional<std::future<void>> trace_future{};
+  std::optional<std::future<void>> traceFuture{};
   std::atomic<int> progress{0};
   // Samples per pixel of the last finished render (for the saved file name). Kept here because `renderer`, and
   // with it the film's sample counts, is released when a render completes.
-  std::atomic<int> last_spp{0};
+  std::atomic<int> lastSpp{0};
 
   std::shared_ptr<Renderer> renderer;
 
@@ -35,18 +35,18 @@ struct RayTracer {
 
     renderer = std::make_shared<Renderer>();
     // A Stop pressed just as the previous render finished would otherwise abort this one immediately.
-    Renderer::stop_rendering = false;
-    trace_future = std::async(std::launch::async, [&]() {
+    Renderer::stopRequested = false;
+    traceFuture = std::async(std::launch::async, [&]() {
       image.clear();
       scene.cam.initialize();
-      logger.log("Rendering... ", scene.cam.image_width, "x", scene.cam.image_height, " with ",
-                 scene.cam.samples_per_pixel, " samples per pixel");
+      logger.log("Rendering... ", scene.cam.imageWidth, "x", scene.cam.imageHeight, " with ",
+                 scene.cam.samplesPerPixel, " samples per pixel");
       auto startTime = std::chrono::high_resolution_clock::now();
 
       status = RENDERING;
-      renderer->render_scene(scene, image, &progress);
-      last_spp = scene.cam.uncapped_spp ? renderer->film.get_average_sample_count()
-                                        : scene.cam.sqrt_spp * scene.cam.sqrt_spp;
+      renderer->renderScene(scene, image, &progress);
+      lastSpp = scene.cam.uncappedSpp ? renderer->film.getAverageSampleCount()
+                                        : scene.cam.sqrtSpp * scene.cam.sqrtSpp;
       status = DONE;
 
       auto endTime = std::chrono::high_resolution_clock::now();
@@ -62,22 +62,22 @@ struct RayTracer {
     renderer.reset();
   }
 
-  void setupScene(GLResources& GLResources, int current_scene, float lookFrom[3], float lookAt[3]) {
-    // Ensure current_scene is within valid range
-    if (current_scene < 0 || current_scene >= static_cast<int>(sceneRegistry().size())) {
-      logger.log("Invalid scene index: ", current_scene);
+  void setupScene(GLResources& GLResources, int currentScene, float lookFrom[3], float lookAt[3]) {
+    // Ensure currentScene is within valid range
+    if (currentScene < 0 || currentScene >= static_cast<int>(sceneRegistry().size())) {
+      logger.log("Invalid scene index: ", currentScene);
       return;
     }
 
-    const SceneEntry& entry = sceneRegistry()[current_scene];
-    logger.log("Setting up scene ... ", current_scene, " ", entry.name);
+    const SceneEntry& entry = sceneRegistry()[currentScene];
+    logger.log("Setting up scene ... ", currentScene, " ", entry.name);
     scene = entry.make();
 
-    GLResources.renderWidth = scene.cam.image_width;
-    GLResources.renderHeight = static_cast<int>(scene.cam.image_width / scene.cam.aspect_ratio);
+    GLResources.renderWidth = scene.cam.imageWidth;
+    GLResources.renderHeight = static_cast<int>(scene.cam.imageWidth / scene.cam.aspectRatio);
     image.initialize(GLResources.renderWidth, GLResources.renderHeight);
 
-    auto vec3tofloat = [](const vec3& v, float f[3]) {
+    auto vec3tofloat = [](const Vec3& v, float f[3]) {
       f[0] = static_cast<float>(v[0]);
       f[1] = static_cast<float>(v[1]);
       f[2] = static_cast<float>(v[2]);
@@ -89,10 +89,10 @@ struct RayTracer {
   }
 
   void stopRendering() {
-    if (trace_future.has_value()) {
-      Renderer::stop_rendering = true;
-      // trace_future->wait();
-      // trace_future.reset();
+    if (traceFuture.has_value()) {
+      Renderer::stopRequested = true;
+      // traceFuture->wait();
+      // traceFuture.reset();
     }
   }
 };

@@ -18,71 +18,71 @@
 
 namespace glimpse {
 
-class pdf {
+class PDF {
  public:
-  virtual ~pdf() {}
+  virtual ~PDF() {}
 
-  virtual double value(const vec3& direction) const = 0;
-  virtual vec3 generate() const = 0;
+  virtual double value(const Vec3& direction) const = 0;
+  virtual Vec3 generate() const = 0;
 };
 
-class sphere_pdf : public pdf {
+class SpherePDF : public PDF {
  public:
-  sphere_pdf() {}
+  SpherePDF() {}
 
-  double value(const vec3& direction) const override { return 1 / (4 * math::pi); }
+  double value(const Vec3& direction) const override { return 1 / (4 * math::pi); }
 
-  vec3 generate() const override { return random_unit_vector(); }
+  Vec3 generate() const override { return randomUnitVector(); }
 };
 
-class cosine_pdf : public pdf {
+class CosinePDF : public PDF {
  public:
-  cosine_pdf(const vec3& w) : uvw(w) {}
+  CosinePDF(const Vec3& w) : uvw(w) {}
 
-  double value(const vec3& direction) const override {
-    auto cosine_theta = dot(unit_vector(direction), uvw.w());
-    return std::fmax(0, cosine_theta / math::pi);
+  double value(const Vec3& direction) const override {
+    auto cosineTheta = dot(unitVector(direction), uvw.w());
+    return std::fmax(0, cosineTheta / math::pi);
   }
 
-  vec3 generate() const override { return uvw.transform(random_cosine_direction()); }
+  Vec3 generate() const override { return uvw.transform(randomCosineDirection()); }
 
  private:
-  onb uvw;
+  ONB uvw;
 };
 
-class hittable_pdf : public pdf {
+class HittablePDF : public PDF {
  public:
-  hittable_pdf(const hittable& objects, const point3& origin) : objects(objects), origin(origin) {}
+  HittablePDF(const Hittable& objects, const Point3& origin) : objects(objects), origin(origin) {}
 
-  double value(const vec3& direction) const override { return objects.pdf_value(origin, direction); }
+  double value(const Vec3& direction) const override { return objects.pdfValue(origin, direction); }
 
-  vec3 generate() const override { return objects.random(origin); }
+  Vec3 generate() const override { return objects.random(origin); }
 
  private:
-  const hittable& objects;
-  point3 origin;
+  const Hittable& objects;
+  Point3 origin;
 };
 
-class mixture_pdf : public pdf {
+class MixturePDF : public PDF {
  public:
-  mixture_pdf(shared_ptr<pdf> p0, shared_ptr<pdf> p1) {
+  MixturePDF(shared_ptr<PDF> p0, shared_ptr<PDF> p1) {
     p[0] = p0;
     p[1] = p1;
   }
 
-  double value(const vec3& direction) const override {
+  double value(const Vec3& direction) const override {
     return 0.5 * p[0]->value(direction) + 0.5 * p[1]->value(direction);
   }
 
-  vec3 generate() const override {
-    if (random_double() < 0.5)
+  Vec3 generate() const override {
+    if (randomDouble() < 0.5)
       return p[0]->generate();
     else
       return p[1]->generate();
   }
 
  private:
-  shared_ptr<pdf> p[2];
+  shared_ptr<PDF> p[2];
 };
 
 }  // namespace glimpse

@@ -6,30 +6,30 @@
 
 namespace glimpse {
 
-class sphere : public hittable {
+class Sphere : public Hittable {
  public:
   // Stationary Sphere
-  sphere(const point3& static_center, double radius_, shared_ptr<material> mat)
-      : center(static_center, vec3(0, 0, 0)), radius(std::fmax(0, radius_)), mat(mat) {
-    auto rvec = vec3(radius, radius, radius);
-    bbox = aabb(static_center - rvec, static_center + rvec);
+  Sphere(const Point3& staticCenter, double radius_, shared_ptr<Material> mat)
+      : center(staticCenter, Vec3(0, 0, 0)), radius(std::fmax(0, radius_)), mat(mat) {
+    auto rvec = Vec3(radius, radius, radius);
+    bbox = AABB(staticCenter - rvec, staticCenter + rvec);
   }
 
   // Moving Sphere
-  sphere(const point3& center1, const point3& center2, double radius_, shared_ptr<material> mat)
+  Sphere(const Point3& center1, const Point3& center2, double radius_, shared_ptr<Material> mat)
       : center(center1, center2 - center1), radius(std::fmax(0, radius_)), mat(mat) {
-    auto rvec = vec3(radius, radius, radius);
-    aabb box1(center.at(0) - rvec, center.at(0) + rvec);
-    aabb box2(center.at(1) - rvec, center.at(1) + rvec);
-    bbox = aabb(box1, box2);
+    auto rvec = Vec3(radius, radius, radius);
+    AABB box1(center.at(0) - rvec, center.at(0) + rvec);
+    AABB box2(center.at(1) - rvec, center.at(1) + rvec);
+    bbox = AABB(box1, box2);
   }
 
-  bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
-    point3 current_center = center.at(r.time());
-    vec3 oc = current_center - r.origin();
-    auto a = r.direction().length_squared();
+  bool hit(const Ray& r, Interval rayT, HitRecord& rec) const override {
+    Point3 currentCenter = center.at(r.time());
+    Vec3 oc = currentCenter - r.origin();
+    auto a = r.direction().lengthSquared();
     auto h = dot(r.direction(), oc);
-    auto c = oc.length_squared() - radius * radius;
+    auto c = oc.lengthSquared() - radius * radius;
 
     auto discriminant = h * h - a * c;
     if (discriminant < 0) return false;
@@ -38,50 +38,50 @@ class sphere : public hittable {
 
     // Find the nearest root that lies in the acceptable range.
     auto root = (h - sqrtd) / a;
-    if (!ray_t.surrounds(root)) {
+    if (!rayT.surrounds(root)) {
       root = (h + sqrtd) / a;
-      if (!ray_t.surrounds(root)) return false;
+      if (!rayT.surrounds(root)) return false;
     }
 
     rec.t = root;
     rec.p = r.at(rec.t);
-    vec3 outward_normal = (rec.p - current_center) / radius;
-    rec.set_face_normal(r, outward_normal);
-    get_sphere_uv(outward_normal, rec.u, rec.v);
+    Vec3 outwardNormal = (rec.p - currentCenter) / radius;
+    rec.setFaceNormal(r, outwardNormal);
+    getSphereUv(outwardNormal, rec.u, rec.v);
     rec.mat = mat;
 
     return true;
   }
 
-  aabb bounding_box() const override { return bbox; }
+  AABB boundingBox() const override { return bbox; }
 
-  double pdf_value(const point3& origin, const vec3& direction) const override {
+  double pdfValue(const Point3& origin, const Vec3& direction) const override {
     // This method only works for stationary spheres.
 
-    hit_record rec;
-    if (!this->hit(ray(origin, direction), interval(0.001, math::infinity), rec)) return 0;
+    HitRecord rec;
+    if (!this->hit(Ray(origin, direction), Interval(0.001, math::infinity), rec)) return 0;
 
-    auto dist_squared = (center.at(0) - origin).length_squared();
-    auto cos_theta_max = std::sqrt(1 - radius * radius / dist_squared);
-    auto solid_angle = 2 * math::pi * (1 - cos_theta_max);
+    auto distSquared = (center.at(0) - origin).lengthSquared();
+    auto cosThetaMax = std::sqrt(1 - radius * radius / distSquared);
+    auto solidAngle = 2 * math::pi * (1 - cosThetaMax);
 
-    return 1 / solid_angle;
+    return 1 / solidAngle;
   }
 
-  vec3 random(const point3& origin) const override {
-    vec3 direction = center.at(0) - origin;
-    auto distance_squared = direction.length_squared();
-    onb uvw(direction);
-    return uvw.transform(random_to_sphere(radius, distance_squared));
+  Vec3 random(const Point3& origin) const override {
+    Vec3 direction = center.at(0) - origin;
+    auto distanceSquared = direction.lengthSquared();
+    ONB uvw(direction);
+    return uvw.transform(randomToSphere(radius, distanceSquared));
   }
 
  private:
-  ray center;
+  Ray center;
   double radius;
-  shared_ptr<material> mat;
-  aabb bbox;
+  shared_ptr<Material> mat;
+  AABB bbox;
 
-  static void get_sphere_uv(const point3& p, double& u, double& v) {
+  static void getSphereUv(const Point3& p, double& u, double& v) {
     // p: a given point on the sphere of radius one, centered at the origin.
     // u: returned value [0,1] of angle around the Y axis from X=-1.
     // v: returned value [0,1] of angle from Y=-1 to Y=+1.
@@ -96,65 +96,65 @@ class sphere : public hittable {
     v = theta / math::pi;
   }
 
-  static vec3 random_to_sphere(double radius, double distance_squared) {
-    auto r1 = random_double();
-    auto r2 = random_double();
-    auto z = 1 + r2 * (std::sqrt(1 - radius * radius / distance_squared) - 1);
+  static Vec3 randomToSphere(double radius, double distanceSquared) {
+    auto r1 = randomDouble();
+    auto r2 = randomDouble();
+    auto z = 1 + r2 * (std::sqrt(1 - radius * radius / distanceSquared) - 1);
 
     auto phi = 2 * math::pi * r1;
     auto x = std::cos(phi) * std::sqrt(1 - z * z);
     auto y = std::sin(phi) * std::sqrt(1 - z * z);
 
-    return vec3(x, y, z);
+    return Vec3(x, y, z);
   }
 };
 
-class moving_sphere : public hittable {
+class MovingSphere : public Hittable {
  public:
-  moving_sphere() {}
-  moving_sphere(point3 cen0, point3 cen1, double r, shared_ptr<material> m)
-      : center{cen0, cen1 - cen0}, radius{r}, mat_ptr{m} {
-    auto rvec = vec3(radius, radius, radius);
-    aabb box1(center.at(0) - rvec, center.at(0) + rvec);
-    aabb box2(center.at(1) - rvec, center.at(1) + rvec);
-    bbox = aabb(box1, box2);
+  MovingSphere() {}
+  MovingSphere(Point3 cen0, Point3 cen1, double r, shared_ptr<Material> m)
+      : center{cen0, cen1 - cen0}, radius{r}, matPtr{m} {
+    auto rvec = Vec3(radius, radius, radius);
+    AABB box1(center.at(0) - rvec, center.at(0) + rvec);
+    AABB box2(center.at(1) - rvec, center.at(1) + rvec);
+    bbox = AABB(box1, box2);
   }
 
-  bool hit(const ray &r, interval ray_t, hit_record &rec) const override;
+  bool hit(const Ray &r, Interval rayT, HitRecord &rec) const override;
 
-  aabb bounding_box() const override { return bbox; }
+  AABB boundingBox() const override { return bbox; }
 
  public:
-  ray center;
+  Ray center;
   double time0{}, time1{};
   double radius{};
-  aabb bbox;
-  shared_ptr<material> mat_ptr;
+  AABB bbox;
+  shared_ptr<Material> matPtr;
 };
 
-class quad : public hittable {
+class Quad : public Hittable {
  public:
-  quad(const point3& Q, const vec3& u, const vec3& v, shared_ptr<material> mat) : Q(Q), u(u), v(v), mat(mat) {
+  Quad(const Point3& Q, const Vec3& u, const Vec3& v, shared_ptr<Material> mat) : Q(Q), u(u), v(v), mat(mat) {
     auto n = cross(u, v);
-    normal = unit_vector(n);
+    normal = unitVector(n);
     D = dot(normal, Q);
     w = n / dot(n, n);
 
     area = n.length();
 
-    set_bounding_box();
+    setBoundingBox();
   }
 
-  virtual void set_bounding_box() {
+  virtual void setBoundingBox() {
     // Compute the bounding box of all four vertices.
-    auto bbox_diagonal1 = aabb(Q, Q + u + v);
-    auto bbox_diagonal2 = aabb(Q + u, Q + v);
-    bbox = aabb(bbox_diagonal1, bbox_diagonal2);
+    auto bboxDiagonal1 = AABB(Q, Q + u + v);
+    auto bboxDiagonal2 = AABB(Q + u, Q + v);
+    bbox = AABB(bboxDiagonal1, bboxDiagonal2);
   }
 
-  aabb bounding_box() const override { return bbox; }
+  AABB boundingBox() const override { return bbox; }
 
-  bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+  bool hit(const Ray& r, Interval rayT, HitRecord& rec) const override {
     auto denom = dot(normal, r.direction());
 
     // No hit if the ray is parallel to the plane.
@@ -162,82 +162,82 @@ class quad : public hittable {
 
     // Return false if the hit point parameter t is outside the ray interval.
     auto t = (D - dot(normal, r.origin())) / denom;
-    if (!ray_t.contains(t)) return false;
+    if (!rayT.contains(t)) return false;
 
     // Determine if the hit point lies within the planar shape using its plane coordinates.
     auto intersection = r.at(t);
-    vec3 planar_hitpt_vector = intersection - Q;
-    auto alpha = dot(w, cross(planar_hitpt_vector, v));
-    auto beta = dot(w, cross(u, planar_hitpt_vector));
+    Vec3 planarHitptVector = intersection - Q;
+    auto alpha = dot(w, cross(planarHitptVector, v));
+    auto beta = dot(w, cross(u, planarHitptVector));
 
-    if (!is_interior(alpha, beta, rec)) return false;
+    if (!isInterior(alpha, beta, rec)) return false;
 
     // Ray hits the 2D shape; set the rest of the hit record and return true.
     rec.t = t;
     rec.p = intersection;
     rec.mat = mat;
-    rec.set_face_normal(r, normal);
+    rec.setFaceNormal(r, normal);
 
     return true;
   }
 
-  virtual bool is_interior(double a, double b, hit_record& rec) const {
-    interval unit_interval = interval(0, 1);
+  virtual bool isInterior(double a, double b, HitRecord& rec) const {
+    Interval unitInterval = Interval(0, 1);
     // Given the hit point in plane coordinates, return false if it is outside the
     // primitive, otherwise set the hit record UV coordinates and return true.
 
-    if (!unit_interval.contains(a) || !unit_interval.contains(b)) return false;
+    if (!unitInterval.contains(a) || !unitInterval.contains(b)) return false;
 
     rec.u = a;
     rec.v = b;
     return true;
   }
 
-  double pdf_value(const point3& origin, const vec3& direction) const override {
-    hit_record rec;
-    if (!this->hit(ray(origin, direction), interval(0.001, math::infinity), rec)) return 0;
+  double pdfValue(const Point3& origin, const Vec3& direction) const override {
+    HitRecord rec;
+    if (!this->hit(Ray(origin, direction), Interval(0.001, math::infinity), rec)) return 0;
 
-    auto distance_squared = rec.t * rec.t * direction.length_squared();
+    auto distanceSquared = rec.t * rec.t * direction.lengthSquared();
     auto cosine = std::fabs(dot(direction, rec.normal) / direction.length());
 
-    return distance_squared / (cosine * area);
+    return distanceSquared / (cosine * area);
   }
 
-  vec3 random(const point3& origin) const override {
-    auto p = Q + (random_double() * u) + (random_double() * v);
+  Vec3 random(const Point3& origin) const override {
+    auto p = Q + (randomDouble() * u) + (randomDouble() * v);
     return p - origin;
   }
 
  private:
-  point3 Q;
-  vec3 u, v;
-  vec3 w;
-  shared_ptr<material> mat;
-  aabb bbox;
-  vec3 normal;
+  Point3 Q;
+  Vec3 u, v;
+  Vec3 w;
+  shared_ptr<Material> mat;
+  AABB bbox;
+  Vec3 normal;
   double D;
   double area;
 };
 
-inline shared_ptr<hittable_list> box(const point3& a, const point3& b, shared_ptr<material> mat) {
+inline shared_ptr<HittableList> box(const Point3& a, const Point3& b, shared_ptr<Material> mat) {
   // Returns the 3D box (six sides) that contains the two opposite vertices a & b.
 
-  auto sides = make_shared<hittable_list>();
+  auto sides = make_shared<HittableList>();
 
   // Construct the two opposite vertices with the minimum and maximum coordinates.
-  auto min = point3(std::fmin(a.x(), b.x()), std::fmin(a.y(), b.y()), std::fmin(a.z(), b.z()));
-  auto max = point3(std::fmax(a.x(), b.x()), std::fmax(a.y(), b.y()), std::fmax(a.z(), b.z()));
+  auto min = Point3(std::fmin(a.x(), b.x()), std::fmin(a.y(), b.y()), std::fmin(a.z(), b.z()));
+  auto max = Point3(std::fmax(a.x(), b.x()), std::fmax(a.y(), b.y()), std::fmax(a.z(), b.z()));
 
-  auto dx = vec3(max.x() - min.x(), 0, 0);
-  auto dy = vec3(0, max.y() - min.y(), 0);
-  auto dz = vec3(0, 0, max.z() - min.z());
+  auto dx = Vec3(max.x() - min.x(), 0, 0);
+  auto dy = Vec3(0, max.y() - min.y(), 0);
+  auto dz = Vec3(0, 0, max.z() - min.z());
 
-  sides->add(make_shared<quad>(point3(min.x(), min.y(), max.z()), dx, dy, mat));   // front
-  sides->add(make_shared<quad>(point3(max.x(), min.y(), max.z()), -dz, dy, mat));  // right
-  sides->add(make_shared<quad>(point3(max.x(), min.y(), min.z()), -dx, dy, mat));  // back
-  sides->add(make_shared<quad>(point3(min.x(), min.y(), min.z()), dz, dy, mat));   // left
-  sides->add(make_shared<quad>(point3(min.x(), max.y(), max.z()), dx, -dz, mat));  // top
-  sides->add(make_shared<quad>(point3(min.x(), min.y(), min.z()), dx, dz, mat));   // bottom
+  sides->add(make_shared<Quad>(Point3(min.x(), min.y(), max.z()), dx, dy, mat));   // front
+  sides->add(make_shared<Quad>(Point3(max.x(), min.y(), max.z()), -dz, dy, mat));  // right
+  sides->add(make_shared<Quad>(Point3(max.x(), min.y(), min.z()), -dx, dy, mat));  // back
+  sides->add(make_shared<Quad>(Point3(min.x(), min.y(), min.z()), dz, dy, mat));   // left
+  sides->add(make_shared<Quad>(Point3(min.x(), max.y(), max.z()), dx, -dz, mat));  // top
+  sides->add(make_shared<Quad>(Point3(min.x(), min.y(), min.z()), dx, dz, mat));   // bottom
 
   return sides;
 }

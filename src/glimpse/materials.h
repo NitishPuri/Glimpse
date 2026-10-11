@@ -7,140 +7,140 @@
 
 namespace glimpse {
 
-class scatter_record {
+class ScatterRecord {
  public:
-  color attenuation;
-  shared_ptr<pdf> pdf_ptr;
-  bool skip_pdf;
-  ray skip_pdf_ray;
+  Color attenuation;
+  shared_ptr<PDF> pdfPtr;
+  bool skipPdf;
+  Ray skipPdfRay;
 };
 
-class material {
+class Material {
  public:
-  virtual ~material() = default;
+  virtual ~Material() = default;
 
-  virtual color emitted(const ray& r_in, const hit_record& rec, double u, double v, const point3& p) const {
-    return color(0, 0, 0);
+  virtual Color emitted(const Ray& rIn, const HitRecord& rec, double u, double v, const Point3& p) const {
+    return Color(0, 0, 0);
   }
 
-  virtual bool scatter(const ray& r_in, const hit_record& rec, scatter_record& srec) const { return false; }
+  virtual bool scatter(const Ray& rIn, const HitRecord& rec, ScatterRecord& srec) const { return false; }
 
-  virtual double scattering_pdf(const ray& r_in, const hit_record& rec, const ray& scattered) const { return 0; }
+  virtual double scatteringPdf(const Ray& rIn, const HitRecord& rec, const Ray& scattered) const { return 0; }
 };
 
-class lambertian : public material {
+class Lambertian : public Material {
  public:
-  lambertian(const color& albedo) : tex(make_shared<solid_color>(albedo)) {}
-  lambertian(shared_ptr<texture> tex) : tex(tex) {}
+  Lambertian(const Color& albedo) : tex(make_shared<SolidColor>(albedo)) {}
+  Lambertian(shared_ptr<Texture> tex) : tex(tex) {}
 
-  bool scatter(const ray& r_in, const hit_record& rec, scatter_record& srec) const override {
+  bool scatter(const Ray& rIn, const HitRecord& rec, ScatterRecord& srec) const override {
     srec.attenuation = tex->value(rec.u, rec.v, rec.p);
-    srec.pdf_ptr = make_shared<cosine_pdf>(rec.normal);
-    srec.skip_pdf = false;
+    srec.pdfPtr = make_shared<CosinePDF>(rec.normal);
+    srec.skipPdf = false;
     return true;
   }
 
-  double scattering_pdf(const ray& r_in, const hit_record& rec, const ray& scattered) const override {
-    auto cos_theta = dot(rec.normal, unit_vector(scattered.direction()));
-    return cos_theta < 0 ? 0 : cos_theta / math::pi;
+  double scatteringPdf(const Ray& rIn, const HitRecord& rec, const Ray& scattered) const override {
+    auto cosTheta = dot(rec.normal, unitVector(scattered.direction()));
+    return cosTheta < 0 ? 0 : cosTheta / math::pi;
   }
 
  private:
-  shared_ptr<texture> tex;
+  shared_ptr<Texture> tex;
 };
 
-class metal : public material {
+class Metal : public Material {
  public:
-  metal(const color& albedo, double fuzz) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1) {}
+  Metal(const Color& albedo, double fuzz) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1) {}
 
-  bool scatter(const ray& r_in, const hit_record& rec, scatter_record& srec) const override {
-    vec3 reflected = reflect(r_in.direction(), rec.normal);
-    reflected = unit_vector(reflected) + (fuzz * random_unit_vector());
+  bool scatter(const Ray& rIn, const HitRecord& rec, ScatterRecord& srec) const override {
+    Vec3 reflected = reflect(rIn.direction(), rec.normal);
+    reflected = unitVector(reflected) + (fuzz * randomUnitVector());
 
     srec.attenuation = albedo;
-    srec.pdf_ptr = nullptr;
-    srec.skip_pdf = true;
-    srec.skip_pdf_ray = ray(rec.p, reflected, r_in.time());
+    srec.pdfPtr = nullptr;
+    srec.skipPdf = true;
+    srec.skipPdfRay = Ray(rec.p, reflected, rIn.time());
 
     return true;
   }
 
  private:
-  color albedo;
+  Color albedo;
   double fuzz;
 };
 
-class dielectric : public material {
+class Dielectric : public Material {
  public:
-  dielectric(double refraction_index) : refraction_index(refraction_index) {}
+  Dielectric(double refractionIndex) : refractionIndex(refractionIndex) {}
 
-  bool scatter(const ray& r_in, const hit_record& rec, scatter_record& srec) const override {
-    srec.attenuation = color(1.0, 1.0, 1.0);
-    srec.pdf_ptr = nullptr;
-    srec.skip_pdf = true;
-    double ri = rec.front_face ? (1.0 / refraction_index) : refraction_index;
+  bool scatter(const Ray& rIn, const HitRecord& rec, ScatterRecord& srec) const override {
+    srec.attenuation = Color(1.0, 1.0, 1.0);
+    srec.pdfPtr = nullptr;
+    srec.skipPdf = true;
+    double ri = rec.frontFace ? (1.0 / refractionIndex) : refractionIndex;
 
-    vec3 unit_direction = unit_vector(r_in.direction());
-    double cos_theta = std::fmin(dot(-unit_direction, rec.normal), 1.0);
-    double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
+    Vec3 unitDirection = unitVector(rIn.direction());
+    double cosTheta = std::fmin(dot(-unitDirection, rec.normal), 1.0);
+    double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
 
-    bool cannot_refract = ri * sin_theta > 1.0;
-    vec3 direction;
+    bool cannotRefract = ri * sinTheta > 1.0;
+    Vec3 direction;
 
-    if (cannot_refract || reflectance(cos_theta, ri) > random_double())
-      direction = reflect(unit_direction, rec.normal);
+    if (cannotRefract || reflectance(cosTheta, ri) > randomDouble())
+      direction = reflect(unitDirection, rec.normal);
     else
-      direction = refract(unit_direction, rec.normal, ri);
+      direction = refract(unitDirection, rec.normal, ri);
 
-    srec.skip_pdf_ray = ray(rec.p, direction, r_in.time());
+    srec.skipPdfRay = Ray(rec.p, direction, rIn.time());
     return true;
   }
 
  private:
   // Refractive index in vacuum or air, or the ratio of the material's refractive index over
   // the refractive index of the enclosing media
-  double refraction_index;
+  double refractionIndex;
 
-  static double reflectance(double cosine, double refraction_index) {
+  static double reflectance(double cosine, double refractionIndex) {
     // Use Schlick's approximation for reflectance.
-    auto r0 = (1 - refraction_index) / (1 + refraction_index);
+    auto r0 = (1 - refractionIndex) / (1 + refractionIndex);
     r0 = r0 * r0;
     return r0 + (1 - r0) * std::pow((1 - cosine), 5);
   }
 };
 
-class diffuse_light : public material {
+class DiffuseLight : public Material {
  public:
-  diffuse_light(shared_ptr<texture> tex) : tex(tex) {}
-  diffuse_light(const color& emit) : tex(make_shared<solid_color>(emit)) {}
+  DiffuseLight(shared_ptr<Texture> tex) : tex(tex) {}
+  DiffuseLight(const Color& emit) : tex(make_shared<SolidColor>(emit)) {}
 
-  color emitted(const ray& r_in, const hit_record& rec, double u, double v, const point3& p) const override {
-    if (!rec.front_face) return color(0, 0, 0);
+  Color emitted(const Ray& rIn, const HitRecord& rec, double u, double v, const Point3& p) const override {
+    if (!rec.frontFace) return Color(0, 0, 0);
     return tex->value(u, v, p);
   }
 
  private:
-  shared_ptr<texture> tex;
+  shared_ptr<Texture> tex;
 };
 
-class isotropic : public material {
+class Isotropic : public Material {
  public:
-  isotropic(const color& albedo) : tex(make_shared<solid_color>(albedo)) {}
-  isotropic(shared_ptr<texture> tex) : tex(tex) {}
+  Isotropic(const Color& albedo) : tex(make_shared<SolidColor>(albedo)) {}
+  Isotropic(shared_ptr<Texture> tex) : tex(tex) {}
 
-  bool scatter(const ray& r_in, const hit_record& rec, scatter_record& srec) const override {
+  bool scatter(const Ray& rIn, const HitRecord& rec, ScatterRecord& srec) const override {
     srec.attenuation = tex->value(rec.u, rec.v, rec.p);
-    srec.pdf_ptr = make_shared<sphere_pdf>();
-    srec.skip_pdf = false;
+    srec.pdfPtr = make_shared<SpherePDF>();
+    srec.skipPdf = false;
     return true;
   }
 
-  double scattering_pdf(const ray& r_in, const hit_record& rec, const ray& scattered) const override {
+  double scatteringPdf(const Ray& rIn, const HitRecord& rec, const Ray& scattered) const override {
     return 1 / (4 * math::pi);
   }
 
  private:
-  shared_ptr<texture> tex;
+  shared_ptr<Texture> tex;
 };
 
 }  // namespace glimpse

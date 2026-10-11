@@ -25,7 +25,7 @@ Work top to bottom. Tick boxes as work lands, and commit each tick together with
 2. **One new idea per technique.** A technique adds one rendering idea. When it needs a refactor (for
    example recursive → iterative), that refactor is part of the technique and is written up in its note.
 3. **The code changes only when a stage needs it.** There is no up-front restructure. The RTIOW-shaped core
-   (recursive `ray_color`, `material::scatter`, `shared_ptr`, `double`) changes only when a technique
+   (recursive `rayColor`, `Material::scatter`, `shared_ptr`, `double`) changes only when a technique
    needs it to.
 4. **Old methods stay selectable.** When a technique replaces a method, the old one stays behind a flag
    (`--integrator`, `--sampler`, ...). That keeps equal-time comparisons and viewer toggles possible.
@@ -128,7 +128,7 @@ Load-Balancing Scheme* (03).
 ### Stage 2 — Sampling
 
 - [ ] **04 `samplers`:** a `Sampler` interface with independent, stratified, Halton and Sobol (Owen-scrambled)
-      implementations. It replaces `random_double()` in the camera and at each bounce. Equal-SPP error
+      implementations. It replaces `randomDouble()` in the camera and at each bounce. Equal-SPP error
       comparison.
 - [ ] **05 `adaptive_sampling`:** turn on the Welford variance in `Film`. Pixels get a minimum SPP, then a
       stop criterion based on variance. Heatmaps of variance and SPP in the viewer. Equal-time comparison
@@ -141,7 +141,7 @@ Read: pbrt §2.3–2.4, §8.1–8.8, §A.4–A.5; RTG1 ch16 *Sampling Transforma
 ### Stage 3 — Light transport core
 
 - [ ] **07 `iterative_path`**
-  - The recursive `ray_color` becomes a loop with a running throughput and Russian roulette.
+  - The recursive `rayColor` becomes a loop with a running throughput and Russian roulette.
   - The new loop must produce the same image as the old one, within noise, against the reference.
 - [ ] **08 `nee`**
   - Next-event estimation: sample a light, cast a shadow ray, and avoid counting emission twice.
@@ -162,7 +162,7 @@ Read: pbrt §13.1–13.4, §2.2 (MIS), §6.8 (rounding error); RTG1 ch6 *Avoidin
 ### Stage 4 — Materials
 
 - [ ] **11 `bsdf_interface`**
-  - A shading frame plus a `BSDF` with `f` / `sample_f` / `pdf`, replacing `material::scatter`.
+  - A shading frame plus a `BSDF` with `f` / `Sample_f` / `PDF` (pbrt-v4 names), replacing `Material::scatter`.
   - Lambertian, mirror and smooth dielectric are ported to it, with unit tests for reciprocity and
     energy conservation.
 - [ ] **12 `microfacet_conductor`:** Trowbridge-Reitz (GGX) with visible-normal sampling and the
@@ -206,7 +206,7 @@ Sampling of Many Lights on the GPU*; RTG2 ch21 *The Alias Method*.
 ### Stage 7 — Volumes
 
 - [ ] **20 `media`:** a medium interface, homogeneous media, the Henyey-Greenstein phase function, and
-      delta and ratio tracking. The RTIOW `constant_medium` becomes one case of it. Volumetric path
+      delta and ratio tracking. The RTIOW `ConstantMedium` becomes one case of it. Volumetric path
       tracing with NEE.
 - [ ] **21 `hetero_volumes`:** grid and procedural (Perlin) density. Clouds and smoke. NanoVDB is optional.
 

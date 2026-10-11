@@ -16,65 +16,65 @@ namespace glimpse {
 // 6. The camera fires rays from random points on the lens
 //    through the current image sample.
 
-class camera {
+class Camera {
  public:
   void initialize() {
-    image_height = static_cast<int>(image_width / aspect_ratio);
-    image_height = (image_height < 1) ? 1 : image_height;
+    imageHeight = static_cast<int>(imageWidth / aspectRatio);
+    imageHeight = (imageHeight < 1) ? 1 : imageHeight;
 
-    sqrt_spp = int(std::sqrt(samples_per_pixel));
-    pixel_samples_scale = 1.0 / (sqrt_spp * sqrt_spp);
-    recip_sqrt_spp = 1.0 / sqrt_spp;
+    sqrtSpp = int(std::sqrt(samplesPerPixel));
+    pixelSamplesScale = 1.0 / (sqrtSpp * sqrtSpp);
+    recipSqrtSpp = 1.0 / sqrtSpp;
 
     origin = lookfrom;
 
     // Determine viewport dimensions.
-    auto theta = math::degrees_to_radians(vfov);
+    auto theta = math::degreesToRadians(vfov);
     auto h = tan(theta / 2);
-    auto viewport_height = 2.0 * h * focus_distance;
-    auto viewport_width = aspect_ratio * viewport_height;
+    auto viewportHeight = 2.0 * h * focusDistance;
+    auto viewportWidth = aspectRatio * viewportHeight;
 
     // Calculate the u,v,w unit basis vectors for the camera coordinate frame.
-    w = unit_vector(lookfrom - lookat);
-    u = unit_vector(cross(vup, w));
+    w = unitVector(lookfrom - lookat);
+    u = unitVector(cross(vup, w));
     v = cross(w, u);
 
     // Calculate the vectors across the horizontal and down the vertical
     // viewport edges.
-    horizontal = viewport_width * u;
-    vertical = viewport_height * v;  // TODO: should this be inverted ?
+    horizontal = viewportWidth * u;
+    vertical = viewportHeight * v;  // TODO: should this be inverted ?
 
-    lower_left_corner = origin - horizontal / 2 - vertical / 2 - focus_distance * w;
+    lowerLeftCorner = origin - horizontal / 2 - vertical / 2 - focusDistance * w;
 
     // Calculate the camera defocus disk basis vectors.
-    // defocus_angle = aperture;
-    auto defocus_radius = focus_distance * std::tan(math::degrees_to_radians(defocus_angle / 2));
-    defocus_disk_u = u * defocus_radius;
-    defocus_disk_v = v * defocus_radius;
+    // defocusAngle = aperture;
+    auto defocusRadius = focusDistance * std::tan(math::degreesToRadians(defocusAngle / 2));
+    defocusDiskU = u * defocusRadius;
+    defocusDiskV = v * defocusRadius;
   }
 
   // normalised coordinates!
-  ray get_ray(double s, double t) const {
+  Ray getRay(double s, double t) const {
     // without defocus blur, all rays pass through the origin
 
-    auto ray_origin = (defocus_angle <= 0) ? origin : defocus_disk_sample();
+    auto rayOrigin = (defocusAngle <= 0) ? origin : defocusDiskSample();
 
-    auto ray_direction = lower_left_corner + s * horizontal + t * vertical - ray_origin;
+    auto rayDirection = lowerLeftCorner + s * horizontal + t * vertical - rayOrigin;
 
     // Random time for motion blur?
-    return ray(ray_origin, ray_direction, random_double());
+    return Ray(rayOrigin, rayDirection, randomDouble());
   }
 
-  point3 defocus_disk_sample() const {
+  Point3 defocusDiskSample() const {
     // Returns a random point in the camera defocus disk.
-    auto p = random_in_unit_disk();
-    return origin + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
+    auto p = randomInUnitDisk();
+    return origin + (p[0] * defocusDiskU) + (p[1] * defocusDiskV);
   }
 
   // TODO: Move manipulator out of base camera!
   void fly(float dx, float dy) {
-    vec3 forward = unit_vector(lookat - lookfrom);
-    vec3 right = unit_vector(cross(forward, vup));
+    Vec3 forward = unitVector(lookat - lookfrom);
+    Vec3 right = unitVector(cross(forward, vup));
 
     lookfrom += forward * dy + right * dx;
     lookat += forward * dy + right * dx;
@@ -83,7 +83,7 @@ class camera {
   }
 
   void orbit(float dx, float dy) {
-    vec3 direction = lookfrom - lookat;
+    Vec3 direction = lookfrom - lookat;
     auto radius = direction.length();
 
     auto theta = atan2(direction.z(), direction.x());
@@ -101,38 +101,38 @@ class camera {
   }
 
  public:
-  double aspect_ratio = 16.0 / 9.0;  // Ratio of image width over height
-  int image_width = 800;             // rendered image width in pixels
+  double aspectRatio = 16.0 / 9.0;  // Ratio of image width over height
+  int imageWidth = 800;             // rendered image width in pixels
 
   // SPP
-  bool uncapped_spp = false;     // If true, the number of samples per pixel is
-                                 // not capped at sqrt_spp
-  double pixel_samples_scale{};  // Color scale factor for a sum of pixel samples
-  int samples_per_pixel = 100;   // count of random samples for each pixel
-  int sqrt_spp{};                // Square root of number of samples per pixel
-  double recip_sqrt_spp{};       // 1/sqrt_spp
+  bool uncappedSpp = false;     // If true, the number of samples per pixel is
+                                 // not capped at sqrtSpp
+  double pixelSamplesScale{};  // Color scale factor for a sum of pixel samples
+  int samplesPerPixel = 100;   // count of random samples for each pixel
+  int sqrtSpp{};                // Square root of number of samples per pixel
+  double recipSqrtSpp{};       // 1/sqrtSpp
 
-  int max_depth = 50;  // maximum number of ray bounces into scene
+  int maxDepth = 50;  // maximum number of ray bounces into scene
 
   float vfov = 60.0f;                 // vertical field of view
-  point3 lookfrom = point3(0, 0, 0);  // point camera is looking from
-  point3 lookat = point3(0, 0, -1);   // point camera is looking at
-  point3 vup = vec3(0, 1, 0);         // camera realtive "up" direction
+  Point3 lookfrom = Point3(0, 0, 0);  // point camera is looking from
+  Point3 lookat = Point3(0, 0, -1);   // point camera is looking at
+  Point3 vup = Vec3(0, 1, 0);         // camera realtive "up" direction
 
-  float defocus_angle = 0.1f;    // variation angle of rays through each pixel
-  float focus_distance = 10.0f;  // distance from camera lookfrom point to plane of perfect focus
+  float defocusAngle = 0.1f;    // variation angle of rays through each pixel
+  float focusDistance = 10.0f;  // distance from camera lookfrom point to plane of perfect focus
 
-  int image_height = 0;
+  int imageHeight = 0;
 
  private:
-  point3 origin;
+  Point3 origin;
 
-  point3 lower_left_corner;
-  vec3 horizontal;
-  vec3 vertical;
+  Point3 lowerLeftCorner;
+  Vec3 horizontal;
+  Vec3 vertical;
 
-  vec3 u, v, w;
-  vec3 defocus_disk_u, defocus_disk_v;
+  Vec3 u, v, w;
+  Vec3 defocusDiskU, defocusDiskV;
 };
 
 }  // namespace glimpse
