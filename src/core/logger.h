@@ -1,9 +1,11 @@
 #pragma once
 
-// supress warning due to localtime being unsafe
-#pragma warning(disable : 4996)
+#ifdef _MSC_VER
+#pragma warning(disable : 4996)  // MSVC flags std::localtime as unsafe
+#endif
 
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -15,6 +17,8 @@
 class Logger {
  public:
   Logger(const std::string &log_file_path) : log_file_path(log_file_path) {
+    const auto dir = std::filesystem::path(log_file_path).parent_path();
+    if (!dir.empty()) std::filesystem::create_directories(dir);
     log_file.open(log_file_path, std::ios_base::app);  // Open in append mode
     if (!log_file.is_open()) {
       std::cerr << "Unable to open log file: " << log_file_path << std::endl;
@@ -60,3 +64,11 @@ class Logger {
     return ss.str();
   }
 };
+
+// One log file per run, like Glint: logs/<app>_<YYYYmmdd_HHMMSS>.log (relative to the repo root, where run.sh runs).
+inline std::string log_file_for(const std::string &app) {
+  const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  std::ostringstream ss;
+  ss << "logs/" << app << '_' << std::put_time(std::localtime(&now), "%Y%m%d_%H%M%S") << ".log";
+  return ss.str();
+}

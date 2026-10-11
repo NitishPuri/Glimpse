@@ -9,6 +9,11 @@ namespace ut = boost::ut;
 template <>
 inline auto ut::cfg<ut::override> = ut::runner<ut::reporter<ut::printer>>{};
 
+#include <string>
+
+// Where tests write files: build/<cfg>/test_output (GLIMPSE_TEST_OUTPUT_DIR comes from CMake), not the repo root.
+inline std::string test_output_path(const std::string& file) { return std::string(GLIMPSE_TEST_OUTPUT_DIR) + "/" + file; }
+
 // namespace cfg {
 // class reporter : public ut::reporter<ut::printer> {
 //  public:

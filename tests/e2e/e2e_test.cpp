@@ -86,7 +86,7 @@ void test_scene_uncapped(const std::string& name, Scene (*create_scene_fn)(), in
   // Set the random seed for deterministic rendering
   Random::set_seed(seed);
 
-  const std::string test_output_dir = "./test_output/";
+  const std::string test_output_dir = test_output_path("");
   const std::string reference_dir = "./tests/e2e/reference_images/";
 
   ensure_directory_exists(test_output_dir);
@@ -172,7 +172,7 @@ void test_scene_uncapped(const std::string& name, Scene (*create_scene_fn)(), in
 void test_debug_scene() {
   using namespace boost::ut;
 
-  const std::string test_output_dir = "./test_output/";
+  const std::string test_output_dir = test_output_path("");
   ensure_directory_exists(test_output_dir);
   std::string output_filename = test_output_dir + "debug_scene" + ext_for_testing;
 
@@ -276,7 +276,7 @@ void test_scene(const std::string& name, Scene (*create_scene_fn)(), int width =
   // Set the random seed for deterministic rendering
   Random::set_seed(seed);
 
-  const std::string test_output_dir = "./test_output/";
+  const std::string test_output_dir = test_output_path("");
   const std::string reference_dir = "./tests/e2e/reference_images/";
 
   ensure_directory_exists(test_output_dir);

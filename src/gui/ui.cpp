@@ -76,13 +76,13 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
     // `renderer` is released once a render completes, so use the spp recorded when it finished.
     const int spp = raytracer.last_spp.load();
 
-    // Ensure the results directory exists
-    std::string dir = "./glimpse_results";
-    std::filesystem::create_directory(dir);
+    // Same folder as the CLI's renders; lossless PNG like the CLI default.
+    std::string dir = "results";
+    std::filesystem::create_directories(dir);
 
     std::ostringstream ss;
     ss << dir << "/" << std::put_time(std::localtime(&now_time), "%Y%m%d%H%M%S") << "_"
-       << Scene::SceneNames[params.current_scene] << "_samples_" << spp << ".jpg";
+       << Scene::SceneNames[params.current_scene] << "_samples_" << spp << ".png";
     auto outfile_path = ss.str();
 
     if (raytracer.image.write(outfile_path)) {

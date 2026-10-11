@@ -9,8 +9,6 @@
 
 using namespace glimpse;
 
-const std::string log_file_path = "./log_cli.txt";
-
 int main(int argc, char **argv) {
   const ParseResult parsed = parse_command_line(argc, argv);
   if (!parsed.ok()) {
@@ -34,7 +32,7 @@ int main(int argc, char **argv) {
     return 2;
   }
 
-  Logger logger(log_file_path);
+  Logger logger(log_file_for("cli"));
   // Seeds every worker thread's generator. Rows are split per thread, so this is reproducible on one machine;
   // seeding that is independent of the thread count is technique 03.
   if (options.seed) Random::set_seed(*options.seed);

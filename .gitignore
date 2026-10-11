@@ -6,8 +6,10 @@ log.txt
 .vscode/*
 results/
 refs/
+logs/
 ext/glfw*
 ext/stb/
+# Pre-2026-10-11 locations (may still exist locally)
 imgui.ini
 log_cli.txt
 log_gui.txt

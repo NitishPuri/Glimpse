@@ -64,7 +64,7 @@ void AppWindow::run() {
 }
 
 int main() {
-  Logger logger(log_file_path);
+  Logger logger(log_file_for("gui"));
   AppWindow app(logger);
   if (app.initApp() != 0) {
     return -1;

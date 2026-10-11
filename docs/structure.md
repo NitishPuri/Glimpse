@@ -158,7 +158,7 @@ Each step is one reviewable chunk, and the tests stay green after each:
 1. **Delete dead and legacy files** (section 2.3): the `#if 0` files, `plots.h`, `ext.7z`, `CMakeSettings.json`,
    the workflows. No behaviour change. *(done 2026-10-11)*
 2. **Runtime output:** `logs/`, `results/` for the viewer too, tests writing into the build tree, no
-   `imgui.ini`.
+   `imgui.ini`. *(done 2026-10-11)*
 3. **Moves and file splits** into the section 3 layout, with namespace hygiene (no renames inside files yet).
    Includes become `"glimpse/..."`.
 4. **Scene registry** as a single ordered table; scene families split into files.

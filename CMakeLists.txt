@@ -99,6 +99,7 @@ if(BUILD_TESTS)
         tests/unit_tests/bvh_node_test.cpp
         tests/unit_tests/cli_test.cpp
         tests/unit_tests/gui_layout_test.cpp
+        tests/unit_tests/logger_test.cpp
 
         tests/e2e/e2e_test.cpp
         tests/e2e/test_scenes.h
@@ -115,7 +116,8 @@ if(BUILD_TESTS)
     )
 
     # boost.ut's runner calls std::exit(-1) when any assertion failed, so ctest can rely on the exit code.
-    # Run from the repo root: tests read ./res and write ./test_output.
+    # Tests write their scratch files into the build tree, and run from the repo root like the apps (./res).
+    target_compile_definitions(Glimpse_tests PRIVATE GLIMPSE_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test_output")
     add_test(NAME GlimpseTests COMMAND Glimpse_tests WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
 

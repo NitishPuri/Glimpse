@@ -22,6 +22,7 @@ void bvh_test();
 void random_test();
 void cli_test();
 void gui_layout_test();
+void logger_test();
 
 // End-to-end tests
 void e2e_test();
@@ -31,8 +32,8 @@ int main(int argc, char** argv) {
   const auto filter = argc > 1 ? argv[1] : "*";
   ut::cfg<ut::override> = ut::options{.filter = filter};
 
-  // Image tests write here. It is gitignored, so a fresh clone doesn't have it.
-  std::filesystem::create_directories("./test_output");
+  // Scratch space for tests that write files, inside the build tree (see CMakeLists.txt).
+  std::filesystem::create_directories(GLIMPSE_TEST_OUTPUT_DIR);
   // ut::cfg<ut::runner<ut::reporter<ut::printer>>> = ut::options{.filter = filter};
   // ut::runner<ut::reporter<ut::printer>> = ut::options{.filter = filter};
 
@@ -55,6 +56,7 @@ int main(int argc, char** argv) {
   random_test();
   cli_test();
   gui_layout_test();
+  logger_test();
 
   // E2E
   // e2e_test();

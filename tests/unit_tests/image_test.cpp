@@ -156,7 +156,7 @@ void test_image_roundtrip() {
     }
 
     // Write the image
-    std::string test_file = "./test_output/roundtrip_test.tga";
+    std::string test_file = test_output_path("roundtrip_test.tga");
     bool write_success = original.write(test_file);
     expect(write_success) << "Failed to write test image";
 
@@ -215,7 +215,7 @@ void test_image_roundtrip() {
     for (const auto& format : formats) {
       if (log_to_console) std::cout << "\n===== Testing format: " << format << " =====\n";
 
-      std::string test_file = "./test_output/roundtrip_test." + format;
+      std::string test_file = test_output_path("roundtrip_test." + format);
       bool write_success = original.write(test_file);
       expect(write_success) << "Failed to write test image";
 
@@ -267,7 +267,7 @@ void test_image_roundtrip() {
     for (const auto& format : formats) {
       if (log_to_console) std::cout << "\n===== Testing format: " << format << " =====\n";
 
-      std::string test_file = "./test_output/rgb_test." + format;
+      std::string test_file = test_output_path("rgb_test." + format);
       bool write_success = test_img.write(test_file);
       expect(write_success) << "Failed to write test image";
 
@@ -313,7 +313,7 @@ void test_image_roundtrip() {
     for (const auto& format : formats) {
       if (log_to_console) std::cout << "\n===== Testing format: " << format << " for vertical flip =====\n";
 
-      std::string test_file = "./test_output/vertical_flip_test." + format;
+      std::string test_file = test_output_path("vertical_flip_test." + format);
       test_img.write(test_file);
 
       Image loaded(test_file);
@@ -345,7 +345,7 @@ void test_image_roundtrip() {
     }
 
     // Test with PNG (most reliable format)
-    std::string test_file = "./test_output/gamma_test.png";
+    std::string test_file = test_output_path("gamma_test.png");
     test_img.write(test_file);
 
     Image loaded(test_file);
