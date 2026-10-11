@@ -1,6 +1,6 @@
-#include "glimpse/hittables/sphere.h"
+#include "glimpse/shapes.h"
 
-#include "glimpse/material.h"
+#include "glimpse/materials.h"
 
 //
 #include "../test_cfg.h"

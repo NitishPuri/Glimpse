@@ -162,7 +162,10 @@ Each step is one reviewable chunk, and the tests stay green after each:
 3. **Moves and file splits** into the section 3 layout, with namespace hygiene (no renames inside files yet).
    Includes become `"glimpse/..."`.
    - 3a *(done 2026-10-11)*: `src/core` → `src/glimpse` (+ `util/`), every include a full `"glimpse/..."` path.
-   - 3b: file splits/merges and renames to the section 3 names, namespace hygiene, `ext/` as system includes.
+   - 3b-i *(done 2026-10-11)*: `hittables/` → `interaction.h`, `instancing.h`, `shapes`, `aggregates`, `media.h`;
+     `materials.h`, `textures`; `ray_color` → `integrators.{h,cpp}`.
+   - 3b-ii: util splits (`vecmath`, `sampling`, `rng`, `log`), `glimpse.cpp` statics to their types, namespace
+     hygiene (no global `using namespace`, `glimpse::gui`), `ext/` as system includes, the pre-existing warnings.
 4. **Scene registry** as a single ordered table; scene families split into files.
 5. **Tests self-register** (boost.ut suites); the manual list in `testing.cpp` goes.
 6. **Naming** per D1, as a mechanical rename. If D1 = keep, this step is dropped.

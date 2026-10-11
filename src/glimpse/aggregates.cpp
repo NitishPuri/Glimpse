@@ -1,8 +1,8 @@
-#include "glimpse/hittables/bvh_node.h"
+#include "glimpse/aggregates.h"
 
 #include <algorithm>
 
-using namespace glimpse;
+namespace glimpse {
 
 bvh_node::bvh_node(std::vector<shared_ptr<hittable>>& objects, size_t start, size_t end) {
   bbox = aabb::empty;
@@ -39,3 +39,5 @@ bool bvh_node::hit(const ray& r, interval ray_t, hit_record& rec) const {
 
   return hit_left || hit_right;
 }
+
+}  // namespace glimpse

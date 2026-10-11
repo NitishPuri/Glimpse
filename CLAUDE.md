@@ -99,7 +99,7 @@ Style: `.clang-format` (Google base, 2-space indent, 120 columns). Everything is
 Targets: `Glimpse` (static library, a recursive glob over `src/glimpse`), `Glimpse_cli` (`src/cli/main.cpp`),
 `Glimpse_gui` (`src/gui`) and `Glimpse_tests`.
 
-**Rendering pipeline** (`src/glimpse/render.cpp`):
+**Rendering pipeline** (`src/glimpse/render.cpp`, integrator in `integrators.cpp`):
 - `Renderer::render_scene(Scene, Image&, progress*)` builds a `bvh_node` from `scene.world` on every render.
   It then splits the image **by rows across `hardware_concurrency()` threads** using `std::async`.
 - Each thread loops over stratified sub-pixel cells (`cam.sqrt_spp`²), then over its rows and pixels. It calls
@@ -119,9 +119,10 @@ Targets: `Glimpse` (static library, a recursive glob over `src/glimpse`), `Glimp
 background, `camera`). It is registered in `Scene::SceneMap` (name → factory) **and** in `Scene::SceneNames`. The
 order of that vector is the CLI `--scene` index and the GUI's combo order. A new scene needs both entries.
 
-**Hittables** (`src/glimpse/hittables/`): `hittable` interface (+ `translate`/`rotate_y` instancing wrappers),
-`sphere`, `moving_sphere`, `quad` (+ `box()` helper), `constant_medium`, `hittable_list`, `bvh_node`.
-Materials (`material.h`) return a `scatter_record` holding either a pdf or a `skip_pdf_ray`.
+**Geometry** (pbrt-like split): `interaction.h` (`hit_record` + the `hittable` interface), `shapes.{h,cpp}`
+(`sphere`, `moving_sphere`, `quad` + `box()`), `aggregates.{h,cpp}` (`hittable_list`, `bvh_node`), `instancing.h`
+(`translate`, `rotate_y`), `media.h` (`constant_medium`). Materials (`materials.h`) return a `scatter_record` holding
+either a pdf or a `skip_pdf_ray`; textures are in `textures.{h,cpp}`.
 
 **GUI** (`src/gui`): `AppWindow` owns `GLResources` (GLFW window, GL texture that shows the `Image`), `UI`
 (ImGui/ImPlot panels: scene choice, camera, SPP, depth, progress, plots, saving to `glimpse_results/`) and

@@ -1,6 +1,6 @@
-#include "glimpse/hittables/moving_sphere.h"
+#include "glimpse/shapes.h"
 
-using namespace glimpse;
+namespace glimpse {
 
 bool moving_sphere::hit(const ray &r, interval ray_t, hit_record &rec) const {
   auto current_center = center.at(r.time());
@@ -30,3 +30,5 @@ bool moving_sphere::hit(const ray &r, interval ray_t, hit_record &rec) const {
 
   return true;
 }
+
+}  // namespace glimpse

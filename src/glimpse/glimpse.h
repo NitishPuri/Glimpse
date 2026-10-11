@@ -15,23 +15,21 @@
 #include "glimpse/ray.h"
 #include "glimpse/util/aabb.h"
 
-#include "glimpse/hittables/hittable.h"
+#include "glimpse/interaction.h"
+#include "glimpse/instancing.h"
 
-#include "glimpse/texture.h"
-#include "glimpse/material.h"
+#include "glimpse/textures.h"
+#include "glimpse/materials.h"
 #include "glimpse/perlin.h"
 
 #include "glimpse/camera.h"
 #include "glimpse/util/image.h"
 
-// hittables
-#include "glimpse/hittables/hittable_list.h"
-#include "glimpse/hittables/quad.h"
-#include "glimpse/hittables/sphere.h"
-#include "glimpse/hittables/moving_sphere.h"
+// geometry
+#include "glimpse/aggregates.h"
+#include "glimpse/shapes.h"
 
-#include "glimpse/hittables/constant_medium.h"
-#include "glimpse/hittables/bvh_node.h"
+#include "glimpse/media.h"
 
 #include "glimpse/scenes.h"
 // clang-format on

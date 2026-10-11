@@ -1,8 +1,8 @@
 #pragma once
 
-#include "glimpse/material.h"
-#include "glimpse/texture.h"
-#include "glimpse/hittables/hittable.h"
+#include "glimpse/interaction.h"
+#include "glimpse/materials.h"
+#include "glimpse/textures.h"
 
 namespace glimpse {
 
@@ -52,4 +52,4 @@ class constant_medium : public hittable {
   shared_ptr<material> phase_function;
 };
 
-}
+}  // namespace glimpse

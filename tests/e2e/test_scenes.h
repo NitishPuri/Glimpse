@@ -1,10 +1,9 @@
 #pragma once
 
 #include "glimpse/camera.h"
-#include "glimpse/hittables/hittable.h"
-#include "glimpse/hittables/quad.h"
-#include "glimpse/hittables/sphere.h"
-#include "glimpse/material.h"
+#include "glimpse/interaction.h"
+#include "glimpse/shapes.h"
+#include "glimpse/materials.h"
 #include "glimpse/scenes.h"
 #include "glimpse/util/vec3.h"
 

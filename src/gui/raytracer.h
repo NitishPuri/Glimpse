@@ -4,7 +4,7 @@
 #include <future>
 #include <optional>
 
-#include "glimpse/hittables/quad.h"
+#include "glimpse/shapes.h"
 #include "glimpse/util/image.h"
 #include "glimpse/render.h"
 #include "glimpse/scenes.h"

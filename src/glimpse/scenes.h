@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "glimpse/camera.h"
-#include "glimpse/hittables/hittable_list.h"
+#include "glimpse/aggregates.h"
 
 namespace glimpse {
 

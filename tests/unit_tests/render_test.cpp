@@ -1,9 +1,9 @@
 #include "glimpse/render.h"
 
-#include "glimpse/hittables/bvh_node.h"
-#include "glimpse/hittables/sphere.h"
+#include "glimpse/aggregates.h"
+#include "glimpse/shapes.h"
 #include "glimpse/util/image.h"
-#include "glimpse/material.h"
+#include "glimpse/materials.h"
 #include "glimpse/ray.h"
 #include "glimpse/util/vec3.h"
 

@@ -1,4 +1,4 @@
-#include "glimpse/texture.h"
+#include "glimpse/textures.h"
 
 #include "../test_cfg.h"
 

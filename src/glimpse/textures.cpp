@@ -1,9 +1,9 @@
-#include "glimpse/texture.h"
+#include "glimpse/textures.h"
 
 #include "glimpse/util/image.h"
 #include "glimpse/util/interval.h"
 
-using namespace glimpse;
+namespace glimpse {
 
 // TODO: Sampling floats directly from texture doesnt work,
 // it kind of does, but there are it seems bands of missing data.
@@ -37,3 +37,5 @@ color image_texture::value(double u, double v, const vec3 &p) const {
   const auto color_scale = 1.0 / 255.0;
   return color(color_scale * pixel.rgb[0], color_scale * pixel.rgb[1], color_scale * pixel.rgb[2]);
 }
+
+}  // namespace glimpse

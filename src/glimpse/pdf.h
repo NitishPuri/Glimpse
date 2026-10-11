@@ -11,8 +11,8 @@
 // along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //==============================================================================================
 
-#include "glimpse/hittables/hittable_list.h"
-#include "glimpse/hittables/sphere.h"
+#include "glimpse/aggregates.h"
+#include "glimpse/shapes.h"
 #include "glimpse/util/onb.h"
 
 namespace glimpse {

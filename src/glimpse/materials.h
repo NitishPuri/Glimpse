@@ -1,8 +1,8 @@
 #pragma once
 
-#include "glimpse/hittables/hittable.h"
+#include "glimpse/interaction.h"
 #include "glimpse/pdf.h"
-#include "glimpse/texture.h"
+#include "glimpse/textures.h"
 
 namespace glimpse {
 
