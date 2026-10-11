@@ -3,7 +3,7 @@
 #include <initializer_list>
 #include <vector>
 
-#include "glimpse/scenes.h"
+#include "glimpse/scenes/registry.h"
 
 //
 #include "../test_cfg.h"
@@ -76,16 +76,16 @@ void cli_test() {
 
     "resolve_scene"_test = [] {
       expect(resolve_scene_name("cornell_box").value_or("") == "cornell_box");
-      expect(resolve_scene_name("9").value_or("") == Scene::SceneNames[9]);
-      expect(resolve_scene_name("0").value_or("") == Scene::SceneNames[0]);
+      expect(resolve_scene_name("9").value_or("") == std::string(sceneRegistry()[9].name));
+      expect(resolve_scene_name("0").value_or("") == std::string(sceneRegistry()[0].name));
       expect(!resolve_scene_name("-1").has_value());
-      expect(!resolve_scene_name(std::to_string(Scene::SceneNames.size())).has_value());
+      expect(!resolve_scene_name(std::to_string(sceneRegistry().size())).has_value());
       expect(!resolve_scene_name("no_such_scene").has_value());
       expect(!resolve_scene_name("").has_value());
     };
 
     "apply_keeps_scene_values"_test = [] {
-      Scene s = Scene::SceneMap["cornell_box"]();  // 600 px, 100 spp, aspect 1.0
+      Scene s = findScene("cornell_box")->make();  // 600 px, 100 spp, aspect 1.0
       apply_options(CmdOptions{}, s);
       expect(s.cam.image_width == 600_i);
       expect(s.cam.image_height == 600_i) << "initialize() ran";
@@ -94,7 +94,7 @@ void cli_test() {
     };
 
     "apply_spp_rounds_down"_test = [] {
-      Scene s = Scene::SceneMap["cornell_box"]();
+      Scene s = findScene("cornell_box")->make();
       CmdOptions o;
       o.spp = 10;
       apply_options(o, s);
@@ -103,7 +103,7 @@ void cli_test() {
     };
 
     "apply_width_recomputes_height"_test = [] {
-      Scene s = Scene::SceneMap["earth"]();
+      Scene s = findScene("earth")->make();
       CmdOptions o;
       o.width = 101;
       o.depth = 7;

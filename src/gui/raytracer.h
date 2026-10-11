@@ -7,7 +7,7 @@
 #include "glimpse/shapes.h"
 #include "glimpse/util/image.h"
 #include "glimpse/render.h"
-#include "glimpse/scenes.h"
+#include "glimpse/scenes/registry.h"
 
 namespace glimpse::gui {
 
@@ -64,13 +64,14 @@ struct RayTracer {
 
   void setupScene(GLResources& GLResources, int current_scene, float lookFrom[3], float lookAt[3]) {
     // Ensure current_scene is within valid range
-    if (current_scene < 0 || current_scene >= Scene::SceneNames.size()) {
+    if (current_scene < 0 || current_scene >= static_cast<int>(sceneRegistry().size())) {
       logger.log("Invalid scene index: ", current_scene);
       return;
     }
 
-    logger.log("Setting up scene ... ", current_scene, " ", Scene::SceneNames[current_scene]);
-    scene = Scene::SceneMap[Scene::SceneNames[current_scene]]();
+    const SceneEntry& entry = sceneRegistry()[current_scene];
+    logger.log("Setting up scene ... ", current_scene, " ", entry.name);
+    scene = entry.make();
 
     GLResources.renderWidth = scene.cam.image_width;
     GLResources.renderHeight = static_cast<int>(scene.cam.image_width / scene.cam.aspect_ratio);

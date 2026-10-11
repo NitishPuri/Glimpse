@@ -23,6 +23,7 @@ void random_test();
 void cli_test();
 void gui_layout_test();
 void logger_test();
+void registry_test();
 
 // End-to-end tests
 void e2e_test();
@@ -57,6 +58,7 @@ int main(int argc, char** argv) {
   cli_test();
   gui_layout_test();
   logger_test();
+  registry_test();
 
   // E2E
   // e2e_test();

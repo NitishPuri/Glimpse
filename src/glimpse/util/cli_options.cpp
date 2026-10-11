@@ -7,7 +7,7 @@
 #include <sstream>
 #include <string_view>
 
-#include "glimpse/scenes.h"
+#include "glimpse/scenes/registry.h"
 
 namespace glimpse {
 
@@ -103,9 +103,9 @@ std::string usage() {
 }
 
 std::optional<std::string> resolve_scene_name(const std::string& name_or_index) {
-  if (Scene::SceneMap.count(name_or_index)) return name_or_index;
-  auto index = parse_int<size_t>(name_or_index, 0, static_cast<long long>(Scene::SceneNames.size()) - 1);
-  if (index) return Scene::SceneNames[*index];
+  if (findScene(name_or_index)) return name_or_index;
+  auto index = parse_int<size_t>(name_or_index, 0, static_cast<long long>(sceneRegistry().size()) - 1);
+  if (index) return sceneRegistry()[*index].name;
   return std::nullopt;
 }
 

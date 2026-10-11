@@ -5,7 +5,7 @@
 
 #include "glimpse/util/image.h"
 #include "glimpse/render.h"
-#include "glimpse/scenes.h"
+#include "glimpse/scene.h"
 #include "print_ascii_image.h"
 #include "test_scenes.h"
 

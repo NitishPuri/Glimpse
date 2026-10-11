@@ -5,7 +5,7 @@
 #include "glimpse/film.h"
 #include "glimpse/integrators.h"
 #include "glimpse/util/image.h"
-#include "glimpse/scenes.h"
+#include "glimpse/scene.h"
 
 namespace glimpse {
 

@@ -1,8 +1,5 @@
 #pragma once
 
-#include <functional>
-#include <unordered_map>
-
 #include "glimpse/camera.h"
 #include "glimpse/aggregates.h"
 
@@ -18,9 +15,6 @@ struct Scene {
   color background = color(0.7, 0.8, 1.0);
 
   camera cam;
-
-  static std::unordered_map<std::string, std::function<Scene()>> SceneMap;
-  static std::vector<std::string> SceneNames;
 };
 
 }  // namespace glimpse

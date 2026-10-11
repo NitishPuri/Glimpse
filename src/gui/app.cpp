@@ -15,10 +15,9 @@ int AppWindow::initApp() {
 
   // Setup Raytracer
   if (glfwGetCurrentContext() == gl_res.window) {
-    if (!ui.params.startScene.empty()) {
-      ui.params.current_scene =
-          static_cast<int>(std::find(Scene::SceneNames.begin(), Scene::SceneNames.end(), ui.params.startScene) -
-                           Scene::SceneNames.begin());
+    // An unknown start scene keeps the default index (it used to become size(), one past the end).
+    if (const SceneEntry* start = findScene(ui.params.startScene)) {
+      ui.params.current_scene = static_cast<int>(start - sceneRegistry().data());
     }
     raytracer.setupScene(gl_res, ui.params.current_scene, ui.params.lookFrom, ui.params.lookAt);
   } else {

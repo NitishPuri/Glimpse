@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     return 0;
   }
   if (options.list_scenes) {
-    for (size_t i = 0; i < Scene::SceneNames.size(); ++i) std::cout << i << "  " << Scene::SceneNames[i] << "\n";
+    for (size_t i = 0; i < sceneRegistry().size(); ++i) std::cout << i << "  " << sceneRegistry()[i].name << "\n";
     return 0;
   }
 
@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
   if (options.seed) Random::set_seed(*options.seed);
 
   // Scenes declare their own lights (scene.lights); nothing is added here.
-  Scene scene = Scene::SceneMap[*scene_name]();
+  Scene scene = findScene(*scene_name)->make();
   apply_options(options, scene);
   const camera &cam = scene.cam;
   Image image(cam.image_width, cam.image_height);

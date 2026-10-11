@@ -32,5 +32,6 @@
 
 #include "glimpse/media.h"
 
-#include "glimpse/scenes.h"
+#include "glimpse/scene.h"
+#include "glimpse/scenes/registry.h"
 // clang-format on

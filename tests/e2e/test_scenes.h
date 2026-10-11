@@ -4,7 +4,7 @@
 #include "glimpse/interaction.h"
 #include "glimpse/shapes.h"
 #include "glimpse/materials.h"
-#include "glimpse/scenes.h"
+#include "glimpse/scene.h"
 #include "glimpse/util/vecmath.h"
 
 // Simple scene with a single sphere

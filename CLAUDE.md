@@ -115,9 +115,10 @@ Targets: `Glimpse` (static library, a recursive glob over `src/glimpse`), `Glimp
 - `Random` (`util/rng.h`) uses a thread-local `mt19937` with a global seed (`Random::set_seed`, 0 = random).
   Determinism across thread counts is not guaranteed.
 
-**Scenes** (`scenes.cpp`): each scene is a free function that returns a `Scene` (world, lights,
-background, `camera`). It is registered in `Scene::SceneMap` (name → factory) **and** in `Scene::SceneNames`. The
-order of that vector is the CLI `--scene` index and the GUI's combo order. A new scene needs both entries.
+**Scenes** (`src/glimpse/scenes/`): a `Scene` (`scene.h`) is world + lights + background + `camera`. Factories live in
+family files (`rtiow.cpp`, `cornell.cpp`, `showcase.cpp`), are declared in `factories.h`, and are listed once in
+`registry.cpp`. `sceneRegistry()` is an ordered table that the CLI index, `--list-scenes` and the viewer combo all
+read, so new scenes go at the end. `findScene(name)` looks one up by name.
 
 **Utilities** (`src/glimpse/util/`): `math.h` (constants, `degrees_to_radians`), `rng.h` (`Random`, `random_double`),
 `vecmath.h` (`vec3`/`point3`/`color`, `onb`), `sampling.h` (warps: `random_unit_vector`, `random_cosine_direction`,

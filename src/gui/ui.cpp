@@ -84,7 +84,7 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& gl_res) {
 
     std::ostringstream ss;
     ss << dir << "/" << std::put_time(std::localtime(&now_time), "%Y%m%d%H%M%S") << "_"
-       << Scene::SceneNames[params.current_scene] << "_samples_" << spp << ".png";
+       << sceneRegistry()[params.current_scene].name << "_samples_" << spp << ".png";
     auto outfile_path = ss.str();
 
     if (raytracer.image.write(outfile_path)) {
@@ -131,10 +131,10 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& gl_res) {
     ImGui::BeginDisabled();
   }
 
-  if (ImGui::BeginCombo("Scene", Scene::SceneNames[params.current_scene].c_str())) {
-    for (int n = 0; n < Scene::SceneNames.size(); n++) {
+  if (ImGui::BeginCombo("Scene", sceneRegistry()[params.current_scene].name)) {
+    for (int n = 0; n < static_cast<int>(sceneRegistry().size()); n++) {
       const bool is_selected = (params.current_scene == n);
-      if (ImGui::Selectable(Scene::SceneNames[n].c_str(), is_selected)) {
+      if (ImGui::Selectable(sceneRegistry()[n].name, is_selected)) {
         params.current_scene = n;
         raytracer.setupScene(gl_res, params.current_scene, params.lookFrom, params.lookAt);
         maybeRenderOnParamChange(raytracer);

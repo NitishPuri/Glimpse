@@ -168,7 +168,7 @@ Each step is one reviewable chunk, and the tests stay green after each:
      `logger.h` → `log.h`; `glimpse.cpp` statics → C++17 inline definitions; no global `using namespace`; GUI in
      `glimpse::gui`; `ext/` as system includes. The clean build is down to 1 warning (`scenes.cpp` unused `c`,
      left for step 7: removing it changes `untitled_1`'s random sequence).
-4. **Scene registry** as a single ordered table; scene families split into files.
+4. **Scene registry** as a single ordered table; scene families split into files. *(done 2026-10-11)*
 5. **Tests self-register** (boost.ut suites); the manual list in `testing.cpp` goes.
 6. **Naming** per D1, as a mechanical rename. If D1 = keep, this step is dropped.
 7. **File-header comments** across the tree, plus resolving the TODOs and the commented-out code. Each item
