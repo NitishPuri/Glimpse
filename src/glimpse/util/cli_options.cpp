@@ -59,6 +59,10 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
       o.listScenes = true;
       continue;
     }
+    if (arg == "--reference") {
+      o.reference = true;
+      continue;
+    }
     if (arg != "--scene" && arg != "--spp" && arg != "--width" && arg != "--depth" && arg != "--seed" &&
         arg != "--out" && arg != "--exposure") {
       result.error = "unknown argument: " + arg;
@@ -105,13 +109,16 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
       (arg == "--spp" ? o.spp : arg == "--width" ? o.width : o.depth) = v;
     }
   }
+  if (o.reference && !o.out.empty() && !isFloatOutput(o.out)) {
+    result.error = "--reference writes linear radiance: --out must be a .pfm, not '" + o.out + "'";
+  }
   return result;
 }
 
 std::string usage() {
   std::ostringstream ss;
   ss << "usage: Glimpse_cli [--scene <name|index>] [--spp N] [--width N] [--depth N] [--seed N] [--out file]\n"
-        "                   [--exposure STOPS] [--list-scenes] [--help]\n"
+        "                   [--exposure STOPS] [--reference] [--list-scenes] [--help]\n"
         "  --scene   scene name or index (default cornell_box; see --list-scenes)\n"
         "  --spp     samples per pixel; rounded down to a square (10 -> 9) for stratified sampling\n"
         "  --width   image width; height follows the scene's aspect ratio\n"
@@ -119,7 +126,8 @@ std::string usage() {
         "  --seed    fixed RNG seed (>= 1); reproducible on the same machine and thread count\n"
         "  --out     output image: .png .jpg .bmp .tga (sRGB, 8-bit) or .pfm (linear float radiance)\n"
         "            (default results/<scene>.png)\n"
-        "  --exposure  scale radiance by 2^STOPS before sRGB encoding (8-bit outputs only; default 0)\n";
+        "  --exposure  scale radiance by 2^STOPS before sRGB encoding (8-bit outputs only; default 0)\n"
+        "  --reference render a converged reference: 4096 spp unless --spp, written to refs/<scene>.pfm\n";
   return ss.str();
 }
 
@@ -131,13 +139,19 @@ std::optional<std::string> resolveSceneName(const std::string& nameOrIndex) {
 }
 
 void applyOptions(const CmdOptions& options, Scene& scene) {
-  if (options.spp) scene.cam.samplesPerPixel = *options.spp;
+  if (options.spp) {
+    scene.cam.samplesPerPixel = *options.spp;
+  } else if (options.reference) {
+    scene.cam.samplesPerPixel = kReferenceSpp;
+  }
   if (options.width) scene.cam.imageWidth = *options.width;
   if (options.depth) scene.cam.maxDepth = *options.depth;
   scene.cam.initialize();
 }
 
 std::string defaultOutputPath(const std::string& sceneName) { return "results/" + sceneName + ".png"; }
+
+std::string referenceOutputPath(const std::string& sceneName) { return "refs/" + sceneName + ".pfm"; }
 
 bool isFloatOutput(const std::string& path) { return extensionOf(path) == "pfm"; }
 

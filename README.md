@@ -52,7 +52,9 @@ CLI flags:
 | `--width N` | height follows the scene's aspect ratio |
 | `--depth N` | maximum bounces |
 | `--seed N` | fixed RNG seed; reproducible on the same machine |
-| `--out file` | `.png .jpg .bmp .tga`; default `results/<scene>.png` |
+| `--out file` | `.png .jpg .bmp .tga` (sRGB, 8-bit) or `.pfm` (linear float radiance); default `results/<scene>.png` |
+| `--exposure STOPS` | scale radiance by 2^STOPS before sRGB encoding (8-bit outputs only) |
+| `--reference` | converged reference: 4096 spp (unless `--spp`), written to `refs/<scene>.pfm` |
 
 Tests: `./run.sh tests` (all), `./run.sh tests "camera*"` (boost.ut name filter), or
 `ctest --test-dir build/release`.
@@ -83,4 +85,5 @@ Dependencies: [stb](https://github.com/nothings/stb), [boost.ut](https://github.
 - The structure review is applied: `src/glimpse/` with a pbrt-like file split, pbrt/Glint naming, a scene registry,
   self-registering tests, file headers, diagram tooling.
 
-Next: Stage 1, measuring (float output, reference renders, error metrics).
+**Stage 1 (measuring) is in progress:** 01 `float_output` is done (linear PFM output, sRGB display, `--exposure`,
+`--reference` → `refs/<scene>.pfm`); see `docs/techniques/`. Next: 02 `error_metrics`.

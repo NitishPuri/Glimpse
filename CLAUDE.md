@@ -84,11 +84,12 @@ Linux (same pattern as Glint):
 ```
 Windows (old setup): `configure.bat` → `build.bat`; `cli.bat`, `gui.bat`, `test.bat <filter>`.
 
-State (**Stage 0 done**, 2026-10-11; next is Stage 1, technique 01 `float_output`): the library, CLI, viewer and tests build with GCC 11, and the tests pass under ctest.
+State (Stage 0 done; **Stage 1: 01 `float_output` done**, next 02 `error_metrics`; technique notes in `docs/techniques/`): the library, CLI, viewer and tests build with GCC 11, and the tests pass under ctest.
 - CLI flags: `--scene <name|index> --spp --width --depth --seed --out --list-scenes --help`.
   - `--spp` is rounded down to a square (the stratified grid is `sqrtSpp × sqrtSpp`).
   - `--seed` is reproducible on one machine, but not across thread counts (technique 03).
-  - `--out` takes `.png/.jpg/.bmp/.tga` (PFM comes with technique 01).
+  - `--out` takes `.png/.jpg/.bmp/.tga` (sRGB, `--exposure`) or `.pfm` (linear radiance). `--reference` renders
+    4096 spp into `refs/<scene>.pfm`.
 - `Renderer::renderScene` calls `cam.initialize()` itself, and the stop flag aborts capped renders too.
 - `Image` rows are top-down, like image files: the renderer converts from camera `v` when writing, and the viewer
   doesn't flip.

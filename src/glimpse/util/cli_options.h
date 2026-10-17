@@ -20,9 +20,14 @@ struct CmdOptions {
   std::optional<uint32_t> seed;  // >= 1; 0 is reserved by Random::setSeed for "random"
   double exposure = 0.0;          // stops, applied before sRGB encoding (8-bit outputs only)
   std::string out;               // empty: defaultOutputPath(scene)
+  bool reference = false;  // render a converged reference: linear .pfm, kReferenceSpp unless --spp is given
   bool listScenes = false;
   bool help = false;
 };
+
+// Samples per pixel for --reference (a 64x64 stratified grid): high enough that its noise is far below what the
+// techniques under test leave, so error measured against it is the technique's error.
+constexpr int kReferenceSpp = 4096;
 
 struct ParseResult {
   CmdOptions options;
@@ -40,6 +45,9 @@ std::optional<std::string> resolveSceneName(const std::string& nameOrIndex);
 void applyOptions(const CmdOptions& options, Scene& scene);
 
 std::string defaultOutputPath(const std::string& sceneName);
+
+// Where --reference writes by default: refs/<scene>.pfm (gitignored cache).
+std::string referenceOutputPath(const std::string& sceneName);
 
 // True for .pfm: the linear float film is written as-is (no exposure, no sRGB).
 bool isFloatOutput(const std::string& path);

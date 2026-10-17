@@ -131,7 +131,7 @@ runs, and `Glimpse_cli --scene cornell_box --spp 64 --out x.png` writes an image
 
 ### Stage 1 — Measuring
 
-- [ ] **01 `float_output`**
+- [x] **01 `float_output`** (2026-10-11, `docs/techniques/01_float_output.md`)
   - `Image` keeps linear float data, and `--out x.pfm` writes it.
   - PNG/JPG output uses the proper sRGB transfer function with exposure, replacing the `sqrt` gamma.
   - `--reference` renders at very high SPP into `refs/<scene>.pfm`.

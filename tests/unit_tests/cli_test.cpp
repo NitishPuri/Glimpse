@@ -54,6 +54,28 @@ static ut::suite<"cli"> cliSuite = [] {
       expect(!parse({"--exposure"}).ok()) << "missing value";
     };
 
+    // A reference is the converged image later techniques are measured against: lossless and high spp.
+    "reference"_test = [] {
+      auto r = parse({"--reference"});
+      expect(r.ok()) << r.error;
+      expect(r.options.reference);
+      expect(referenceOutputPath("cornell_box") == "refs/cornell_box.pfm");
+
+      Scene s = findScene("cornell_box")->make();
+      applyOptions(r.options, s);
+      expect(s.cam.samplesPerPixel == 4096_i) << "default reference spp";
+      expect(s.cam.sqrtSpp == 64_i);
+
+      auto r2 = parse({"--reference", "--spp", "256"});
+      Scene s2 = findScene("cornell_box")->make();
+      applyOptions(r2.options, s2);
+      expect(s2.cam.samplesPerPixel == 256_i) << "--spp still wins";
+
+      expect(parse({"--reference", "--out", "x/ref.pfm"}).ok());
+      expect(!parse({"--reference", "--out", "x/ref.png"}).ok()) << "a reference must be lossless (.pfm)";
+      expect(!parse({"--out", "x/ref.png", "--reference"}).ok()) << "order doesn't matter";
+    };
+
     "help_and_list"_test = [] {
       expect(parse({"--help"}).options.help);
       expect(parse({"-h"}).options.help);

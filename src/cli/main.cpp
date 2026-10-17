@@ -59,7 +59,9 @@ int main(int argc, char **argv) {
   const auto seconds = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - start).count();
   logger.log("Rendered in ", seconds, " s");
 
-  const std::string out = options.out.empty() ? defaultOutputPath(*sceneName) : options.out;
+  const std::string out = !options.out.empty() ? options.out
+                          : options.reference ? referenceOutputPath(*sceneName)
+                                              : defaultOutputPath(*sceneName);
   const auto parent = std::filesystem::path(out).parent_path();
   if (!parent.empty()) std::filesystem::create_directories(parent);
   // The output comes from the linear film: .pfm writes it as-is (lossless radiance, the measurement), 8-bit formats
