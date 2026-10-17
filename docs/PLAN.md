@@ -27,6 +27,10 @@ Work top to bottom. Tick boxes as work lands, and commit each tick together with
 3. **The code changes only when a stage needs it.** There is no up-front restructure. The RTIOW-shaped core
    (recursive `rayColor`, `Material::scatter`, `shared_ptr`, `double`) changes only when a technique
    needs it to.
+   - Those refactors **converge on pbrt-v4's class model** (pbrt ch1, the system overview): `Integrator`, `Sampler`,
+     `Filter`, `Film`, `Camera`, `Shape`/`Primitive`, `Light`/`LightSampler`, `BSDF`, `Spectrum`, `Medium`.
+   - The **"pbrt alignment"** table in `docs/architecture.md` maps each RTIOW type to its pbrt counterpart and the
+     technique that closes the gap. Added 2026-10-17, after reading pbrt ch1.
 4. **Old methods stay selectable.** When a technique replaces a method, the old one stays behind a flag
    (`--integrator`, `--sampler`, ...). That keeps equal-time comparisons and viewer toggles possible.
 5. **Reading spine.** For each technique:
@@ -50,6 +54,8 @@ Work top to bottom. Tick boxes as work lands, and commit each tick together with
       with the method it improves on. pbrt-v4's `imgtool diff` is an independent cross-check.
 - [ ] `docs/techniques/NN_name.md` is written, following the template below, including its **Diagrams**.
 - [ ] Unit tests still pass. New math (warps, pdfs, BSDF reciprocity and energy) gets a unit test.
+- [ ] If the technique closes a pbrt alignment gap, its note says so and the table in `docs/architecture.md` is
+      updated.
 - [ ] Learnings are added to the vault stage note, and its reading items are ticked.
 
 ### Diagrams (convention taken from Glint)
@@ -88,6 +94,7 @@ reorder, drop or swap whatever turned out to be (un)interesting.
 ## Idea          (one paragraph of theory, in my own words)
 ## Diagrams      (mermaid for flow/structure; computed figures from tools/diagrams.py, see below)
 ## What changed  (files, refactors and why)
+## pbrt alignment (the RTIOW → pbrt gap this closes, if any; update docs/architecture.md)
 ## Numbers       (scene, spp/time, RMSE/relMSE vs reference, equal-time vs previous method, image)
 ## Gotchas
 ## Repro         (exact CLI commands)
@@ -165,11 +172,23 @@ Read: pbrt §2.3–2.4, §8.1–8.8, §A.4–A.5; RTG1 ch16 *Sampling Transforma
 ### Stage 3 — Light transport core
 
 - [ ] **07 `iterative_path`**
-  - The recursive `rayColor` becomes a loop with a running throughput and Russian roulette.
+  - **pbrt alignment, `Integrator`:** the free function `rayColor` becomes an `Integrator` class hierarchy (pbrt
+    §1.3.3 `Integrator`, §1.3.4 `ImageTileIntegrator`, §1.3.5 `RayIntegrator::Li`).
+    - Today's recursion is kept as `RTIOWIntegrator` (`--integrator rtiow`). Its closest pbrt relative is the
+      recursive `RandomWalkIntegrator` of §1.3.6.
+    - The new loop is `SimplePathIntegrator` (pbrt §13.3, `--integrator simple`).
+    - The `--integrator` flag starts here.
+  - The recursive `rayColor` becomes a loop with a running throughput (beta) and Russian roulette.
   - The new loop must produce the same image as the old one, within noise, against the reference.
 - [ ] **08 `nee`**
-  - The showcase scenes `material_showcase` and `untitled_1` have emitters that aren't in `scene.lights` (old
-    "add light" TODOs). Add them here, where `scene.lights` starts to matter.
+  - **pbrt alignment, `Light` / `LightSampler`:**
+    - A `Light` interface (pbrt §12.1: `SampleLi`, `PDF_Li`, `L`), with `DiffuseAreaLight` (§12.4) attached to a
+      shape, replaces the RTIOW pattern of emitters as `Hittable`s duplicated into a `scene.lights` list.
+    - A `UniformLightSampler` (§12.6) picks a light. Technique 18 adds power and BVH light samplers on the same
+      interface.
+    - The integrator becomes `PathIntegrator` (pbrt §13.4).
+  - The showcase scenes `material_showcase` and `untitled_1` have emitters that aren't lights yet (old "add light"
+    TODOs). They become `DiffuseAreaLight`s here.
   - Next-event estimation: sample a light, cast a shadow ray, and avoid counting emission twice.
   - Robust ray offsets (RTG1 ch6) replace the `0.001` epsilon.
 - [ ] **09 `mis`**
@@ -182,8 +201,9 @@ Read: pbrt §2.3–2.4, §8.1–8.8, §A.4–A.5; RTG1 ch16 *Sampling Transforma
   - Written fresh. The dormant 2025 attempt (`ray_visualizer` / `ray_analysis` / `ray_debug`) was deleted in the
     Stage 0 structure review; git history has it.
 
-Read: pbrt §13.1–13.4, §2.2 (MIS), §6.8 (rounding error); RTG1 ch6 *Avoiding Self-Intersection*, ch17
-*Ignoring the Inconvenient*; RTG2 ch14 *The Reference Path Tracer*, ch20 *Multiple Importance Sampling 101*.
+Read: pbrt §1.3 (system overview: integrators), §12.1, §12.4, §12.6, §13.1–13.4, §2.2 (MIS), §6.8 (rounding
+error); RTG1 ch6 *Avoiding Self-Intersection*, ch17 *Ignoring the Inconvenient*; RTG2 ch14 *The Reference Path
+Tracer*, ch20 *Multiple Importance Sampling 101*.
 
 ### Stage 4 — Materials
 
@@ -206,6 +226,11 @@ Read: pbrt §9.1–9.7, §10.5, §14.3; RTG1 ch12 *Bump Terminator*; RTG1 ch16.6
 
 - [ ] **14 `triangle_meshes`:** OBJ/PLY loading, watertight ray/triangle intersection, interpolated normals
       and UVs.
+  - **pbrt alignment, `Shape` / `Primitive`:**
+    - `Hittable` splits into `Shape` (pure geometry: `Intersect`, `Bounds`, `Sample`, pbrt §6.1) and `Primitive`
+      (a shape plus material, area light and medium interface; `GeometricPrimitive`, §7.1).
+    - The aggregates (`BVHNode`, later 15's linear BVH) hold primitives.
+    - Triangles are the first shape written against the new interface; spheres and quads are ported to it.
 - [ ] **15 `sah_bvh`:** a BVH built with the surface-area heuristic and flattened into an array (pbrt's
       `LinearBVHNode`). Benchmarked against the current midpoint BVH (rays/s, build time).
 - [ ] **16 `pbrt_scene_loader`**

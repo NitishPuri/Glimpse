@@ -32,6 +32,10 @@ Rules that come with it:
 - **One new idea per technique; refactors only when a technique needs them.** The RTIOW-shaped core (recursive
   `rayColor`, `Material::scatter`, `shared_ptr`, `double`) changes only at the technique that requires it, and that
   refactor is written up in the technique note.
+- **Converge on pbrt-v4's class model** (owner's request, 2026-10-17): `Integrator` (07), `Light` / `LightSampler`
+  (08), `Shape` / `Primitive` (14), `Sampler` (04), `Filter` (06), `BSDF` (11), spectral (19), media (20). The
+  "pbrt alignment" table in `docs/architecture.md` tracks each gap. Every technique note has a "pbrt alignment"
+  section. Don't build new features on the RTIOW shortcuts a planned refactor is about to replace.
 - **Old methods stay selectable** behind flags (`--integrator`, `--sampler`, ...) so every technique can be
   compared at equal time against what it replaces.
 - **Definition of done**, as listed in `PLAN.md`:

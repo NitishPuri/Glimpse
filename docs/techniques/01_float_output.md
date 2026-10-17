@@ -66,6 +66,13 @@ inside `readPFM`/`writePFM` (see `docs/architecture.md`, image orientation).
   and exposure, `Film::linearRGB` orientation, CLI flags. 42 tests in total.
 - `CMakeLists.txt`: the library glob uses `CONFIGURE_DEPENDS` (new `.cpp` files were missed until reconfigure).
 
+## pbrt alignment
+
+Closes part of the **`Film`** gap: like pbrt's film (§5.4), Glimpse's `Film` now holds the linear estimate and
+writes it losslessly, with display encoding as a separate output step (pbrt's `RGBFilm` writes linear values; sRGB
+is applied only for 8-bit formats). Still open: filter weights (06) and variance (05). See the table in
+`docs/architecture.md`.
+
 ## Numbers
 
 Cornell box, 300×300, AMD Ryzen 9 5900HX (16 threads), release build:
