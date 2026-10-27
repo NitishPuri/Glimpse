@@ -153,6 +153,17 @@ static ut::suite<"cli"> cliSuite = [] {
     };
 
     "default_output_path"_test = [] { expect(defaultOutputPath("earth") == "results/earth.png"); };
+
+    "convergence"_test = [] {
+      auto r = parse({"--convergence", "out/cb.csv", "--spp", "256"});
+      expect(r.ok()) << r.error;
+      expect(r.options.convergence == "out/cb.csv");
+      expect(parse({}).options.convergence.empty()) << "default: a normal render";
+      expect(!parse({"--convergence", "cb.png"}).ok()) << "CSV only";
+      expect(!parse({"--convergence"}).ok()) << "missing value";
+      expect(!parse({"--convergence", "cb.csv", "--reference"}).ok());
+      expect(!parse({"--convergence", "cb.csv", "--out", "cb.pfm"}).ok()) << "it writes no image";
+    };
   };
 
   "cli_compare"_test = [] {

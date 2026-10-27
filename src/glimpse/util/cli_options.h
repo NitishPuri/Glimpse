@@ -21,6 +21,7 @@ struct CmdOptions {
   double exposure = 0.0;          // stops, applied before sRGB encoding (8-bit outputs only)
   std::string out;               // empty: defaultOutputPath(scene)
   bool reference = false;  // render a converged reference: linear .pfm, kReferenceSpp unless --spp is given
+  std::string convergence;  // CSV path: measure error vs spp/time against refs/<scene>.pfm (--spp = largest spp)
   bool listScenes = false;
   bool help = false;
 };

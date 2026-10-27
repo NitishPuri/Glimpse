@@ -223,6 +223,38 @@ def srgb_vs_sqrt():
     return fig
 
 
+# --- 02 error_metrics ------------------------------------------------------------------------------------------
+
+def read_csv(path):
+    """Columns of a CSV written by the renderer (e.g. `Glimpse_cli --convergence`), as float arrays by name."""
+    data = np.genfromtxt(ROOT / path, delimiter=",", names=True)
+    return {name: data[name] for name in data.dtype.names}
+
+
+@figure("02_convergence", "docs/diagrams/02_convergence.svg")
+def convergence():
+    """Error vs spp and vs time for cornell_box (from `Glimpse_cli --convergence`, data in docs/data/).
+    An unbiased estimator's MSE is its variance, ~1/N: slope -1 on log-log axes. The fitted slope is printed in the
+    legend; a flatter tail would mean bias, or a reference too noisy to measure against."""
+    d = read_csv("docs/data/02_convergence_cornell_box.csv")
+    spp, seconds = d["spp"], d["seconds"]
+    fig, axes = plt.subplots(1, 2, figsize=(9.0, 3.8))
+    for ax, x, xlabel in [(axes[0], spp, "samples per pixel"), (axes[1], seconds, "render time (s)")]:
+        for key, label, color in [("relmse", "relMSE", COSINE_COLOR), ("mse", "MSE", UNIFORM_COLOR)]:
+            slope = np.polyfit(np.log(x), np.log(d[key]), 1)[0]
+            ax.loglog(x, d[key], "o-", color=color, ms=4, label=f"{label}   (slope {slope:.2f})")
+        # 1/N guide through the first relMSE point.
+        ax.loglog(x, d["relmse"][0] * x[0] / x, "--", color="black", lw=0.8, label="∝ 1/x")
+        ax.set_xlabel(xlabel)
+        ax.grid(True, which="both", lw=0.3, alpha=0.5)
+        ax.legend(fontsize=8, loc="lower left")
+    axes[0].set_ylabel("error vs refs/cornell_box.pfm (4096 spp)")
+    axes[0].set_title("error vs spp: the estimator's rate")
+    axes[1].set_title("error vs time: what equal-time compares")
+    fig.tight_layout()
+    return fig
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("names", nargs="*", help="figures to build (default: all)")

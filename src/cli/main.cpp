@@ -1,10 +1,11 @@
-// Glimpse_cli: render one scene to an image file, or `compare` a render against a reference.
+// Glimpse_cli: render one scene to an image file, measure its `--convergence`, or `compare` two renders.
 // Flags are parsed in util/cli_options; the scene comes from scenes/registry; logs go to logs/cli_<time>.log.
 
 #include <chrono>
 #include <filesystem>
 #include <iostream>
 
+#include "glimpse/convergence.h"
 #include "glimpse/util/cli_options.h"
 #include "glimpse/util/color.h"
 #include "glimpse/util/float_image.h"
@@ -57,6 +58,47 @@ int runCompare(int argc, const char *const *argv) {
   return 0;
 }
 
+// `--convergence out.csv`: error vs spp and time against refs/<scene>.pfm (technique 02).
+int runConvergence(const glimpse::CmdOptions &options, const std::string &sceneName, glimpse::Logger &logger) {
+  using namespace glimpse;
+  const std::string refPath = referenceOutputPath(sceneName);
+  const auto ref = readPFM(refPath);
+  if (!ref) {
+    std::cerr << "error: no reference " << refPath << " (render one with --scene " << sceneName << " --reference)\n";
+    return 1;
+  }
+
+  Scene scene = findScene(sceneName)->make();
+  // The reference fixes the image size; an explicit --width must agree with it.
+  if (!options.width) scene.cam.imageWidth = ref->width;
+  applyOptions(options, scene);
+  if (scene.cam.imageWidth != ref->width || scene.cam.imageHeight != ref->height) {
+    std::cerr << "error: render size " << scene.cam.imageWidth << "x" << scene.cam.imageHeight
+              << " doesn't match the reference " << ref->width << "x" << ref->height << "\n";
+    return 2;
+  }
+
+  const auto schedule = convergenceSchedule(options.spp.value_or(kConvergenceMaxSpp));
+  logger.log("Convergence of ", sceneName, " at ", ref->width, "x", ref->height, ", depth ", scene.cam.maxDepth,
+             ", ", schedule.size(), " renders up to ", schedule.back(), " spp, against ", refPath);
+  const auto points = measureConvergence(scene, *ref, schedule, [&](const ConvergencePoint &p) {
+    logger.log(p.spp, " spp  ", p.seconds, " s  RMSE ", p.error.rmse, "  relMSE ", p.error.relMSE);
+  });
+  if (points.size() != schedule.size()) {
+    logger.log("Convergence stopped after ", points.size(), " of ", schedule.size(), " renders");
+    return 1;
+  }
+
+  const auto parent = std::filesystem::path(options.convergence).parent_path();
+  if (!parent.empty()) std::filesystem::create_directories(parent);
+  if (!writeConvergenceCSV(options.convergence, points)) {
+    logger.log("Failed to write ", options.convergence);
+    return 1;
+  }
+  logger.log("Wrote ", options.convergence);
+  return 0;
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
@@ -90,6 +132,8 @@ int main(int argc, char **argv) {
   // Seeds every worker thread's generator. Rows are split per thread, so this is reproducible on one machine;
   // seeding that is independent of the thread count is technique 03.
   if (options.seed) Random::setSeed(*options.seed);
+
+  if (!options.convergence.empty()) return runConvergence(options, *sceneName, logger);
 
   // Scenes declare their own lights (scene.lights); nothing is added here.
   Scene scene = findScene(*sceneName)->make();

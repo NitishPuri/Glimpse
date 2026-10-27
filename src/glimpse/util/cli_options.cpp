@@ -65,7 +65,7 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
       continue;
     }
     if (arg != "--scene" && arg != "--spp" && arg != "--width" && arg != "--depth" && arg != "--seed" &&
-        arg != "--out" && arg != "--exposure") {
+        arg != "--out" && arg != "--exposure" && arg != "--convergence") {
       result.error = "unknown argument: " + arg;
       return result;
     }
@@ -84,6 +84,12 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
         return result;
       }
       o.out = value;
+    } else if (arg == "--convergence") {
+      if (extensionOf(value) != "csv") {
+        result.error = invalid + " (a .csv file)";
+        return result;
+      }
+      o.convergence = value;
     } else if (arg == "--exposure") {
       double stops = 0.0;
       const char* end = value.data() + value.size();
@@ -113,13 +119,18 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
   if (o.reference && !o.out.empty() && !isFloatOutput(o.out)) {
     result.error = "--reference writes linear radiance: --out must be a .pfm, not '" + o.out + "'";
   }
+  // Convergence renders many images and keeps only their error, so an output image or a reference makes no sense.
+  if (!o.convergence.empty() && (o.reference || !o.out.empty())) {
+    result.error = "--convergence writes only its CSV: it can't be combined with --reference or --out";
+  }
   return result;
 }
 
 std::string usage() {
   std::ostringstream ss;
   ss << "usage: Glimpse_cli [--scene <name|index>] [--spp N] [--width N] [--depth N] [--seed N] [--out file]\n"
-        "                   [--exposure STOPS] [--reference] [--list-scenes] [--help]\n"
+        "                   [--exposure STOPS] [--reference] [--convergence file.csv]\n"
+        "                   [--list-scenes] [--help]\n"
         "  --scene   scene name or index (default cornell_box; see --list-scenes)\n"
         "  --spp     samples per pixel; rounded down to a square (10 -> 9) for stratified sampling\n"
         "  --width   image width; height follows the scene's aspect ratio\n"
@@ -129,6 +140,8 @@ std::string usage() {
         "            (default results/<scene>.png)\n"
         "  --exposure  scale radiance by 2^STOPS before sRGB encoding (8-bit outputs only; default 0)\n"
         "  --reference render a converged reference: 4096 spp unless --spp, written to refs/<scene>.pfm\n"
+        "  --convergence file.csv  render at 1, 4, 9, 16, 36, ... spp up to --spp (default 1024), writing\n"
+        "            spp, seconds and error against refs/<scene>.pfm (image size taken from the reference)\n"
         "\n"
         "       Glimpse_cli compare <test.pfm> <ref.pfm> [--error-image out.png]\n"
         "  prints MSE, RMSE and relMSE of test against ref; --error-image writes per-pixel relative squared\n"
