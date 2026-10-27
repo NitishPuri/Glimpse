@@ -1,4 +1,4 @@
-// Glimpse_cli: render one scene to an image file.
+// Glimpse_cli: render one scene to an image file, or `compare` a render against a reference.
 // Flags are parsed in util/cli_options; the scene comes from scenes/registry; logs go to logs/cli_<time>.log.
 
 #include <chrono>
@@ -10,10 +10,59 @@
 #include "glimpse/util/float_image.h"
 #include "glimpse/glimpse.h"
 #include "glimpse/util/log.h"
+#include "glimpse/util/image.h"
+#include "glimpse/util/metrics.h"
 #include "glimpse/render.h"
+
+namespace {
+
+// `compare <test.pfm> <ref.pfm>`: prints the error of a render against a reference (technique 02).
+int runCompare(int argc, const char *const *argv) {
+  using namespace glimpse;
+  const CompareParseResult parsed = parseCompareCommand(argc, argv);
+  if (!parsed.ok()) {
+    std::cerr << "error: " << parsed.error << "\n\n" << usage();
+    return 2;
+  }
+  const CompareOptions &o = parsed.options;
+
+  const auto test = readPFM(o.test);
+  const auto ref = readPFM(o.ref);
+  if (!test || !ref) {
+    std::cerr << "error: cannot read " << (!test ? o.test : o.ref) << "\n";
+    return 1;
+  }
+  const auto stats = compareImages(*test, *ref);
+  if (!stats) {
+    std::cerr << "error: size mismatch: " << test->width << "x" << test->height << " vs " << ref->width << "x"
+              << ref->height << "\n";
+    return 1;
+  }
+
+  // Full precision: these numbers get pasted into technique notes and compared across runs.
+  std::cout.precision(6);
+  std::cout << "test    " << o.test << "\nref     " << o.ref << "\nsize    " << ref->width << "x" << ref->height
+            << "\nMSE     " << stats->mse << "\nRMSE    " << stats->rmse << "\nrelMSE  " << stats->relMSE << "\n";
+  if (stats->nonFinite > 0) std::cout << "warning: " << stats->nonFinite << " NaN/inf channel values skipped\n";
+
+  if (!o.errorImage.empty()) {
+    const auto parent = std::filesystem::path(o.errorImage).parent_path();
+    if (!parent.empty()) std::filesystem::create_directories(parent);
+    if (!falseColorError(*test, *ref).write(o.errorImage)) {
+      std::cerr << "error: cannot write " << o.errorImage << "\n";
+      return 1;
+    }
+    std::cout << "wrote   " << o.errorImage << "\n";
+  }
+  return 0;
+}
+
+}  // namespace
 
 int main(int argc, char **argv) {
   using namespace glimpse;
+
+  if (isCompareCommand(argc, argv)) return runCompare(argc, argv);
 
   const ParseResult parsed = parseCommandLine(argc, argv);
   if (!parsed.ok()) {

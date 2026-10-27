@@ -16,6 +16,12 @@ ParseResult parse(std::initializer_list<const char*> args) {
   argv.insert(argv.end(), args.begin(), args.end());
   return parseCommandLine(static_cast<int>(argv.size()), argv.data());
 }
+
+CompareParseResult parseCompare(std::initializer_list<const char*> args) {
+  std::vector<const char*> argv{"Glimpse_cli", "compare"};
+  argv.insert(argv.end(), args.begin(), args.end());
+  return parseCompareCommand(static_cast<int>(argv.size()), argv.data());
+}
 }  // namespace
 
 static ut::suite<"cli"> cliSuite = [] {
@@ -147,5 +153,40 @@ static ut::suite<"cli"> cliSuite = [] {
     };
 
     "default_output_path"_test = [] { expect(defaultOutputPath("earth") == "results/earth.png"); };
+  };
+
+  "cli_compare"_test = [] {
+    "detected_only_as_first_argument"_test = [] {
+      const char* cmp[] = {"Glimpse_cli", "compare", "a.pfm", "b.pfm"};
+      const char* render[] = {"Glimpse_cli", "--scene", "compare"};
+      expect(isCompareCommand(4, cmp));
+      expect(!isCompareCommand(3, render)) << "a scene named 'compare' is not the subcommand";
+      expect(!isCompareCommand(1, cmp));
+    };
+
+    "two_images"_test = [] {
+      auto r = parseCompare({"test.pfm", "refs/ref.pfm"});
+      expect(r.ok()) << r.error;
+      expect(r.options.test == "test.pfm");
+      expect(r.options.ref == "refs/ref.pfm");
+      expect(r.options.errorImage.empty());
+    };
+
+    "error_image"_test = [] {
+      auto r = parseCompare({"a.pfm", "--error-image", "out/err.png", "b.pfm"});
+      expect(r.ok()) << r.error;
+      expect(r.options.test == "a.pfm" && r.options.ref == "b.pfm") << "flag may sit between the images";
+      expect(r.options.errorImage == "out/err.png");
+      expect(!parseCompare({"a.pfm", "b.pfm", "--error-image", "err.pfm"}).ok()) << "error image is 8-bit only";
+      expect(!parseCompare({"a.pfm", "b.pfm", "--error-image"}).ok()) << "missing value";
+    };
+
+    "rejects"_test = [] {
+      expect(!parseCompare({}).ok());
+      expect(!parseCompare({"a.pfm"}).ok()) << "one image";
+      expect(!parseCompare({"a.pfm", "b.pfm", "c.pfm"}).ok()) << "three images";
+      expect(!parseCompare({"a.png", "b.pfm"}).ok()) << "8-bit sRGB would measure the tone curve, not the estimator";
+      expect(!parseCompare({"a.pfm", "b.pfm", "--spp", "4"}).ok()) << "unknown flag";
+    };
   };
 };

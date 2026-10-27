@@ -38,6 +38,26 @@ struct ParseResult {
 ParseResult parseCommandLine(int argc, const char* const argv[]);
 std::string usage();
 
+// `Glimpse_cli compare <test.pfm> <ref.pfm> [--error-image out.png]` (technique 02): error metrics of a render
+// against a reference, the number every later technique is judged by.
+struct CompareOptions {
+  std::string test;
+  std::string ref;
+  std::string errorImage;  // empty: no false-colour image
+};
+
+struct CompareParseResult {
+  CompareOptions options;
+  std::string error;  // empty on success
+  bool ok() const { return error.empty(); }
+};
+
+// True if argv[1] is the `compare` subcommand.
+bool isCompareCommand(int argc, const char* const argv[]);
+
+// Parses argv[2..]; argv[1] is "compare".
+CompareParseResult parseCompareCommand(int argc, const char* const argv[]);
+
 // Accepts a scene name or a decimal index into sceneRegistry().
 std::optional<std::string> resolveSceneName(const std::string& nameOrIndex);
 

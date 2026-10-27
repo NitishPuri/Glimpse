@@ -9,6 +9,7 @@
 #include <limits>
 #include <sstream>
 #include <string_view>
+#include <vector>
 
 #include "glimpse/scenes/registry.h"
 
@@ -127,8 +128,55 @@ std::string usage() {
         "  --out     output image: .png .jpg .bmp .tga (sRGB, 8-bit) or .pfm (linear float radiance)\n"
         "            (default results/<scene>.png)\n"
         "  --exposure  scale radiance by 2^STOPS before sRGB encoding (8-bit outputs only; default 0)\n"
-        "  --reference render a converged reference: 4096 spp unless --spp, written to refs/<scene>.pfm\n";
+        "  --reference render a converged reference: 4096 spp unless --spp, written to refs/<scene>.pfm\n"
+        "\n"
+        "       Glimpse_cli compare <test.pfm> <ref.pfm> [--error-image out.png]\n"
+        "  prints MSE, RMSE and relMSE of test against ref; --error-image writes per-pixel relative squared\n"
+        "  error as a false-colour 8-bit image (log scale, black 1e-4 .. pale yellow 1; cyan = NaN/inf)\n";
   return ss.str();
+}
+
+bool isCompareCommand(int argc, const char* const argv[]) { return argc > 1 && std::string_view(argv[1]) == "compare"; }
+
+CompareParseResult parseCompareCommand(int argc, const char* const argv[]) {
+  CompareParseResult result;
+  CompareOptions& o = result.options;
+  std::vector<std::string> positional;
+
+  for (int i = 2; i < argc; ++i) {
+    const std::string arg = argv[i];
+    if (arg == "--error-image") {
+      if (i + 1 >= argc) {
+        result.error = "missing value for " + arg;
+        return result;
+      }
+      o.errorImage = argv[++i];
+      // The error image is a visualisation, so 8-bit only; the numbers are what gets measured.
+      if (!isWritableExtension(o.errorImage) || isFloatOutput(o.errorImage)) {
+        result.error = "invalid value for --error-image: '" + o.errorImage + "' (supported: .png .jpg .jpeg .bmp .tga)";
+        return result;
+      }
+    } else if (arg.rfind("--", 0) == 0) {
+      result.error = "unknown argument: " + arg;
+      return result;
+    } else {
+      positional.push_back(arg);
+    }
+  }
+  if (positional.size() != 2) {
+    result.error = "compare takes two images, <test.pfm> <ref.pfm>";
+    return result;
+  }
+  // Only float images: comparing 8-bit sRGB would measure the tone curve and quantisation, not the estimator.
+  for (const std::string& path : positional) {
+    if (!isFloatOutput(path)) {
+      result.error = "compare needs linear .pfm images, not '" + path + "'";
+      return result;
+    }
+  }
+  o.test = positional[0];
+  o.ref = positional[1];
+  return result;
 }
 
 std::optional<std::string> resolveSceneName(const std::string& nameOrIndex) {
