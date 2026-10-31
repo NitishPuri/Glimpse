@@ -3,10 +3,13 @@
 
 #include "ui.h"
 
+#include <chrono>
 #include <filesystem>
+#include <vector>
 
 #include "app.h"
 #include "camera_controls.h"
+#include "imgui/implot.h"
 #include "layout.h"
 
 namespace glimpse::gui {
@@ -24,6 +27,9 @@ glimpse::gui::Layout currentLayout() {
 }
 
 constexpr ImGuiWindowFlags kPinned = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+
+// The live error is measured a few times a second: each sample copies the film, cheap next to rendering it.
+constexpr double kErrorSampleInterval = 0.25;
 }  // namespace
 
 void UIRenderer::cameraUI(RayTracer& raytracer, GLResources& glRes) {
@@ -98,30 +104,100 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& glRes) {
     }
   }
 
+  // Elapsed time, average spp and throughput, from the progress counter (one count per camera sample).
+  auto currentStats = [&] {
+    RenderStats s;
+    s.seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - raytracer.startTime).count();
+    const double samples = static_cast<double>(raytracer.progress.load());
+    s.spp = samples / (static_cast<double>(glRes.renderWidth) * glRes.renderHeight);
+    s.samplesPerSecond = s.seconds > 0 ? samples / s.seconds : 0;
+    return s;
+  };
+
   if (raytracer.status == RayTracer::RENDERING) {
+    const RenderStats stats = currentStats();
+    lastStats = stats;
     if (raytracer.scene.cam.uncappedSpp) {
-      auto avgSpp = raytracer.renderer->film.getAverageSampleCount();
-      ImGui::Text("Average SPP ... %d", avgSpp);
+      ImGui::Text("Average SPP ... %.1f", stats.spp);
       ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(0.0f, 0.0f), "Progress..");
     } else {
       // The stratified grid renders sqrtSpp^2 samples (e.g. 10 requested -> 9), so count against that.
       const int spp = raytracer.scene.cam.sqrtSpp * raytracer.scene.cam.sqrtSpp;
-      const int pixels = glRes.renderWidth * glRes.renderHeight;
-      const int samplesDone = raytracer.progress.load();
-      ImGui::Text("Rendering...%d/%d", samplesDone / pixels, spp);
-      float progress = float(samplesDone) / float(pixels * spp);
-      ImGui::ProgressBar(progress, ImVec2(-1, 0), "Progress");
+      ImGui::Text("Rendering...%d/%d", static_cast<int>(stats.spp), spp);
+      ImGui::ProgressBar(static_cast<float>(stats.spp / spp), ImVec2(-1, 0), "Progress");
+    }
+    ImGui::Text("%.1f s   %.2f Msamples/s", stats.seconds, stats.samplesPerSecond / 1e6);
+
+    if (raytracer.measuring && stats.seconds - lastErrorSample >= kErrorSampleInterval) {
+      raytracer.errors.sample(raytracer.renderer->film, raytracer.progress.load(), stats.seconds);
+      lastErrorSample = stats.seconds;
     }
 
     // Uploaded every frame while rendering; the workers write the Image concurrently (see the viewer backlog).
     glRes.updateFramebuffer(raytracer.image.data());
 
   } else if (raytracer.status == RayTracer::DONE) {
+    // The finished film is the curve's last point. Its time is late by at most one frame.
+    lastStats = currentStats();
+    if (raytracer.measuring) raytracer.errors.sample(raytracer.renderer->film, raytracer.progress.load(), lastStats->seconds);
+    lastErrorSample = -1;
     glRes.updateFramebuffer(raytracer.image.data());
     ImGui::Text("Done");
     raytracer.reset();
   } else {
     ImGui::Text("Idle");
+    if (lastStats)
+      ImGui::Text("Last: %.1f spp in %.2f s, %.2f Msamples/s", lastStats->spp, lastStats->seconds,
+                  lastStats->samplesPerSecond / 1e6);
+  }
+}
+
+void UIRenderer::errorUI(RayTracer& raytracer, GLResources& glRes) {
+  if (!ImGui::CollapsingHeader("Error vs reference", ImGuiTreeNodeFlags_DefaultOpen)) return;
+
+  const std::string reason = raytracer.errors.unavailableReason(raytracer.scene);
+  if (!reason.empty()) {
+    ImGui::TextWrapped("%s", reason.c_str());
+    const auto& ref = raytracer.errors.ref();
+    if (ref && raytracer.scene.cam.imageWidth != ref->width && raytracer.status == RayTracer::IDLE &&
+        ImGui::Button("Match reference size")) {
+      raytracer.setRenderWidth(glRes, ref->width);
+      maybeRenderOnParamChange(raytracer);
+    }
+    return;
+  }
+
+  const auto& series = raytracer.errors.series();
+  if (series.empty()) {
+    ImGui::TextWrapped("Render to measure against the %dx%d reference.", raytracer.errors.ref()->width,
+                       raytracer.errors.ref()->height);
+    return;
+  }
+  const ErrorPoint& last = series.back();
+  ImGui::Text("%.1f spp   RMSE %.4g   relMSE %.4g", last.spp, last.error.rmse, last.error.relMSE);
+  if (last.error.nonFinite > 0)
+    ImGui::TextColored(ImVec4(1, 0.3f, 0.3f, 1), "%zu NaN/inf values skipped", last.error.nonFinite);
+  ImGui::Checkbox("x axis: time", &errorVsTime);
+
+  // Until every pixel has a sample, unrendered (black) pixels dominate the error: plot from 1 spp on.
+  std::vector<double> xs, ys;
+  for (const ErrorPoint& p : series) {
+    if (p.spp < 1 || p.error.relMSE <= 0) continue;
+    xs.push_back(errorVsTime ? p.seconds : p.spp);
+    ys.push_back(p.error.relMSE);
+  }
+  if (ImPlot::BeginPlot("##error", ImVec2(-1, 220))) {
+    ImPlot::SetupAxes(errorVsTime ? "seconds" : "spp", "relMSE", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
+    ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Log10);
+    ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_Log10);
+    if (!xs.empty()) ImPlot::PlotLine("relMSE", xs.data(), ys.data(), static_cast<int>(xs.size()));
+    if (xs.size() > 1) {
+      // An unbiased estimator's error falls as 1/N: a slope of -1 on these axes, drawn from the first point.
+      const double gx[2] = {xs.front(), xs.back()};
+      const double gy[2] = {ys.front(), ys.front() * xs.front() / xs.back()};
+      ImPlot::PlotLine("1/x", gx, gy, 2);
+    }
+    ImPlot::EndPlot();
   }
 }
 
@@ -165,6 +241,9 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& glRes) {
   }
 
   ImGui::Checkbox("Auto Render", &params.autoRender);
+
+  // Outside the disabled block: the plot stays interactive while rendering.
+  errorUI(raytracer, glRes);
 
   ImGui::End();
 }

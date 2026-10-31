@@ -40,7 +40,7 @@ struct RenderSectionArgs {
   int endRow;
   const Scene &scene;
   const BVHNode &worldBvh;
-  std::atomic<int> *progress;
+  std::atomic<int64_t> *progress;
 };
 
 void renderSection(RenderSectionArgs &args) {
@@ -130,7 +130,7 @@ void renderSectionUncap(RenderSectionArgs &args) {
             << std::endl;
 }
 
-void Renderer::renderScene(Scene scene, Image &image, std::atomic<int> *progress) {
+void Renderer::renderScene(Scene scene, Image &image, std::atomic<int64_t> *progress) {
   // Derived camera fields (imageHeight, sqrtSpp, viewport) must be current. Callers set public fields and
   // may forget initialize(); it only recomputes, so calling it again is harmless.
   scene.cam.initialize();

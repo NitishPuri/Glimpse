@@ -88,12 +88,16 @@ Linux (same pattern as Glint):
 ```
 Windows (old setup): `configure.bat` → `build.bat`; `cli.bat`, `gui.bat`, `test.bat <filter>`.
 
-State (Stage 0 done; **Stage 1: 01 `float_output` done**, next 02 `error_metrics`; technique notes in `docs/techniques/`): the library, CLI, viewer and tests build with GCC 11, and the tests pass under ctest.
+State (Stage 0 done; **Stage 1: 01 `float_output` and 02 `error_metrics` done**, next 03 `deterministic_rng`; technique notes in `docs/techniques/`): the library, CLI, viewer and tests build with GCC 11, and the tests pass under ctest.
 - CLI flags: `--scene <name|index> --spp --width --depth --seed --out --list-scenes --help`.
   - `--spp` is rounded down to a square (the stratified grid is `sqrtSpp × sqrtSpp`).
   - `--seed` is reproducible on one machine, but not across thread counts (technique 03).
   - `--out` takes `.png/.jpg/.bmp/.tga` (sRGB, `--exposure`) or `.pfm` (linear radiance). `--reference` renders
     4096 spp into `refs/<scene>.pfm`.
+  - `compare <test.pfm> <ref.pfm> [--error-image x.png]` prints MSE/RMSE/relMSE (pbrt's MRSE, `util/metrics`).
+    `--convergence x.csv` renders 1..`--spp` (default 1024) spp against the reference (size taken from it) and
+    writes `spp,seconds,mse,rmse,relmse`; `tools/diagrams.py` plots it from `docs/data/`.
+  - `refs/cornell_box.pfm` is 300×300 (`--width 300`, seed 101); test renders need that width.
 - `Renderer::renderScene` calls `cam.initialize()` itself, and the stop flag aborts capped renders too.
 - `Image` rows are top-down, like image files: the renderer converts from camera `v` when writing, and the viewer
   doesn't flip.
@@ -122,6 +126,8 @@ Targets: `Glimpse` (static library, a recursive glob over `src/glimpse`), `Glimp
 - `rayColor` is recursive. Emission plus scatter: specular materials use `srec.skipPdf`. Otherwise it
   samples a `MixturePDF` (light `HittablePDF` + material pdf) **only if `scene.lights` is non-empty**.
   Lights are a separate `HittableList` that must duplicate emitter geometry from `world`.
+- The viewer's `ErrorTracker` (`src/gui/error_tracker.h`) plots live relMSE against `refs/<scene>.pfm` (ImPlot),
+  but only while the render matches the reference (size, camera, depth, background). Progress is `atomic<int64_t>`.
 - `Film` keeps per-pixel sample counts and sums. The Welford mean/variance code exists but is commented
   out, so variance always reads zero. Adaptive sampling depends on it.
 - `Random` (`util/rng.h`) uses a thread-local `mt19937` with a global seed (`Random::setSeed`, 0 = random).

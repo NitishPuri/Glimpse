@@ -142,7 +142,7 @@ runs, and `Glimpse_cli --scene cornell_box --spp 64 --out x.png` writes an image
   - `Image` keeps linear float data, and `--out x.pfm` writes it.
   - PNG/JPG output uses the proper sRGB transfer function with exposure, replacing the `sqrt` gamma.
   - `--reference` renders at very high SPP into `refs/<scene>.pfm`.
-- [ ] **02 `error_metrics`**
+- [x] **02 `error_metrics`** (2026-10-28, `docs/techniques/02_error_metrics.md`)
   - A comparison tool (`Glimpse_cli compare a.pfm b.pfm`) prints RMSE and relMSE and can write a
     false-colour error image.
   - A convergence mode writes error against SPP and against time to CSV.

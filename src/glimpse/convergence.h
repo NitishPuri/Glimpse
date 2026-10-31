@@ -3,7 +3,8 @@
 // Convergence measurement (technique 02): render a scene at increasing spp, time each render, and measure its error
 // against the reference. Error vs spp shows the estimator's rate: an unbiased Monte Carlo estimator's MSE is its
 // variance, which falls as 1/N, a slope of -1 on log-log axes; a flatter tail means bias (or a bad reference).
-// Error vs seconds is what an equal-time comparison reads off: pbrt-v4 §2.1.3's efficiency is 1 / (variance * time).
+// Error vs seconds is what an equal-time comparison reads off: pbrt-v4 §2.1.4 defines efficiency as
+// 1 / (variance * time).
 // Each point is an independent render, not a snapshot of one progressive render, because the stratified grid
 // (sqrtSpp x sqrtSpp) is fixed per render; it also means each time includes the BVH build, like a real run.
 

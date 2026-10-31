@@ -3,6 +3,8 @@
 
 #include "app.h"
 
+#include "imgui/implot.h"
+
 namespace glimpse::gui {
 
 int AppWindow::initApp() {
@@ -11,6 +13,7 @@ int AppWindow::initApp() {
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
+  ImPlot::CreateContext();
   // The layout is computed every frame (layout.h); a saved imgui.ini would only fight it.
   ImGui::GetIO().IniFilename = nullptr;
   ImGui_ImplGlfw_InitForOpenGL(glRes.window, true);
@@ -63,6 +66,7 @@ void AppWindow::run() {
   raytracer.stopRendering();
   if (raytracer.traceFuture) raytracer.traceFuture->wait();
 
+  ImPlot::DestroyContext();
   glfwDestroyWindow(glRes.window);
   glfwTerminate();
 }

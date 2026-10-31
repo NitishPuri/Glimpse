@@ -125,7 +125,7 @@ void testSceneUncapped(const std::string& name, Scene (*createSceneFn)(), int wi
               << scene.cam.imageHeight << ")"
               << " for " << runTimeSeconds << " seconds" << std::endl;
 
-    std::atomic<int> progress = 0;
+    std::atomic<int64_t> progress = 0;
     Renderer renderer;
 
     // Start rendering in a separate thread
@@ -187,7 +187,7 @@ void testDebugScene() {
               << std::endl;
 
     // Render synchronously (no need for async with tiny image)
-    std::atomic<int> progress = 0;
+    std::atomic<int64_t> progress = 0;
     Renderer renderer;
     renderer.renderScene(scene, renderedImage, &progress);
 
@@ -314,7 +314,7 @@ void testScene(const std::string& name, Scene (*createSceneFn)(), int width = 20
               << ")"
               << " with " << scene.cam.samplesPerPixel << " samples" << std::endl;
 
-    std::atomic<int> progress = 0;
+    std::atomic<int64_t> progress = 0;
     std::atomic<bool> renderCompleted = false;
     Renderer renderer;
     renderer.renderScene(scene, renderedImage, &progress);

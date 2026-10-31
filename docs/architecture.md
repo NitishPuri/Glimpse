@@ -36,7 +36,8 @@ flowchart BT
     math["math.h · rng.h"]
     vecmath["vecmath.h (Vec3, ONB)"]
     sampling["sampling.h (warps)"]
-    misc["interval.h · aabb · image · log.h · cli_options"]
+    misc["interval.h · aabb · image · float_image · color · log.h · cli_options"]
+    metrics["metrics (MSE, relMSE, error image)"]
   end
   ray["ray.h"]
   interaction["interaction.h (HitRecord, Hittable)"]
@@ -45,6 +46,7 @@ flowchart BT
   camera["camera.h"]
   integrators["integrators (rayColor)"]
   render["render (Renderer, threads) · film.h"]
+  convergence["convergence (error vs spp/time)"]
   scenes["scene.h · scenes/ (registry, families)"]
   cli["src/cli: Glimpse_cli"]
   gui["src/gui: Glimpse_gui (glimpse::gui)"]
@@ -53,6 +55,7 @@ flowchart BT
   sampling --> vecmath
   ray --> vecmath
   misc --> vecmath
+  metrics --> misc
   interaction --> ray
   interaction --> misc
   geometry --> interaction
@@ -67,8 +70,12 @@ flowchart BT
   scenes --> geometry
   scenes --> shading
   scenes --> camera
+  convergence --> render
+  convergence --> metrics
   cli --> render
+  cli --> convergence
   gui --> render
+  gui --> metrics
 ```
 
 ## One render, end to end (CLI)

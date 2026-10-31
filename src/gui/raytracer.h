@@ -2,8 +2,10 @@
 
 // RayTracer: runs Renderer::renderScene on a background thread (std::async) and exposes status/progress to the UI.
 // lastSpp records the finished render's samples per pixel, because the renderer is released when it completes.
+// `errors` measures the live film against the scene's reference (technique 02); the UI samples it while rendering.
 
 #include <atomic>
+#include <chrono>
 #include <future>
 #include <optional>
 
@@ -11,6 +13,7 @@
 #include "glimpse/util/image.h"
 #include "glimpse/render.h"
 #include "glimpse/scenes/registry.h"
+#include "error_tracker.h"
 
 namespace glimpse::gui {
 
@@ -20,12 +23,16 @@ struct RayTracer {
   enum Status { IDLE, RENDERING, DONE };
   std::atomic<Status> status{IDLE};
   std::optional<std::future<void>> traceFuture{};
-  std::atomic<int> progress{0};
+  std::atomic<int64_t> progress{0};  // samples traced; 64-bit: an uncapped 600x600 render passes 2^31 in minutes
   // Samples per pixel of the last finished render (for the saved file name). Kept here because `renderer`, and
   // with it the film's sample counts, is released when a render completes.
   std::atomic<int> lastSpp{0};
 
   std::shared_ptr<Renderer> renderer;
+
+  ErrorTracker errors;
+  bool measuring = false;  // the current render is the reference's image, so its error is sampled
+  std::chrono::steady_clock::time_point startTime;
 
   Logger& logger;
   RayTracer(Logger& logger) : logger(logger) {}
@@ -37,6 +44,10 @@ struct RayTracer {
     }
 
     renderer = std::make_shared<Renderer>();
+    startTime = std::chrono::steady_clock::now();
+    // Decided once per render: camera drags edit the camera while a preview runs.
+    errors.start();
+    measuring = errors.unavailableReason(scene).empty();
     // A Stop pressed just as the previous render finished would otherwise abort this one immediately.
     Renderer::stopRequested = false;
     traceFuture = std::async(std::launch::async, [&]() {
@@ -75,10 +86,7 @@ struct RayTracer {
     const SceneEntry& entry = sceneRegistry()[currentScene];
     logger.log("Setting up scene ... ", currentScene, " ", entry.name);
     scene = entry.make();
-
-    GLResources.renderWidth = scene.cam.imageWidth;
-    GLResources.renderHeight = static_cast<int>(scene.cam.imageWidth / scene.cam.aspectRatio);
-    image.initialize(GLResources.renderWidth, GLResources.renderHeight);
+    errors.loadReference(entry.name, scene);
 
     auto vec3tofloat = [](const Vec3& v, float f[3]) {
       f[0] = static_cast<float>(v[0]);
@@ -88,7 +96,21 @@ struct RayTracer {
     vec3tofloat(scene.cam.lookfrom, lookFrom);
     vec3tofloat(scene.cam.lookat, lookAt);
 
-    GLResources.setupFramebuffer();
+    resizeOutput(GLResources);
+  }
+
+  // Changes the render width (height follows the aspect ratio), e.g. to match the reference's size.
+  void setRenderWidth(GLResources& glRes, int width) {
+    scene.cam.imageWidth = width;
+    resizeOutput(glRes);
+  }
+
+  // Sizes the Image and the GL texture to the scene camera.
+  void resizeOutput(GLResources& glRes) {
+    glRes.renderWidth = scene.cam.imageWidth;
+    glRes.renderHeight = static_cast<int>(scene.cam.imageWidth / scene.cam.aspectRatio);
+    image.initialize(glRes.renderWidth, glRes.renderHeight);
+    glRes.setupFramebuffer();
   }
 
   void stopRendering() {

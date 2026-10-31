@@ -4,6 +4,7 @@
 // Film and the displayed Image.
 
 #include <atomic>
+#include <cstdint>
 
 #include "glimpse/film.h"
 #include "glimpse/integrators.h"
@@ -17,7 +18,7 @@ Vec3 sampleSquareStratified(int sI, int sJ, double recipSqrtSpp);
 
 class Renderer {
  public:
-  void renderScene(Scene scene, Image &image, std::atomic<int> *progress = nullptr);
+  void renderScene(Scene scene, Image &image, std::atomic<int64_t> *progress = nullptr);
   static std::atomic<bool> stopRequested;
 
   Film film;

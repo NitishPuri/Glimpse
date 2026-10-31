@@ -40,6 +40,8 @@ int GLResources::initGL() {
 }
 
 void GLResources::setupFramebuffer() {
+  // Called again on every scene change or resize: release the previous texture.
+  if (framebufferTexture) glDeleteTextures(1, &framebufferTexture);
   glGenTextures(1, &framebufferTexture);
   if (checkGLError("glGenTextures")) return;
 
