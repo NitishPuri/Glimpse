@@ -4,6 +4,7 @@
 // overrides to the scene's camera. Kept in the library so the unit tests cover it.
 
 #include <cstdint>
+#include <expected>
 #include <optional>
 #include <string>
 
@@ -30,13 +31,8 @@ struct CmdOptions {
 // techniques under test leave, so error measured against it is the technique's error.
 constexpr int kReferenceSpp = 4096;
 
-struct ParseResult {
-  CmdOptions options;
-  std::string error;  // empty on success
-  bool ok() const { return error.empty(); }
-};
-
-ParseResult parseCommandLine(int argc, const char* const argv[]);
+// A bad flag is a normal outcome for a command line, not an exception: the error is the message for the user.
+std::expected<CmdOptions, std::string> parseCommandLine(int argc, const char* const argv[]);
 std::string usage();
 
 // `Glimpse_cli compare <test.pfm> <ref.pfm> [--error-image out.png]` (technique 02): error metrics of a render
@@ -47,17 +43,11 @@ struct CompareOptions {
   std::string errorImage;  // empty: no false-colour image
 };
 
-struct CompareParseResult {
-  CompareOptions options;
-  std::string error;  // empty on success
-  bool ok() const { return error.empty(); }
-};
-
 // True if argv[1] is the `compare` subcommand.
 bool isCompareCommand(int argc, const char* const argv[]);
 
 // Parses argv[2..]; argv[1] is "compare".
-CompareParseResult parseCompareCommand(int argc, const char* const argv[]);
+std::expected<CompareOptions, std::string> parseCompareCommand(int argc, const char* const argv[]);
 
 // Accepts a scene name or a decimal index into sceneRegistry().
 std::optional<std::string> resolveSceneName(const std::string& nameOrIndex);

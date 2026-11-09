@@ -20,17 +20,17 @@ namespace {
 // `compare <test.pfm> <ref.pfm>`: prints the error of a render against a reference (technique 02).
 int runCompare(int argc, const char *const *argv) {
   using namespace glimpse;
-  const CompareParseResult parsed = parseCompareCommand(argc, argv);
-  if (!parsed.ok()) {
-    std::print(stderr, "error: {}\n\n{}", parsed.error, usage());
+  const auto parsed = parseCompareCommand(argc, argv);
+  if (!parsed) {
+    std::print(stderr, "error: {}\n\n{}", parsed.error(), usage());
     return 2;
   }
-  const CompareOptions &o = parsed.options;
+  const CompareOptions &o = *parsed;
 
   const auto test = readPFM(o.test);
   const auto ref = readPFM(o.ref);
   if (!test || !ref) {
-    std::println(stderr, "error: cannot read {}", !test ? o.test : o.ref);
+    std::println(stderr, "error: {}: {}", !test ? o.test : o.ref, !test ? test.error() : ref.error());
     return 1;
   }
   const auto stats = compareImages(*test, *ref);
@@ -62,7 +62,8 @@ int runConvergence(const glimpse::CmdOptions &options, const std::string &sceneN
   const std::string refPath = referenceOutputPath(sceneName);
   const auto ref = readPFM(refPath);
   if (!ref) {
-    std::println(stderr, "error: no reference {} (render one with --scene {} --reference)", refPath, sceneName);
+    std::println(stderr, "error: no reference: {}: {} (render one with --scene {} --reference)", refPath, ref.error(),
+                 sceneName);
     return 1;
   }
 
@@ -104,12 +105,12 @@ int main(int argc, char **argv) {
 
   if (isCompareCommand(argc, argv)) return runCompare(argc, argv);
 
-  const ParseResult parsed = parseCommandLine(argc, argv);
-  if (!parsed.ok()) {
-    std::print(stderr, "error: {}\n\n{}", parsed.error, usage());
+  const auto parsed = parseCommandLine(argc, argv);
+  if (!parsed) {
+    std::print(stderr, "error: {}\n\n{}", parsed.error(), usage());
     return 2;
   }
-  const CmdOptions &options = parsed.options;
+  const CmdOptions &options = *parsed;
 
   if (options.help) {
     std::print("{}", usage());

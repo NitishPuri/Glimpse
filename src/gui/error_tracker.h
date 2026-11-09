@@ -7,8 +7,8 @@
 // different image.
 
 #include <cstdint>
+#include <expected>
 #include <format>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -37,11 +37,13 @@ class ErrorTracker {
     points.clear();
   }
 
-  const std::optional<FloatImage>& ref() const { return reference; }
+  const std::expected<FloatImage, std::string>& ref() const { return reference; }
 
   // Empty if `scene` renders the reference's image; otherwise why not, for the UI.
   std::string unavailableReason(const Scene& scene) const {
-    if (!reference) return "no reference (Glimpse_cli --scene <name> --reference writes " + path + ")";
+    if (!reference)
+      return std::format("no reference: {}: {} (Glimpse_cli --scene <name> --reference writes it)", path,
+                         reference.error());
     const Camera& c = scene.cam;
     const Camera& r = referenceCamera;
     // imageHeight is only derived in Camera::initialize, which runs on the render thread: derive it here too.
@@ -72,7 +74,7 @@ class ErrorTracker {
 
  private:
   std::string path;
-  std::optional<FloatImage> reference;
+  std::expected<FloatImage, std::string> reference = std::unexpected("not loaded");  // the error says why
   Camera referenceCamera;
   Color referenceBackground;
   std::vector<ErrorPoint> points;

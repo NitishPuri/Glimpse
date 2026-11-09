@@ -46,9 +46,8 @@ bool isWritableExtension(std::string_view path) {
 
 }  // namespace
 
-ParseResult parseCommandLine(int argc, const char* const argv[]) {
-  ParseResult result;
-  CmdOptions& o = result.options;
+std::expected<CmdOptions, std::string> parseCommandLine(int argc, const char* const argv[]) {
+  CmdOptions o;
 
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
@@ -66,12 +65,10 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
     }
     if (arg != "--scene" && arg != "--spp" && arg != "--width" && arg != "--depth" && arg != "--seed" &&
         arg != "--out" && arg != "--exposure" && arg != "--convergence") {
-      result.error = "unknown argument: " + arg;
-      return result;
+      return std::unexpected("unknown argument: " + arg);
     }
     if (i + 1 >= argc) {
-      result.error = "missing value for " + arg;
-      return result;
+      return std::unexpected("missing value for " + arg);
     }
     const std::string value = argv[++i];
     const std::string invalid = "invalid value for " + arg + ": '" + value + "'";
@@ -80,14 +77,12 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
       o.scene = value;
     } else if (arg == "--out") {
       if (!isWritableExtension(value)) {
-        result.error = invalid + " (supported: .png .jpg .jpeg .bmp .tga .pfm)";
-        return result;
+        return std::unexpected(invalid + " (supported: .png .jpg .jpeg .bmp .tga .pfm)");
       }
       o.out = value;
     } else if (arg == "--convergence") {
       if (extensionOf(value) != "csv") {
-        result.error = invalid + " (a .csv file)";
-        return result;
+        return std::unexpected(invalid + " (a .csv file)");
       }
       o.convergence = value;
     } else if (arg == "--exposure") {
@@ -95,35 +90,32 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
       const char* end = value.data() + value.size();
       auto [ptr, ec] = std::from_chars(value.data(), end, stops);
       if (ec != std::errc{} || ptr != end || stops < -20.0 || stops > 20.0) {
-        result.error = invalid + " (stops, -20 .. 20)";
-        return result;
+        return std::unexpected(invalid + " (stops, -20 .. 20)");
       }
       o.exposure = stops;
     } else if (arg == "--seed") {
       o.seed = parseInt<uint32_t>(value, 1, std::numeric_limits<uint32_t>::max());
       if (!o.seed) {
-        result.error = invalid + " (1 .. 4294967295)";
-        return result;
+        return std::unexpected(invalid + " (1 .. 4294967295)");
       }
     } else {
       // Generous upper bounds: they only catch typos, not taste.
       const long long max = arg == "--width" ? 16384 : arg == "--spp" ? 1'000'000 : 10'000;
       auto v = parseInt<int>(value, 1, max);
       if (!v) {
-        result.error = std::format("{} (1 .. {})", invalid, max);
-        return result;
+        return std::unexpected(std::format("{} (1 .. {})", invalid, max));
       }
       (arg == "--spp" ? o.spp : arg == "--width" ? o.width : o.depth) = v;
     }
   }
   if (o.reference && !o.out.empty() && !isFloatOutput(o.out)) {
-    result.error = "--reference writes linear radiance: --out must be a .pfm, not '" + o.out + "'";
+    return std::unexpected("--reference writes linear radiance: --out must be a .pfm, not '" + o.out + "'");
   }
   // Convergence renders many images and keeps only their error, so an output image or a reference makes no sense.
   if (!o.convergence.empty() && (o.reference || !o.out.empty())) {
-    result.error = "--convergence writes only its CSV: it can't be combined with --reference or --out";
+    return std::unexpected("--convergence writes only its CSV: it can't be combined with --reference or --out");
   }
-  return result;
+  return o;
 }
 
 std::string usage() {
@@ -149,45 +141,40 @@ std::string usage() {
 
 bool isCompareCommand(int argc, const char* const argv[]) { return argc > 1 && std::string_view(argv[1]) == "compare"; }
 
-CompareParseResult parseCompareCommand(int argc, const char* const argv[]) {
-  CompareParseResult result;
-  CompareOptions& o = result.options;
+std::expected<CompareOptions, std::string> parseCompareCommand(int argc, const char* const argv[]) {
+  CompareOptions o;
   std::vector<std::string> positional;
 
   for (int i = 2; i < argc; ++i) {
     const std::string arg = argv[i];
     if (arg == "--error-image") {
       if (i + 1 >= argc) {
-        result.error = "missing value for " + arg;
-        return result;
+        return std::unexpected("missing value for " + arg);
       }
       o.errorImage = argv[++i];
       // The error image is a visualisation, so 8-bit only; the numbers are what gets measured.
       if (!isWritableExtension(o.errorImage) || isFloatOutput(o.errorImage)) {
-        result.error = "invalid value for --error-image: '" + o.errorImage + "' (supported: .png .jpg .jpeg .bmp .tga)";
-        return result;
+        return std::unexpected("invalid value for --error-image: '" + o.errorImage +
+                               "' (supported: .png .jpg .jpeg .bmp .tga)");
       }
     } else if (arg.rfind("--", 0) == 0) {
-      result.error = "unknown argument: " + arg;
-      return result;
+      return std::unexpected("unknown argument: " + arg);
     } else {
       positional.push_back(arg);
     }
   }
   if (positional.size() != 2) {
-    result.error = "compare takes two images, <test.pfm> <ref.pfm>";
-    return result;
+    return std::unexpected("compare takes two images, <test.pfm> <ref.pfm>");
   }
   // Only float images: comparing 8-bit sRGB would measure the tone curve and quantisation, not the estimator.
   for (const std::string& path : positional) {
     if (!isFloatOutput(path)) {
-      result.error = "compare needs linear .pfm images, not '" + path + "'";
-      return result;
+      return std::unexpected("compare needs linear .pfm images, not '" + path + "'");
     }
   }
   o.test = positional[0];
   o.ref = positional[1];
-  return result;
+  return o;
 }
 
 std::optional<std::string> resolveSceneName(const std::string& nameOrIndex) {

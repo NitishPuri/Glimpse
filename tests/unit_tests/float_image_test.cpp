@@ -93,13 +93,25 @@ static ut::suite<"float_image"> floatImageSuite = [] {
     };
 
     "rejects_missing_truncated_and_garbage"_test = [] {
-      expect(!readPFM(testOutputPath("does_not_exist.pfm")).has_value());
+      // The error says which failure it was: the viewer and `compare` show it next to the path.
+      const auto missing = readPFM(testOutputPath("does_not_exist.pfm"));
+      expect(!missing.has_value() >> fatal);
+      expect(missing.error() == "cannot open") << missing.error();
       const std::string trunc = testOutputPath("truncated.pfm");
       writeBytes(trunc, "PF\n2 2\n-1.0\n" + floatBytes(1.0f, false));  // needs 12 floats
-      expect(!readPFM(trunc).has_value());
+      const auto truncated = readPFM(trunc);
+      expect(!truncated.has_value() >> fatal);
+      expect(truncated.error() == "truncated: 0 of 2 rows") << truncated.error();
       const std::string garbage = testOutputPath("garbage.pfm");
       writeBytes(garbage, "P6\n2 2\n255\n");
-      expect(!readPFM(garbage).has_value());
+      const auto notPfm = readPFM(garbage);
+      expect(!notPfm.has_value() >> fatal);
+      expect(notPfm.error().starts_with("not a PFM")) << notPfm.error();
+      const std::string badSize = testOutputPath("bad_size.pfm");
+      writeBytes(badSize, "PF\n0 2\n-1.0\n");
+      const auto malformed = readPFM(badSize);
+      expect(!malformed.has_value() >> fatal);
+      expect(malformed.error() == "malformed PFM header") << malformed.error();
     };
   };
 };

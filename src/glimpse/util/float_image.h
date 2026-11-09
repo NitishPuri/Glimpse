@@ -5,7 +5,7 @@
 // stored bottom-to-top. Technique 01 (float_output) writes Film radiance with it; reference renders in refs/ use it.
 // Follows pbrt-v4 §B.5 (src/pbrt/util/image.cpp, ReadPFM/WritePFM).
 
-#include <optional>
+#include <expected>
 #include <string>
 #include <vector>
 
@@ -27,7 +27,8 @@ struct FloatImage {
 bool writePFM(const std::string& path, const FloatImage& image);
 
 // Reads RGB ("PF") or grayscale ("Pf", replicated into RGB) PFM in either byte order, applying |scale|.
-// nullopt if the file is missing, malformed or truncated.
-std::optional<FloatImage> readPFM(const std::string& path);
+// A missing, malformed or truncated file is an expected outcome (no reference rendered yet, an interrupted write),
+// so the error says which, for the caller to show next to the path.
+std::expected<FloatImage, std::string> readPFM(const std::string& path);
 
 }  // namespace glimpse

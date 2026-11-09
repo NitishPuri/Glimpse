@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <format>
 #include <fstream>
 
 namespace glimpse {
@@ -36,15 +37,17 @@ bool writePFM(const std::string& path, const FloatImage& image) {
   return static_cast<bool>(out);
 }
 
-std::optional<FloatImage> readPFM(const std::string& path) {
+std::expected<FloatImage, std::string> readPFM(const std::string& path) {
   std::ifstream in(path, std::ios::binary);
-  if (!in) return std::nullopt;
+  if (!in) return std::unexpected("cannot open");
 
   std::string magic;
   int width = 0, height = 0;
   float scale = 0.0f;
-  in >> magic >> width >> height >> scale;
-  if (!in || (magic != "PF" && magic != "Pf") || width <= 0 || height <= 0 || scale == 0.0f) return std::nullopt;
+  in >> magic;
+  if (magic != "PF" && magic != "Pf") return std::unexpected("not a PFM file (no PF/Pf header)");
+  in >> width >> height >> scale;
+  if (!in || width <= 0 || height <= 0 || scale == 0.0f) return std::unexpected("malformed PFM header");
   in.get();  // the single whitespace character that ends the header
 
   const int channels = magic == "PF" ? 3 : 1;
@@ -55,7 +58,7 @@ std::optional<FloatImage> readPFM(const std::string& path) {
   std::vector<float> row(static_cast<size_t>(width) * channels);
   for (int y = height - 1; y >= 0; --y) {  // the file's first scanline is the image's bottom row
     in.read(reinterpret_cast<char*>(row.data()), static_cast<std::streamsize>(row.size() * sizeof(float)));
-    if (!in) return std::nullopt;  // truncated
+    if (!in) return std::unexpected(std::format("truncated: {} of {} rows", height - 1 - y, height));
     for (int x = 0; x < width; ++x)
       for (int c = 0; c < 3; ++c) {
         float v = row[static_cast<size_t>(x) * channels + (channels == 3 ? c : 0)];
