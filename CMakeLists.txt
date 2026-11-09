@@ -1,12 +1,25 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.22)
 
 set(NAME Glimpse)
 
 message(STATUS "Using ${CMAKE_GENERATOR}")
-project(${NAME} VERSION 0.0.1)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # for clangd / VS Code IntelliSense
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+project(${NAME} VERSION 0.0.1 LANGUAGES C CXX)  # C: glad.c in the viewer
+
+set(CMAKE_CXX_STANDARD 23)  # see CLAUDE.md "C++ standard"
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # for clangd (.clangd reads build/debug)
+
+# The C++23 library we use (std::print, std::expected, ranges::to, views::zip/enumerate) needs at least these.
+# Clang uses GCC's libstdc++ on Linux, and only Clang 19+ can compile libstdc++ 14's <expected>.
+# Configure with a preset (`cmake --preset release`, or ./build.sh) to get the right compiler instead of the
+# system `c++` (GCC 11 on Pop!_OS 22.04).
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
+   OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
+   OR (MSVC AND MSVC_VERSION LESS 1937))
+  message(FATAL_ERROR "Glimpse needs GCC >= 14, Clang >= 19 or MSVC >= 19.37 (C++23), got "
+                      "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}. Use `cmake --preset release`.")
+endif()
 
 
 # Core library
@@ -15,17 +28,11 @@ file(GLOB_RECURSE CORE_HEADERS CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/glimp
 add_library(${NAME} ${CORE_SOURCES} ${CORE_HEADERS})
 target_include_directories(${NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(${NAME} SYSTEM PUBLIC ${PROJECT_SOURCE_DIR}/ext)  # vendored: no warnings from it
-target_compile_features(${NAME} PUBLIC cxx_std_17)
 
 
 # cli 
 add_executable(${NAME}_cli src/cli/main.cpp)
-target_include_directories(${NAME}_cli PUBLIC 
-    ${PROJECT_SOURCE_DIR}/src
-    # ${PROJECT_SOURCE_DIR}/ext
-)
-target_link_libraries(${NAME}_cli ${NAME})
-target_compile_features(${NAME}_cli PUBLIC cxx_std_17)
+target_link_libraries(${NAME}_cli ${NAME})  # src/ and ext/ (as SYSTEM) come with the library
 
 
 # gui
@@ -57,13 +64,8 @@ if(BUILD_GUI)
     file(GLOB_RECURSE APP_SOURCES ${GUI_PATH}/*.cpp)
 
     add_executable(${GUI_NAME} ${APP_SOURCES} ${APP_HEADERS} ${IMGUI_SOURCES} ${GLAD_PATH}/src/glad.c)
-    target_compile_features(${GUI_NAME} PUBLIC cxx_std_20)
     target_link_libraries(${GUI_NAME} PRIVATE ${NAME} glfw OpenGL::GL)
-    target_include_directories(${GUI_NAME} PRIVATE
-        ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/ext
-        ${GLAD_PATH}/include
-    )
+    target_include_directories(${GUI_NAME} SYSTEM PRIVATE ${GLAD_PATH}/include)
 endif()
 
 # Tests
@@ -83,11 +85,6 @@ if(BUILD_TESTS)
         PRIVATE
         ${NAME}
         boost_ut
-    )
-    target_include_directories(Glimpse_tests 
-        PRIVATE 
-        ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/ext
     )
 
     # main() returns 1 when any assertion failed, so ctest relies on the exit code.
@@ -109,12 +106,10 @@ if (MSVC)
 
     target_compile_options(${NAME} PRIVATE ${COMPILE_OPTIONS})
     target_compile_options(${NAME}_cli PRIVATE ${COMPILE_OPTIONS})
-    # target_compile_options(${NAME}_gui PRIVATE ${COMPILE_OPTIONS})
     target_compile_options(${NAME}_tests PRIVATE ${COMPILE_OPTIONS})
 
     target_compile_definitions(${NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
     target_compile_definitions(${NAME}_cli PRIVATE _CRT_SECURE_NO_WARNINGS)
-    # target_compile_definitions(${NAME}_gui PRIVATE _CRT_SECURE_NO_WARNINGS)
     target_compile_definitions(${NAME}_tests PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
     set(COMPILE_OPTIONS 
@@ -124,4 +119,8 @@ else()
     target_compile_options(${NAME} PRIVATE ${COMPILE_OPTIONS})
     target_compile_options(${NAME}_cli PRIVATE ${COMPILE_OPTIONS})
     target_compile_options(${NAME}_tests PRIVATE ${COMPILE_OPTIONS})
+endif()
+# The viewer's own sources only: vendored ImGui/ImPlot/glad compile with the compiler's defaults.
+if(BUILD_GUI)
+    set_source_files_properties(${APP_SOURCES} PROPERTIES COMPILE_OPTIONS "${COMPILE_OPTIONS}")
 endif()

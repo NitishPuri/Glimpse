@@ -1,5 +1,5 @@
 /build/
-/buildLinux/
+.cache/
 .vs/
 out/
 log.txt
@@ -10,6 +10,7 @@ logs/
 ext/glfw*
 ext/stb/
 # Pre-2026-10-11 locations (may still exist locally)
+/buildLinux/
 imgui.ini
 log_cli.txt
 log_gui.txt

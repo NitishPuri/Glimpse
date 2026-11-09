@@ -108,57 +108,24 @@ static ut::suite<"perlin"> perlinSuite = [] {
     };
 
     "noise_periodicity"_test = [] {
+      // The lattice lookup wraps with `& 255`, so the noise repeats every 256 units along each axis. Not bit for
+      // bit: adding 256 rounds the fractional part (i + 0.3 and i + 256.3 differ in the last bits).
       Perlin noise;
-
-      // Test that integer steps create a pattern
-      // Because of how permutation works with & 255, points separated by 256 units
-      // along any axis might show similar patterns
-      double similarity = 0.0;
-      int count = 0;
-
       for (int i = 0; i < 10; i++) {
-        Point3 p1(i, i, i);
-        Point3 p2(i + 256, i, i);
-
-        double n1 = noise.noise(p1);
-        double n2 = noise.noise(p2);
-
-        // Some of these should be similar, but not all
-        if (std::abs(n1 - n2) < 0.5) {
-          similarity += 1.0;
-        }
-        count++;
+        const Point3 p(i + 0.3, 0.5 * i, 0.7);
+        expect(std::abs(noise.noise(p) - noise.noise(p + Vec3(256, 0, 0))) < 1e-9) << "x period, i =" << i;
+        expect(std::abs(noise.noise(p) - noise.noise(p + Vec3(0, 0, -256))) < 1e-9) << "z period, i =" << i;
       }
-
-      // We don't expect exact periodicity due to the XOR operations
-      // but this test just verifies our noise has some structure
-      // rather than making a specific assertion
     };
 
     "noise_zero_at_integers"_test = [] {
-      // In many Perlin implementations, noise is closer to zero at integer coordinates
-      // due to the gradient interpolation. Test if this pattern appears in our implementation
+      // Gradient noise: at a lattice point only corner (0,0,0) has weight, and its offset to the point is zero, so
+      // the dot product with its gradient vanishes whatever the gradient is.
       Perlin noise;
-      double avgInteger = 0.0;
-      double avgHalfpoint = 0.0;
-      int samples = 10;
-
-      for (int i = 0; i < samples; i++) {
-        // Integer coordinates
-        Point3 pInt(i, i, i);
-        // Points halfway between integers
-        Point3 pHalf(i + 0.5, i + 0.5, i + 0.5);
-
-        avgInteger += std::abs(noise.noise(pInt));
-        avgHalfpoint += std::abs(noise.noise(pHalf));
+      for (int i = -5; i < 5; i++) {
+        const double n = noise.noise(Point3(i, 2 * i, 3));
+        expect(n == 0.0) << "i =" << i << "noise =" << n;
       }
-
-      avgInteger /= samples;
-      avgHalfpoint /= samples;
-
-      // This is a statistical test, not a strict rule
-      // Typically, noise magnitudes at integer coordinates would be
-      // lower than halfway between them, but it's not guaranteed
     };
   };
 };
