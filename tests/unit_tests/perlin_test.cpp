@@ -49,11 +49,8 @@ static ut::suite<"perlin"> perlinSuite = [] {
       double prev = noise.noise(Point3(0, 0, 0));
       int differentCount = 0;
 
-      std::cout << prev << std::endl;
-
       for (int i = 1; i < 10; i++) {
         double current = noise.noise(Point3(i, i, i));
-        std::cout << current << std::endl;
         if (std::abs(current - prev) > 0.001) {
           differentCount++;
         }

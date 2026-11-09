@@ -1,6 +1,6 @@
 #include "glimpse/util/image.h"
 
-#include <iomanip>
+#include <print>
 
 #include "../test_cfg.h"
 
@@ -9,6 +9,8 @@ using namespace glimpse;
 // Add a helper function for approximate comparisons of floating point values
 bool approximately(float a, float b, float epsilon = 0.01f) { return std::abs(a - b) <= epsilon; }
 constexpr bool logToConsole = false;
+// "[r,g,b]". The channels are unsigned char, which std::format prints as numbers (only plain `char` is a character).
+std::string rgbText(const ImageColor& c) { return std::format("[{},{},{}]", c.rgb[0], c.rgb[1], c.rgb[2]); }
 
 static ut::suite<"image"> imageSuite = [] {
   using namespace boost::ut;
@@ -177,11 +179,7 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
         if (abs(static_cast<int>(origColor.rgb[0]) - static_cast<int>(loadedColor.rgb[0])) > tolerance ||
             abs(static_cast<int>(origColor.rgb[1]) - static_cast<int>(loadedColor.rgb[1])) > tolerance ||
             abs(static_cast<int>(origColor.rgb[2]) - static_cast<int>(loadedColor.rgb[2])) > tolerance) {
-          std::cout << "Pixel (" << x << "," << y << ") - Original: [" << static_cast<int>(origColor.rgb[0]) << ","
-                    << static_cast<int>(origColor.rgb[1]) << "," << static_cast<int>(origColor.rgb[2])
-                    << "] Loaded: [" << static_cast<int>(loadedColor.rgb[0]) << ","
-                    << static_cast<int>(loadedColor.rgb[1]) << "," << static_cast<int>(loadedColor.rgb[2]) << "]"
-                    << std::endl;
+          std::println("Pixel ({},{}) - Original: {} Loaded: {}", x, y, rgbText(origColor), rgbText(loadedColor));
           diffCount++;
           if (diffCount > 10) {
             break;
@@ -212,7 +210,7 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
     std::vector<std::string> formats = {"png", "bmp", "tga", "jpg"};
 
     for (const auto& format : formats) {
-      if (logToConsole) std::cout << "\n===== Testing format: " << format << " =====\n";
+      if (logToConsole) std::println("\n===== Testing format: {} =====", format);
 
       std::string testFile = testOutputPath("roundtrip_test." + format);
       bool writeSuccess = original.write(testFile);
@@ -230,11 +228,7 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
         auto loadedColor = loaded.get(x, y);
 
         if (logToConsole) {
-          std::cout << "Pixel (" << x << "," << y << ")\n";
-          std::cout << "  Original: [" << static_cast<int>(origColor.rgb[0]) << ","
-                    << static_cast<int>(origColor.rgb[1]) << "," << static_cast<int>(origColor.rgb[2]) << "]\n";
-          std::cout << "  Loaded:   [" << static_cast<int>(loadedColor.rgb[0]) << ","
-                    << static_cast<int>(loadedColor.rgb[1]) << "," << static_cast<int>(loadedColor.rgb[2]) << "]\n";
+          std::println("Pixel ({},{})\n  Original: {}\n  Loaded:   {}", x, y, rgbText(origColor), rgbText(loadedColor));
         }
 
         // Calculate percentage difference
@@ -264,7 +258,7 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
     std::vector<std::string> formats = {"png", "bmp", "tga", "jpg"};
 
     for (const auto& format : formats) {
-      if (logToConsole) std::cout << "\n===== Testing format: " << format << " =====\n";
+      if (logToConsole) std::println("\n===== Testing format: {} =====", format);
 
       std::string testFile = testOutputPath("rgb_test." + format);
       bool writeSuccess = testImg.write(testFile);
@@ -277,17 +271,11 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
       auto greenPixel = loaded.get(1, 0);
       auto bluePixel = loaded.get(2, 0);
 
-      if (logToConsole)
-        std::cout << "Red pixel loaded as: [" << static_cast<int>(redPixel.rgb[0]) << ","
-                  << static_cast<int>(redPixel.rgb[1]) << "," << static_cast<int>(redPixel.rgb[2]) << "]\n";
+      if (logToConsole) std::println("Red pixel loaded as: {}", rgbText(redPixel));
 
-      if (logToConsole)
-        std::cout << "Green pixel loaded as: [" << static_cast<int>(greenPixel.rgb[0]) << ","
-                  << static_cast<int>(greenPixel.rgb[1]) << "," << static_cast<int>(greenPixel.rgb[2]) << "]\n";
+      if (logToConsole) std::println("Green pixel loaded as: {}", rgbText(greenPixel));
 
-      if (logToConsole)
-        std::cout << "Blue pixel loaded as: [" << static_cast<int>(bluePixel.rgb[0]) << ","
-                  << static_cast<int>(bluePixel.rgb[1]) << "," << static_cast<int>(bluePixel.rgb[2]) << "]\n";
+      if (logToConsole) std::println("Blue pixel loaded as: {}", rgbText(bluePixel));
     }
   };
 
@@ -303,14 +291,14 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
       testImg.set(0, y, ImageColor(value, value, value));
 
       // Debug: print what we're setting
-      if (logToConsole) std::cout << "Setting y=" << y << " to value: " << static_cast<int>(value) << std::endl;
+      if (logToConsole) std::println("Setting y={} to value: {}", y, value);
     }
 
     // Write/read test for each format
     std::vector<std::string> formats = {"png", "bmp", "tga"};  // Skip jpg due to compression
 
     for (const auto& format : formats) {
-      if (logToConsole) std::cout << "\n===== Testing format: " << format << " for vertical flip =====\n";
+      if (logToConsole) std::println("\n===== Testing format: {} for vertical flip =====", format);
 
       std::string testFile = testOutputPath("vertical_flip_test." + format);
       testImg.write(testFile);
@@ -325,8 +313,7 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
         int avgValue = (c.rgb[0] + c.rgb[1] + c.rgb[2]) / 3;
 
         if (logToConsole)
-          std::cout << "Row " << y << " loaded with value: " << avgValue
-                    << " (expected: " << 255 - (y * 255 / (height - 1)) << ")" << std::endl;
+          std::println("Row {} loaded with value: {} (expected: {})", y, avgValue, 255 - (y * 255 / (height - 1)));
       }
     }
   };
@@ -340,7 +327,7 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
     for (int x = 0; x < size; x++) {
       unsigned char value = static_cast<unsigned char>(x * 25);
       testImg.set(x, 0, ImageColor(value, value, value));
-      if (logToConsole) std::cout << "Setting x=" << x << " to value: " << static_cast<int>(value) << std::endl;
+      if (logToConsole) std::println("Setting x={} to value: {}", x, value);
     }
 
     // Test with PNG (most reliable format)
@@ -352,9 +339,7 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
 
     if (logToConsole) {
       // Check each value and the difference
-      std::cout << "\nGamma correction results:\n";
-      std::cout << "Original | Loaded | Difference\n";
-      std::cout << "-----------------------------\n";
+      std::println("\nGamma correction results:\nOriginal | Loaded | Difference\n-----------------------------");
     }
 
     auto diffCount = 0, threshold = 1;
@@ -369,8 +354,7 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
       }
 
       if (logToConsole) {
-        std::cout << std::setw(8) << origVal << " | " << std::setw(6) << loadedVal << " | " << std::setw(10) << diff
-                  << std::endl;
+        std::println("{:8} | {:6} | {:10}", origVal, loadedVal, diff);
       }
     }
 

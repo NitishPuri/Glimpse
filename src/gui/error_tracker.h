@@ -7,6 +7,7 @@
 // different image.
 
 #include <cstdint>
+#include <format>
 #include <optional>
 #include <string>
 #include <vector>
@@ -45,8 +46,7 @@ class ErrorTracker {
     const Camera& r = referenceCamera;
     // imageHeight is only derived in Camera::initialize, which runs on the render thread: derive it here too.
     if (c.imageWidth != reference->width || static_cast<int>(c.imageWidth / c.aspectRatio) != reference->height)
-      return "render size differs from the reference's " + std::to_string(reference->width) + "x" +
-             std::to_string(reference->height);
+      return std::format("render size differs from the reference's {}x{}", reference->width, reference->height);
     if (!(c.lookfrom == r.lookfrom) || !(c.lookat == r.lookat) || !(c.vup == r.vup) || c.vfov != r.vfov ||
         c.defocusAngle != r.defocusAngle || c.focusDistance != r.focusDistance)
       return "camera moved since the reference";

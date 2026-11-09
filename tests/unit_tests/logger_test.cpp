@@ -26,7 +26,7 @@ static ut::suite<"logger"> loggerSuite = [] {
       fs::remove_all(dir.parent_path());
       {
         Logger logger((dir / "run.log").string());
-        logger.log("hello ", 42);
+        logger.log("hello {}", 42);
       }
       std::ifstream in(dir / "run.log");
       std::string line;

@@ -23,7 +23,7 @@ int GLResources::initGL() {
   if (!window) {
     const char* description;
     int code = glfwGetError(&description);
-    logger.log("Failed to create GLFW window: ", description, code);
+    logger.log("Failed to create GLFW window: {} (0x{:X})", description ? description : "no description", code);
     glfwTerminate();
     return -1;
   }
@@ -61,7 +61,7 @@ void GLResources::setupFramebuffer() {
 bool GLResources::checkGLError(const std::string& functionName) {
   GLenum err;
   while ((err = glGetError()) != GL_NO_ERROR) {
-    logger.log("OpenGL error in ", functionName, ": ", err);
+    logger.log("OpenGL error in {}: 0x{:04X}", functionName, err);
     return true;
   }
   return false;

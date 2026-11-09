@@ -6,6 +6,7 @@
 #define MULTITHREADED
 #ifdef MULTITHREADED
 #include <future>
+#include <print>
 #include <thread>
 #endif
 
@@ -82,8 +83,7 @@ void renderSection(RenderSectionArgs &args) {
       }
     }
   }
-  std::cout << "Section done ... rows[" << startRow << ", " << endRow << "] thread " << std::this_thread::get_id()
-            << std::endl;
+  std::println("Section done ... rows[{}, {}] thread {}", startRow, endRow, std::this_thread::get_id());
 }
 
 void renderSectionUncap(RenderSectionArgs &args) {
@@ -126,8 +126,7 @@ void renderSectionUncap(RenderSectionArgs &args) {
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
-  std::cout << "Stopping section ... rows[" << startRow << ", " << endRow << "] thread " << std::this_thread::get_id()
-            << std::endl;
+  std::println("Stopping section ... rows[{}, {}] thread {}", startRow, endRow, std::this_thread::get_id());
 }
 
 void Renderer::renderScene(Scene scene, Image &image, std::atomic<int64_t> *progress) {
@@ -168,7 +167,7 @@ void Renderer::renderScene(Scene scene, Image &image, std::atomic<int64_t> *prog
     f.get();
   }
 
-  std::cout << __FUNCTION__ << " : All threads finished rendering..." << std::endl;
+  std::println("{} : All threads finished rendering...", __func__);
   Renderer::stopRequested = false;
 #else  // SINGLETHREADED
 

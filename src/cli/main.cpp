@@ -3,17 +3,17 @@
 
 #include <chrono>
 #include <filesystem>
-#include <iostream>
+#include <print>
 
 #include "glimpse/convergence.h"
+#include "glimpse/glimpse.h"
+#include "glimpse/render.h"
 #include "glimpse/util/cli_options.h"
 #include "glimpse/util/color.h"
 #include "glimpse/util/float_image.h"
-#include "glimpse/glimpse.h"
-#include "glimpse/util/log.h"
 #include "glimpse/util/image.h"
+#include "glimpse/util/log.h"
 #include "glimpse/util/metrics.h"
-#include "glimpse/render.h"
 
 namespace {
 
@@ -22,7 +22,7 @@ int runCompare(int argc, const char *const *argv) {
   using namespace glimpse;
   const CompareParseResult parsed = parseCompareCommand(argc, argv);
   if (!parsed.ok()) {
-    std::cerr << "error: " << parsed.error << "\n\n" << usage();
+    std::print(stderr, "error: {}\n\n{}", parsed.error, usage());
     return 2;
   }
   const CompareOptions &o = parsed.options;
@@ -30,30 +30,28 @@ int runCompare(int argc, const char *const *argv) {
   const auto test = readPFM(o.test);
   const auto ref = readPFM(o.ref);
   if (!test || !ref) {
-    std::cerr << "error: cannot read " << (!test ? o.test : o.ref) << "\n";
+    std::println(stderr, "error: cannot read {}", !test ? o.test : o.ref);
     return 1;
   }
   const auto stats = compareImages(*test, *ref);
   if (!stats) {
-    std::cerr << "error: size mismatch: " << test->width << "x" << test->height << " vs " << ref->width << "x"
-              << ref->height << "\n";
+    std::println(stderr, "error: size mismatch: {}x{} vs {}x{}", test->width, test->height, ref->width, ref->height);
     return 1;
   }
 
-  // Full precision: these numbers get pasted into technique notes and compared across runs.
-  std::cout.precision(6);
-  std::cout << "test    " << o.test << "\nref     " << o.ref << "\nsize    " << ref->width << "x" << ref->height
-            << "\nMSE     " << stats->mse << "\nRMSE    " << stats->rmse << "\nrelMSE  " << stats->relMSE << "\n";
-  if (stats->nonFinite > 0) std::cout << "warning: " << stats->nonFinite << " NaN/inf channel values skipped\n";
+  // Six significant digits: these numbers get pasted into technique notes and compared across runs.
+  std::println("test    {}\nref     {}\nsize    {}x{}", o.test, o.ref, ref->width, ref->height);
+  std::println("MSE     {:.6g}\nRMSE    {:.6g}\nrelMSE  {:.6g}", stats->mse, stats->rmse, stats->relMSE);
+  if (stats->nonFinite > 0) std::println("warning: {} NaN/inf channel values skipped", stats->nonFinite);
 
   if (!o.errorImage.empty()) {
     const auto parent = std::filesystem::path(o.errorImage).parent_path();
     if (!parent.empty()) std::filesystem::create_directories(parent);
     if (!falseColorError(*test, *ref).write(o.errorImage)) {
-      std::cerr << "error: cannot write " << o.errorImage << "\n";
+      std::println(stderr, "error: cannot write {}", o.errorImage);
       return 1;
     }
-    std::cout << "wrote   " << o.errorImage << "\n";
+    std::println("wrote   {}", o.errorImage);
   }
   return 0;
 }
@@ -64,7 +62,7 @@ int runConvergence(const glimpse::CmdOptions &options, const std::string &sceneN
   const std::string refPath = referenceOutputPath(sceneName);
   const auto ref = readPFM(refPath);
   if (!ref) {
-    std::cerr << "error: no reference " << refPath << " (render one with --scene " << sceneName << " --reference)\n";
+    std::println(stderr, "error: no reference {} (render one with --scene {} --reference)", refPath, sceneName);
     return 1;
   }
 
@@ -73,29 +71,29 @@ int runConvergence(const glimpse::CmdOptions &options, const std::string &sceneN
   if (!options.width) scene.cam.imageWidth = ref->width;
   applyOptions(options, scene);
   if (scene.cam.imageWidth != ref->width || scene.cam.imageHeight != ref->height) {
-    std::cerr << "error: render size " << scene.cam.imageWidth << "x" << scene.cam.imageHeight
-              << " doesn't match the reference " << ref->width << "x" << ref->height << "\n";
+    std::println(stderr, "error: render size {}x{} doesn't match the reference {}x{}", scene.cam.imageWidth,
+                 scene.cam.imageHeight, ref->width, ref->height);
     return 2;
   }
 
   const auto schedule = convergenceSchedule(options.spp.value_or(kConvergenceMaxSpp));
-  logger.log("Convergence of ", sceneName, " at ", ref->width, "x", ref->height, ", depth ", scene.cam.maxDepth,
-             ", ", schedule.size(), " renders up to ", schedule.back(), " spp, against ", refPath);
+  logger.log("Convergence of {} at {}x{}, depth {}, {} renders up to {} spp, against {}", sceneName, ref->width,
+             ref->height, scene.cam.maxDepth, schedule.size(), schedule.back(), refPath);
   const auto points = measureConvergence(scene, *ref, schedule, [&](const ConvergencePoint &p) {
-    logger.log(p.spp, " spp  ", p.seconds, " s  RMSE ", p.error.rmse, "  relMSE ", p.error.relMSE);
+    logger.log("{} spp  {:.3f} s  RMSE {:.6g}  relMSE {:.6g}", p.spp, p.seconds, p.error.rmse, p.error.relMSE);
   });
   if (points.size() != schedule.size()) {
-    logger.log("Convergence stopped after ", points.size(), " of ", schedule.size(), " renders");
+    logger.log("Convergence stopped after {} of {} renders", points.size(), schedule.size());
     return 1;
   }
 
   const auto parent = std::filesystem::path(options.convergence).parent_path();
   if (!parent.empty()) std::filesystem::create_directories(parent);
   if (!writeConvergenceCSV(options.convergence, points)) {
-    logger.log("Failed to write ", options.convergence);
+    logger.log("Failed to write {}", options.convergence);
     return 1;
   }
-  logger.log("Wrote ", options.convergence);
+  logger.log("Wrote {}", options.convergence);
   return 0;
 }
 
@@ -108,23 +106,23 @@ int main(int argc, char **argv) {
 
   const ParseResult parsed = parseCommandLine(argc, argv);
   if (!parsed.ok()) {
-    std::cerr << "error: " << parsed.error << "\n\n" << usage();
+    std::print(stderr, "error: {}\n\n{}", parsed.error, usage());
     return 2;
   }
   const CmdOptions &options = parsed.options;
 
   if (options.help) {
-    std::cout << usage();
+    std::print("{}", usage());
     return 0;
   }
   if (options.listScenes) {
-    for (size_t i = 0; i < sceneRegistry().size(); ++i) std::cout << i << "  " << sceneRegistry()[i].name << "\n";
+    for (size_t i = 0; i < sceneRegistry().size(); ++i) std::println("{}  {}", i, sceneRegistry()[i].name);
     return 0;
   }
 
   const auto sceneName = resolveSceneName(options.scene);
   if (!sceneName) {
-    std::cerr << "error: unknown scene '" << options.scene << "' (see --list-scenes)\n";
+    std::println(stderr, "error: unknown scene '{}' (see --list-scenes)", options.scene);
     return 2;
   }
 
@@ -142,15 +140,15 @@ int main(int argc, char **argv) {
   Image image(cam.imageWidth, cam.imageHeight);
 
   // Stratified sampling uses a sqrtSpp x sqrtSpp grid: the real sample count is sqrtSpp^2.
-  logger.log("Rendering ", *sceneName, " at ", cam.imageWidth, "x", cam.imageHeight, ", ", cam.sqrtSpp * cam.sqrtSpp,
-             " spp, depth ", cam.maxDepth);
+  logger.log("Rendering {} at {}x{}, {} spp, depth {}", *sceneName, cam.imageWidth, cam.imageHeight,
+             cam.sqrtSpp * cam.sqrtSpp, cam.maxDepth);
   const auto start = std::chrono::high_resolution_clock::now();
 
   Renderer renderer;
   renderer.renderScene(scene, image, nullptr);
 
   const auto seconds = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - start).count();
-  logger.log("Rendered in ", seconds, " s");
+  logger.log("Rendered in {:.3f} s", seconds);
 
   const std::string out = !options.out.empty() ? options.out
                           : options.reference ? referenceOutputPath(*sceneName)
@@ -162,9 +160,9 @@ int main(int argc, char **argv) {
   const FloatImage linear = renderer.film.linearRGB();
   const bool ok = isFloatOutput(out) ? writePFM(out, linear) : encodeSRGB(linear, options.exposure).write(out);
   if (!ok) {
-    logger.log("Failed to write ", out);
+    logger.log("Failed to write {}", out);
     return 1;
   }
-  logger.log("Wrote ", out);
+  logger.log("Wrote {}", out);
   return 0;
 }

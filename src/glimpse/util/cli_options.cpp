@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <cctype>
 #include <charconv>
+#include <format>
 #include <limits>
-#include <sstream>
 #include <string_view>
 #include <vector>
 
@@ -110,7 +110,7 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
       const long long max = arg == "--width" ? 16384 : arg == "--spp" ? 1'000'000 : 10'000;
       auto v = parseInt<int>(value, 1, max);
       if (!v) {
-        result.error = invalid + " (1 .. " + std::to_string(max) + ")";
+        result.error = std::format("{} (1 .. {})", invalid, max);
         return result;
       }
       (arg == "--spp" ? o.spp : arg == "--width" ? o.width : o.depth) = v;
@@ -127,26 +127,24 @@ ParseResult parseCommandLine(int argc, const char* const argv[]) {
 }
 
 std::string usage() {
-  std::ostringstream ss;
-  ss << "usage: Glimpse_cli [--scene <name|index>] [--spp N] [--width N] [--depth N] [--seed N] [--out file]\n"
-        "                   [--exposure STOPS] [--reference] [--convergence file.csv]\n"
-        "                   [--list-scenes] [--help]\n"
-        "  --scene   scene name or index (default cornell_box; see --list-scenes)\n"
-        "  --spp     samples per pixel; rounded down to a square (10 -> 9) for stratified sampling\n"
-        "  --width   image width; height follows the scene's aspect ratio\n"
-        "  --depth   maximum bounces\n"
-        "  --seed    fixed RNG seed (>= 1); reproducible on the same machine and thread count\n"
-        "  --out     output image: .png .jpg .bmp .tga (sRGB, 8-bit) or .pfm (linear float radiance)\n"
-        "            (default results/<scene>.png)\n"
-        "  --exposure  scale radiance by 2^STOPS before sRGB encoding (8-bit outputs only; default 0)\n"
-        "  --reference render a converged reference: 4096 spp unless --spp, written to refs/<scene>.pfm\n"
-        "  --convergence file.csv  render at 1, 4, 9, 16, 36, ... spp up to --spp (default 1024), writing\n"
-        "            spp, seconds and error against refs/<scene>.pfm (image size taken from the reference)\n"
-        "\n"
-        "       Glimpse_cli compare <test.pfm> <ref.pfm> [--error-image out.png]\n"
-        "  prints MSE, RMSE and relMSE of test against ref; --error-image writes per-pixel relative squared\n"
-        "  error as a false-colour 8-bit image (log scale, black 1e-4 .. pale yellow 1; cyan = NaN/inf)\n";
-  return ss.str();
+  return "usage: Glimpse_cli [--scene <name|index>] [--spp N] [--width N] [--depth N] [--seed N] [--out file]\n"
+         "                   [--exposure STOPS] [--reference] [--convergence file.csv]\n"
+         "                   [--list-scenes] [--help]\n"
+         "  --scene   scene name or index (default cornell_box; see --list-scenes)\n"
+         "  --spp     samples per pixel; rounded down to a square (10 -> 9) for stratified sampling\n"
+         "  --width   image width; height follows the scene's aspect ratio\n"
+         "  --depth   maximum bounces\n"
+         "  --seed    fixed RNG seed (>= 1); reproducible on the same machine and thread count\n"
+         "  --out     output image: .png .jpg .bmp .tga (sRGB, 8-bit) or .pfm (linear float radiance)\n"
+         "            (default results/<scene>.png)\n"
+         "  --exposure  scale radiance by 2^STOPS before sRGB encoding (8-bit outputs only; default 0)\n"
+         "  --reference render a converged reference: 4096 spp unless --spp, written to refs/<scene>.pfm\n"
+         "  --convergence file.csv  render at 1, 4, 9, 16, 36, ... spp up to --spp (default 1024), writing\n"
+         "            spp, seconds and error against refs/<scene>.pfm (image size taken from the reference)\n"
+         "\n"
+         "       Glimpse_cli compare <test.pfm> <ref.pfm> [--error-image out.png]\n"
+         "  prints MSE, RMSE and relMSE of test against ref; --error-image writes per-pixel relative squared\n"
+         "  error as a false-colour 8-bit image (log scale, black 1e-4 .. pale yellow 1; cyan = NaN/inf)\n";
 }
 
 bool isCompareCommand(int argc, const char* const argv[]) { return argc > 1 && std::string_view(argv[1]) == "compare"; }

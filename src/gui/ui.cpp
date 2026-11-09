@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <filesystem>
+#include <format>
 #include <vector>
 
 #include "app.h"
@@ -83,8 +84,6 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& glRes) {
   }
 
   if (ImGui::Button("Save Image")) {
-    auto now = std::chrono::system_clock::now();
-    auto nowTime = std::chrono::system_clock::to_time_t(now);
     // `renderer` is released once a render completes, so use the spp recorded when it finished.
     const int spp = raytracer.lastSpp.load();
 
@@ -92,15 +91,13 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& glRes) {
     std::string dir = "results";
     std::filesystem::create_directories(dir);
 
-    std::ostringstream ss;
-    ss << dir << "/" << std::put_time(std::localtime(&nowTime), "%Y%m%d%H%M%S") << "_"
-       << sceneRegistry()[params.currentScene].name << "_samples_" << spp << ".png";
-    auto outfilePath = ss.str();
+    const auto outfilePath = std::format("{}/{:%Y%m%d%H%M%S}_{}_samples_{}.png", dir, localNow(),
+                                         sceneRegistry()[params.currentScene].name, spp);
 
     if (raytracer.image.write(outfilePath)) {
-      logger.log("Image written to ", outfilePath);
+      logger.log("Image written to {}", outfilePath);
     } else {
-      logger.log("Failed to write image to ", outfilePath);
+      logger.log("Failed to write image to {}", outfilePath);
     }
   }
 

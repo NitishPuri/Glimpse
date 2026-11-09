@@ -53,8 +53,8 @@ struct RayTracer {
     traceFuture = std::async(std::launch::async, [&]() {
       image.clear();
       scene.cam.initialize();
-      logger.log("Rendering... ", scene.cam.imageWidth, "x", scene.cam.imageHeight, " with ",
-                 scene.cam.samplesPerPixel, " samples per pixel");
+      logger.log("Rendering... {}x{} with {} samples per pixel", scene.cam.imageWidth, scene.cam.imageHeight,
+                 scene.cam.samplesPerPixel);
       auto startTime = std::chrono::high_resolution_clock::now();
 
       status = RENDERING;
@@ -66,7 +66,7 @@ struct RayTracer {
       auto endTime = std::chrono::high_resolution_clock::now();
       auto duration = std::chrono::duration<float, std::chrono::seconds::period>(endTime - startTime).count();
 
-      logger.log("Image generated in ", duration, " seconds");
+      logger.log("Image generated in {:.3f} seconds", duration);
     });
   }
 
@@ -79,12 +79,12 @@ struct RayTracer {
   void setupScene(GLResources& GLResources, int currentScene, float lookFrom[3], float lookAt[3]) {
     // Ensure currentScene is within valid range
     if (currentScene < 0 || currentScene >= static_cast<int>(sceneRegistry().size())) {
-      logger.log("Invalid scene index: ", currentScene);
+      logger.log("Invalid scene index: {}", currentScene);
       return;
     }
 
     const SceneEntry& entry = sceneRegistry()[currentScene];
-    logger.log("Setting up scene ... ", currentScene, " ", entry.name);
+    logger.log("Setting up scene ... {} {}", currentScene, entry.name);
     scene = entry.make();
     errors.loadReference(entry.name, scene);
 

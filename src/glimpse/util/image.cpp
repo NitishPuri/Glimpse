@@ -7,7 +7,7 @@
 #endif
 
 #include <algorithm>
-#include <iostream>
+#include <print>
 
 // Define STB image implementation in this file
 #define STB_IMAGE_IMPLEMENTATION
@@ -106,7 +106,7 @@ std::unique_ptr<StbImageData> Image::loadStbImage(const std::string& filename) {
   result->data = stbi_load(filename.c_str(), &result->width, &result->height, &result->channels, bytesPerPixel);
 
   if (!result->data) {
-    std::cerr << "Failed to load image: " << stbi_failure_reason() << std::endl;
+    std::println(stderr, "Failed to load image: {}", stbi_failure_reason());
     return result;
   }
 
@@ -117,7 +117,7 @@ bool Image::read(const std::string& filename) {
   auto stbData = loadStbImage(filename);
 
   if (!stbData->data) {
-    std::cerr << "Failed to load image: " << filename << std::endl;
+    std::println(stderr, "Failed to load image: {}", filename);
     return false;
   }
 
@@ -147,7 +147,7 @@ bool Image::read(const std::string& filename) {
 // Write image using STB library
 bool Image::write(const std::string& filename) const {
   if (!isValid()) {
-    std::cerr << "Cannot write invalid image to: " << filename << std::endl;
+    std::println(stderr, "Cannot write invalid image to: {}", filename);
     return false;
   }
 
@@ -177,7 +177,7 @@ bool Image::write(const std::string& filename) const {
   }
 
   if (!result) {
-    std::cerr << "Failed to write image: " << filename << std::endl;
+    std::println(stderr, "Failed to write image: {}", filename);
     return false;
   }
 

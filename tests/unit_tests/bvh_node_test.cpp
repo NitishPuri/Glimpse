@@ -70,13 +70,10 @@ static ut::suite<"bvh"> bvhSuite = [] {
 
       Ray r(Point3(0, 0, 0), Vec3(1, 0, 0));
       HitRecord rec;
-      std::cout << "empty_list 1" << std::endl;
       expect(emptyBvh.hit(r, Interval(0.001, glimpse::math::infinity), rec) == false);
-      std::cout << "empty_list 2" << std::endl;
     };
 
     "single_object"_test = [] {
-      std::cout << "sinle_object" << std::endl;
       // Test with single object
       HittableList singleList;
       auto mat = make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
