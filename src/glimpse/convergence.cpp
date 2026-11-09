@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cmath>
 #include <fstream>
+#include <numbers>
 
 #include "glimpse/render.h"
 #include "glimpse/scene.h"
@@ -15,7 +16,7 @@ std::vector<int> convergenceSchedule(int maxSpp) {
   std::vector<int> spp;
   const int maxSqrt = static_cast<int>(std::sqrt(maxSpp));  // the same rounding as Camera::initialize
   int last = 0;
-  for (double s = 1; std::lround(s) <= maxSqrt; s *= std::sqrt(2.0)) {
+  for (double s = 1; std::lround(s) <= maxSqrt; s *= std::numbers::sqrt2) {
     const int q = static_cast<int>(std::lround(s));
     if (q != last) spp.push_back(q * q);  // 1 and sqrt(2) both round to 1
     last = q;

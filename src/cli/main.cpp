@@ -101,6 +101,7 @@ int runConvergence(const glimpse::CmdOptions &options, const std::string &sceneN
 
 }  // namespace
 
+// NOLINTNEXTLINE(bugprone-exception-escape): exceptions are for fatal failures; ending the run is the point
 int main(int argc, char **argv) {
   using namespace glimpse;
 

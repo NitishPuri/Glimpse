@@ -23,6 +23,7 @@ template <class T>
 std::optional<T> parseInt(std::string_view text, long long min, long long max) {
   long long value = 0;
   const char* end = text.data() + text.size();
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage): from_chars stops at `end`, no terminator needed
   auto [ptr, ec] = std::from_chars(text.data(), end, value);
   if (ec != std::errc{} || ptr != end || value < min || value > max) return std::nullopt;
   return static_cast<T>(value);
@@ -74,7 +75,7 @@ std::expected<CmdOptions, std::string> parseCommandLine(int argc, const char* co
       return std::unexpected("missing value for " + arg);
     }
     const std::string value = argv[++i];
-    const std::string invalid = "invalid value for " + arg + ": '" + value + "'";
+    const std::string invalid = std::format("invalid value for {}: '{}'", arg, value);
 
     if (arg == "--scene") {
       o.scene = value;

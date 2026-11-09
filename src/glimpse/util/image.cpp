@@ -46,7 +46,7 @@ Image::~Image() = default;
 void Image::initialize(int w, int h) {
   width = w;
   height = h;
-  pixelData.resize(width * height * bytesPerPixel, 0);
+  pixelData.resize(static_cast<size_t>(width) * height * bytesPerPixel, 0);  // size_t: no int overflow
 }
 
 // Pixel access methods
@@ -156,22 +156,17 @@ bool Image::write(const std::string& filename) const {
   size_t dotPos = filename.find_last_of('.');
   if (dotPos != std::string::npos) {
     ext = filename.substr(dotPos + 1);
-    std::transform(ext.begin(), ext.end(), ext.begin(),
-                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    std::ranges::transform(ext, ext.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
   }
 
   int result = 0;
-  if (ext == "png") {
-    result =
-        stbi_write_png(filename.c_str(), width, height, bytesPerPixel, pixelData.data(), width * bytesPerPixel);
-  } else if (ext == "bmp") {
+  if (ext == "bmp") {
     result = stbi_write_bmp(filename.c_str(), width, height, bytesPerPixel, pixelData.data());
   } else if (ext == "jpg" || ext == "jpeg") {
     result = stbi_write_jpg(filename.c_str(), width, height, bytesPerPixel, pixelData.data(), 95);  // 95% quality
   } else if (ext == "tga") {
     result = stbi_write_tga(filename.c_str(), width, height, bytesPerPixel, pixelData.data());
-  } else {
-    // Default to PNG
+  } else {  // .png, and the default
     result =
         stbi_write_png(filename.c_str(), width, height, bytesPerPixel, pixelData.data(), width * bytesPerPixel);
   }

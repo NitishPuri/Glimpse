@@ -24,7 +24,7 @@ namespace glimpse {
 
 class PDF {
  public:
-  virtual ~PDF() {}
+  virtual ~PDF() = default;
 
   virtual double value(const Vec3& direction) const = 0;
   virtual Vec3 generate() const = 0;
@@ -32,7 +32,7 @@ class PDF {
 
 class SpherePDF : public PDF {
  public:
-  SpherePDF() {}
+  SpherePDF() = default;
 
   double value(const Vec3& direction) const override { return 1 / (4 * math::pi); }
 

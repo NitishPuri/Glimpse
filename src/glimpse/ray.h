@@ -9,7 +9,7 @@ namespace glimpse {
 
 class Ray {
  public:
-  Ray() {}
+  Ray() = default;
 
   Ray(const Point3& origin, const Vec3& direction, double time) : orig(origin), dir(direction), tm(time) {}
 

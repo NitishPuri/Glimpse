@@ -4,6 +4,8 @@
 // distance is sampled from the exponential distribution; the phase function is isotropic.
 // Follows TNW "Volumes"; pbrt-v4 ch11 and technique 20 (media, delta/ratio tracking) replace it.
 
+#include <algorithm>
+
 #include "glimpse/interaction.h"
 #include "glimpse/materials.h"
 #include "glimpse/textures.h"
@@ -25,12 +27,12 @@ class ConstantMedium : public Hittable {
 
     if (!boundary->hit(r, Interval(rec1.t + 0.0001, math::infinity), rec2)) return false;
 
-    if (rec1.t < rayT.min) rec1.t = rayT.min;
-    if (rec2.t > rayT.max) rec2.t = rayT.max;
+    rec1.t = std::max(rec1.t, rayT.min);
+    rec2.t = std::min(rec2.t, rayT.max);
 
     if (rec1.t >= rec2.t) return false;
 
-    if (rec1.t < 0) rec1.t = 0;
+    rec1.t = std::max(rec1.t, 0.0);
 
     auto rayLength = r.direction().length();
     auto distanceInsideBoundary = (rec2.t - rec1.t) * rayLength;

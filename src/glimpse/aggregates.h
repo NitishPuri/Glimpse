@@ -16,7 +16,7 @@ class HittableList : public Hittable {
  public:
   std::vector<shared_ptr<Hittable>> objects;
 
-  HittableList() {}
+  HittableList() = default;
   HittableList(shared_ptr<Hittable> object) { add(object); }
 
   void clear() { objects.clear(); }

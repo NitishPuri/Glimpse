@@ -73,7 +73,7 @@ void AppWindow::run() {
 
 }  // namespace glimpse::gui
 
-
+// NOLINTNEXTLINE(bugprone-exception-escape): exceptions are for fatal failures; ending the run is the point
 int main() {
   glimpse::Logger logger(glimpse::logFileFor("gui"));
   glimpse::gui::AppWindow app(logger);

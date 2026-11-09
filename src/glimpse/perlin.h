@@ -10,9 +10,7 @@ namespace glimpse {
 class Perlin {
  public:
   Perlin() {
-    for (int i = 0; i < pointCount; i++) {
-      randvec[i] = unitVector(Vec3::random(-1, 1));
-    }
+    for (Vec3& v : randvec) v = unitVector(Vec3::random(-1, 1));
 
     perlinGeneratePerm(permX);
     perlinGeneratePerm(permY);

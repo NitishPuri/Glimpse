@@ -54,7 +54,7 @@ std::optional<ErrorStats> compareImages(const FloatImage& test, const FloatImage
     sumRSE += relativeSquaredError(v, r);
   }
   // Like pbrt, divide by all channel values (skipped ones count as zero error), so a NaN can't shrink the mean.
-  const double n = static_cast<double>(ref.rgb.size());
+  const auto n = static_cast<double>(ref.rgb.size());
   stats.mse = n > 0 ? sumSE / n : 0;
   stats.rmse = std::sqrt(stats.mse);
   stats.relMSE = n > 0 ? sumRSE / n : 0;

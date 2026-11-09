@@ -5,6 +5,7 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <numbers>
 
 namespace glimpse {
 
@@ -16,7 +17,7 @@ using std::sqrt;
 namespace math {
 // Constants
 const double infinity = std::numeric_limits<double>::infinity();
-const double pi = 3.1415926535897932385;
+const double pi = std::numbers::pi;
 
 // Utility functions
 inline double degreesToRadians(double degrees) { return degrees * pi / 180.0; }

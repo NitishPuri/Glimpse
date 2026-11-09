@@ -106,7 +106,7 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& glRes) {
   auto currentStats = [&] {
     RenderStats s;
     s.seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - raytracer.startTime).count();
-    const double samples = static_cast<double>(raytracer.progress.load());
+    const auto samples = static_cast<double>(raytracer.progress.load());
     s.spp = samples / (static_cast<double>(glRes.renderWidth) * glRes.renderHeight);
     s.samplesPerSecond = s.seconds > 0 ? samples / s.seconds : 0;
     return s;

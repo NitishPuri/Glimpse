@@ -72,7 +72,7 @@ static ut::suite<"image"> imageSuite = [] {
     ImageColor c(128, 64, 32);
     img.set(5, 5, c);
 
-    size_t offset = (5 + 5 * 10) * 3;
+    size_t offset = (5 + 5 * 10) * 3uz;
     expect(img.data()[offset] == 128_uc);
     expect(img.data()[offset + 1] == 64_uc);
     expect(img.data()[offset + 2] == 32_uc);
@@ -101,13 +101,13 @@ static ut::suite<"image"> imageSuite = [] {
     }
 
     // Verify center pixel
-    size_t centerOffset = (1 + 1 * 3) * 3;
+    size_t centerOffset = (1 + 1 * 3) * 3uz;
     expect(img.data()[centerOffset] == 50_uc);
     expect(img.data()[centerOffset + 1] == 50_uc);
     expect(img.data()[centerOffset + 2] == 50_uc);
 
     // Verify corner pixel
-    size_t cornerOffset = (2 + 2 * 3) * 3;
+    size_t cornerOffset = (2 + 2 * 3) * 3uz;
     expect(img.data()[cornerOffset] == 100_uc);
     expect(img.data()[cornerOffset + 1] == 100_uc);
     expect(img.data()[cornerOffset + 2] == 100_uc);
@@ -199,8 +199,8 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
     for (int y = 0; y < original.height; y++) {
       for (int x = 0; x < original.width; x++) {
         // Use exact values rather than gradients
-        uchar rVal = static_cast<uchar>(x * 25);  // 0, 25, 50, 75...
-        uchar gVal = static_cast<uchar>(y * 25);  // 0, 25, 50, 75...
+        auto rVal = static_cast<uchar>(x * 25);   // 0, 25, 50, 75...
+        auto gVal = static_cast<uchar>(y * 25);   // 0, 25, 50, 75...
         uchar bVal = 128;                         // Constant middle value
         original.set(x, y, ImageColor(rVal, gVal, bVal));
       }
@@ -233,8 +233,8 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
 
         // Calculate percentage difference
         for (int c = 0; c < 3; c++) {
-          float origVal = static_cast<float>(origColor.rgb[c]);
-          float loadedVal = static_cast<float>(loadedColor.rgb[c]);
+          auto origVal = static_cast<float>(origColor.rgb[c]);
+          auto loadedVal = static_cast<float>(loadedColor.rgb[c]);
 
           if (origVal > 0) {
             float pctDiff = 100.0f * std::abs(origVal - loadedVal) / origVal;
@@ -287,7 +287,7 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
     // Create a gradient from top to bottom (white to black)
     for (int y = 0; y < height; y++) {
       // Set brightness based on y position (top is white, bottom is black)
-      unsigned char value = static_cast<unsigned char>(255 - (y * 255 / (height - 1)));
+      auto value = static_cast<unsigned char>(255 - (y * 255 / (height - 1)));
       testImg.set(0, y, ImageColor(value, value, value));
 
       // Debug: print what we're setting
@@ -325,7 +325,7 @@ static ut::suite<"image_roundtrip"> imageRoundtripSuite = [] {
 
     // Set grayscale values from 0 to 250 in steps of 25
     for (int x = 0; x < size; x++) {
-      unsigned char value = static_cast<unsigned char>(x * 25);
+      auto value = static_cast<unsigned char>(x * 25);
       testImg.set(x, 0, ImageColor(value, value, value));
       if (logToConsole) std::println("Setting x={} to value: {}", x, value);
     }

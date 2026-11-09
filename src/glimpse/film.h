@@ -17,18 +17,18 @@ class Film {
   Film(int width, int height)
       : width(width),
         height(height),
-        sampleCount(width * height, 0),
-        accumulatedSamples(width * height, Vec3(0, 0, 0)),
-        mean(width * height, Vec3(0, 0, 0)),
-        m2(width * height, Vec3(0, 0, 0)) {}
+        sampleCount(pixelCount(width, height), 0),
+        accumulatedSamples(pixelCount(width, height), Vec3(0, 0, 0)),
+        mean(pixelCount(width, height), Vec3(0, 0, 0)),
+        m2(pixelCount(width, height), Vec3(0, 0, 0)) {}
 
   void initialize(int width, int height) {
     this->width = width;
     this->height = height;
-    sampleCount.resize(width * height, 0);
-    accumulatedSamples.resize(width * height, Vec3(0, 0, 0));
-    mean.resize(width * height, Vec3(0, 0, 0));
-    m2.resize(width * height, Vec3(0, 0, 0));
+    sampleCount.resize(pixelCount(width, height), 0);
+    accumulatedSamples.resize(pixelCount(width, height), Vec3(0, 0, 0));
+    mean.resize(pixelCount(width, height), Vec3(0, 0, 0));
+    m2.resize(pixelCount(width, height), Vec3(0, 0, 0));
   }
 
   void addSample(int x, int y, const Vec3& sample) {
@@ -102,6 +102,9 @@ class Film {
   }
 
  private:
+  // width * height in size_t, so the product can't overflow int before it reaches the vector.
+  static size_t pixelCount(int width, int height) { return static_cast<size_t>(width) * height; }
+
   int width, height;
   std::vector<int> sampleCount;
   std::vector<Vec3> accumulatedSamples;

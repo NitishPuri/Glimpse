@@ -27,6 +27,7 @@ static ut::suite<"pdf"> pdfSuite = [] {
 
       // Test value method with various directions
       Vec3 sameDir(0.0, 0.0, 1.0);
+      // NOLINTNEXTLINE(modernize-use-std-numbers): the pdf computes cos/pi; inv_pi may differ in the last bit
       expect(p.value(sameDir) == 1.0 / glimpse::math::pi) << "Cosine PDF value in normal direction should be 1/π";
 
       Vec3 perpDir(1.0, 0.0, 0.0);

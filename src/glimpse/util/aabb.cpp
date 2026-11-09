@@ -2,6 +2,8 @@
 
 #include "glimpse/util/aabb.h"
 
+#include <algorithm>
+
 namespace glimpse {
 
 bool AABB::hit(const Ray& r, Interval rayT) const {
@@ -16,11 +18,11 @@ bool AABB::hit(const Ray& r, Interval rayT) const {
     auto t1 = (ax.max - rayOrig[axis]) * adinv;
 
     if (t0 < t1) {
-      if (t0 > rayT.min) rayT.min = t0;
-      if (t1 < rayT.max) rayT.max = t1;
+      rayT.min = std::max(rayT.min, t0);
+      rayT.max = std::min(rayT.max, t1);
     } else {
-      if (t1 > rayT.min) rayT.min = t1;
-      if (t0 < rayT.max) rayT.max = t0;
+      rayT.min = std::max(rayT.min, t1);
+      rayT.max = std::min(rayT.max, t0);
     }
 
     if (rayT.max <= rayT.min) return false;

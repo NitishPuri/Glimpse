@@ -1,0 +1,39 @@
+# clang-tidy for Glimpse. Run on what you changed (see CLAUDE.md "Tooling"):
+#   run-clang-tidy-20 -p build/debug -quiet '/(src/(glimpse|gui|cli)|tests/unit_tests)/'
+#
+# The modernize-* checks are how the "C++ standard" rule in CLAUDE.md is enforced: they flag the pre-C++20/23
+# spelling of things (find != npos, stream output, hand-rolled loops) in code being edited.
+# Disabled checks are style choices this codebase makes on purpose, not oversights:
+#   use-trailing-return-type     `auto f() -> int` everywhere is noise
+#   avoid-c-arrays               Vec3's `double e[3]`, Perlin's tables and ImGui's `float[3]` read better raw
+#   use-nodiscard                would land on every getter
+#   use-designated-initializers  RTIOW-style positional aggregates (`RenderSectionArgs{image, film, ...}`)
+#   return-braced-init-list      `return Vec3(x, y, z)` names the type, which the math reads better with than `{x, y, z}`
+#   easily-swappable-parameters  the math is all (double, double, double): Vec3, Interval, Quad, Camera
+#   narrowing-conversions        double/float/int conversions in pixel and sampling code are intentional;
+#                                -Wall covers the rest
+#   enum-size                    the two UI enums are compared, never stored in bulk
+#   magic-numbers etc.           readability-* is opted into one check at a time
+Checks: >
+  -*,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  -modernize-avoid-c-arrays,
+  -modernize-use-nodiscard,
+  -modernize-use-designated-initializers,
+  -modernize-return-braced-init-list,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  performance-*,
+  -performance-enum-size,
+  readability-container-contains,
+  readability-container-size-empty,
+  readability-redundant-string-cstr,
+  readability-use-std-min-max
+CheckOptions:
+  modernize-use-std-print.ReplacementPrintFunction: std::print
+  modernize-use-std-print.ReplacementPrintlnFunction: std::println
+# Our headers only. Not just '/src/': GLFW (build/*/_deps/glfw-src/src) and glad (ext/glad/src) would match it.
+HeaderFilterRegex: '/(src/(glimpse|gui|cli)|tests)/'
+WarningsAsErrors: ''

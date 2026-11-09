@@ -8,12 +8,13 @@
 #include <chrono>
 #include <future>
 #include <optional>
+#include <utility>
 
-#include "glimpse/shapes.h"
-#include "glimpse/util/image.h"
+#include "error_tracker.h"
 #include "glimpse/render.h"
 #include "glimpse/scenes/registry.h"
-#include "error_tracker.h"
+#include "glimpse/shapes.h"
+#include "glimpse/util/image.h"
 
 namespace glimpse::gui {
 
@@ -78,7 +79,7 @@ struct RayTracer {
 
   void setupScene(GLResources& GLResources, int currentScene, float lookFrom[3], float lookAt[3]) {
     // Ensure currentScene is within valid range
-    if (currentScene < 0 || currentScene >= static_cast<int>(sceneRegistry().size())) {
+    if (currentScene < 0 || std::cmp_greater_equal(currentScene, sceneRegistry().size())) {
       logger.log("Invalid scene index: {}", currentScene);
       return;
     }

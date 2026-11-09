@@ -59,7 +59,7 @@ static ut::suite<"float_image"> floatImageSuite = [] {
       expect(writePFM(path, makeTestImage()));
       const std::string bytes = readBytes(path);
       expect(bytes.starts_with("PF\n3 2\n-1")) << "negative scale = little-endian floats";
-      expect(bytes.size() == bytes.find('\n', bytes.find("-1")) + 1 + 3 * 2 * 3 * 4) << "header + 18 floats";
+      expect(bytes.size() == bytes.find('\n', bytes.find("-1")) + 1 + 3uz * 2 * 3 * 4) << "header + 18 floats";
     };
 
     // PFM stores scanlines bottom-to-top: the first row in the file is the image's bottom row (row height-1).

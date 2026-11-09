@@ -11,7 +11,7 @@ class AABB {
  public:
   Interval x, y, z;
 
-  AABB() {}  // The default AABB is empty, since intervals are empty by default.
+  AABB() = default;  // The default AABB is empty, since intervals are empty by default.
 
   AABB(const Interval& x, const Interval& y, const Interval& z) : x(x), y(y), z(z) { padToMinimums(); }
 

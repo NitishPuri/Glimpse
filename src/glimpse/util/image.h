@@ -3,6 +3,7 @@
 // Image: an 8-bit RGB pixel buffer (row 0 = top, like image files) with stb_image read/write by file extension.
 // setFloat() clamps and quantises [0,1] floats. Float (PFM) output arrives with technique 01.
 
+#include <algorithm>
 #include <cmath>
 #include <memory>
 #include <string>
@@ -61,7 +62,7 @@ class Image {
   void initialize(int w, int h);
 
   // clear to blank image
-  void clear() { std::fill(pixelData.begin(), pixelData.end(), uchar{0}); }
+  void clear() { std::ranges::fill(pixelData, uchar{0}); }
 
   // Whether the image has valid data
   bool isValid() const { return !pixelData.empty(); }
@@ -90,7 +91,7 @@ class Image {
     if (linear <= 0.0031308f) {
       return linear * 12.92f;
     } else {
-      return 1.055f * pow(linear, 1.0f / 2.4f) - 0.055f;
+      return 1.055f * std::pow(linear, 1.0f / 2.4f) - 0.055f;
     }
   }
 
@@ -99,7 +100,7 @@ class Image {
     if (srgb <= 0.04045f) {
       return srgb / 12.92f;
     } else {
-      return pow((srgb + 0.055f) / 1.055f, 2.4f);
+      return std::pow((srgb + 0.055f) / 1.055f, 2.4f);
     }
   }
   std::vector<uchar> pixelData;
