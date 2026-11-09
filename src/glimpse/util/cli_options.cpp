@@ -4,6 +4,7 @@
 #include "glimpse/util/cli_options.h"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <charconv>
 #include <format>
@@ -33,16 +34,19 @@ std::string extensionOf(std::string_view path) {
   auto slash = path.find_last_of('/');
   if (dot == std::string_view::npos || (slash != std::string_view::npos && dot < slash)) return "";
   std::string ext(path.substr(dot + 1));
-  std::transform(ext.begin(), ext.end(), ext.begin(),
-                 [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+  std::ranges::transform(ext, ext.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
   return ext;
 }
 
 // 8-bit formats go through Image::write (sRGB-encoded); .pfm is the linear float film (technique 01).
 bool isWritableExtension(std::string_view path) {
-  const std::string ext = extensionOf(path);
-  return ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp" || ext == "tga" || ext == "pfm";
+  constexpr std::array<std::string_view, 6> kWritable{"png", "jpg", "jpeg", "bmp", "tga", "pfm"};
+  return std::ranges::contains(kWritable, extensionOf(path));
 }
+
+// Flags followed by a value; the rest (--help, --list-scenes, --reference) are switches.
+constexpr std::array<std::string_view, 8> kValueFlags{"--scene", "--spp", "--width",    "--depth",
+                                                      "--seed",  "--out", "--exposure", "--convergence"};
 
 }  // namespace
 
@@ -63,8 +67,7 @@ std::expected<CmdOptions, std::string> parseCommandLine(int argc, const char* co
       o.reference = true;
       continue;
     }
-    if (arg != "--scene" && arg != "--spp" && arg != "--width" && arg != "--depth" && arg != "--seed" &&
-        arg != "--out" && arg != "--exposure" && arg != "--convergence") {
+    if (!std::ranges::contains(kValueFlags, arg)) {
       return std::unexpected("unknown argument: " + arg);
     }
     if (i + 1 >= argc) {
@@ -157,7 +160,7 @@ std::expected<CompareOptions, std::string> parseCompareCommand(int argc, const c
         return std::unexpected("invalid value for --error-image: '" + o.errorImage +
                                "' (supported: .png .jpg .jpeg .bmp .tga)");
       }
-    } else if (arg.rfind("--", 0) == 0) {
+    } else if (arg.starts_with("--")) {
       return std::unexpected("unknown argument: " + arg);
     } else {
       positional.push_back(arg);
@@ -179,9 +182,8 @@ std::expected<CompareOptions, std::string> parseCompareCommand(int argc, const c
 
 std::optional<std::string> resolveSceneName(const std::string& nameOrIndex) {
   if (findScene(nameOrIndex)) return nameOrIndex;
-  auto index = parseInt<size_t>(nameOrIndex, 0, static_cast<long long>(sceneRegistry().size()) - 1);
-  if (index) return sceneRegistry()[*index].name;
-  return std::nullopt;
+  return parseInt<size_t>(nameOrIndex, 0, static_cast<long long>(sceneRegistry().size()) - 1)
+      .transform([](size_t index) { return std::string(sceneRegistry()[index].name); });
 }
 
 void applyOptions(const CmdOptions& options, Scene& scene) {

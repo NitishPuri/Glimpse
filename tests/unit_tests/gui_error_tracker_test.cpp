@@ -46,7 +46,7 @@ static ut::suite<"gui_error_tracker"> guiErrorTrackerSuite = [] {
       ErrorTracker tracker;
       tracker.loadReference("no_such_scene", smallScene());
       expect(!tracker.ref().has_value());
-      expect(tracker.unavailableReason(smallScene()).find("no reference") != std::string::npos);
+      expect(tracker.unavailableReason(smallScene()).contains("no reference"));
     };
 
     "valid_only_for_the_reference_image"_test = [] {
@@ -57,16 +57,16 @@ static ut::suite<"gui_error_tracker"> guiErrorTrackerSuite = [] {
 
       Scene edited = scene;
       edited.cam.imageWidth = 8;
-      expect(tracker.unavailableReason(edited).find("size") != std::string::npos);
+      expect(tracker.unavailableReason(edited).contains("size"));
       edited = scene;
       edited.cam.lookfrom = Point3(1, 0, 0);
-      expect(tracker.unavailableReason(edited).find("camera") != std::string::npos);
+      expect(tracker.unavailableReason(edited).contains("camera"));
       edited = scene;
       edited.cam.maxDepth = 2;
-      expect(tracker.unavailableReason(edited).find("depth") != std::string::npos);
+      expect(tracker.unavailableReason(edited).contains("depth"));
       edited = scene;
       edited.background = Color(0, 0, 0);
-      expect(tracker.unavailableReason(edited).find("background") != std::string::npos);
+      expect(tracker.unavailableReason(edited).contains("background"));
     };
 
     "samples_the_film"_test = [] {

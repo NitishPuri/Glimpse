@@ -58,7 +58,7 @@ static ut::suite<"float_image"> floatImageSuite = [] {
       const std::string path = testOutputPath("header.pfm");
       expect(writePFM(path, makeTestImage()));
       const std::string bytes = readBytes(path);
-      expect(bytes.rfind("PF\n3 2\n-1", 0) == 0) << "negative scale = little-endian floats";
+      expect(bytes.starts_with("PF\n3 2\n-1")) << "negative scale = little-endian floats";
       expect(bytes.size() == bytes.find('\n', bytes.find("-1")) + 1 + 3 * 2 * 3 * 4) << "header + 18 floats";
     };
 

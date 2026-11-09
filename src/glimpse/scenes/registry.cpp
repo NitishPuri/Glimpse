@@ -2,6 +2,8 @@
 
 #include "glimpse/scenes/registry.h"
 
+#include <algorithm>
+
 #include "glimpse/scenes/factories.h"
 
 namespace glimpse {
@@ -26,9 +28,8 @@ const std::vector<SceneEntry>& sceneRegistry() {
 }
 
 const SceneEntry* findScene(std::string_view name) {
-  for (const auto& entry : sceneRegistry())
-    if (name == entry.name) return &entry;
-  return nullptr;
+  const auto it = std::ranges::find(sceneRegistry(), name, &SceneEntry::name);
+  return it != sceneRegistry().end() ? &*it : nullptr;
 }
 
 }  // namespace glimpse

@@ -6,6 +6,7 @@
 #include <chrono>
 #include <filesystem>
 #include <format>
+#include <ranges>
 #include <vector>
 
 #include "app.h"
@@ -208,10 +209,10 @@ void UIRenderer::renderUI(RayTracer& raytracer, GLResources& glRes) {
   }
 
   if (ImGui::BeginCombo("Scene", sceneRegistry()[params.currentScene].name)) {
-    for (int n = 0; n < static_cast<int>(sceneRegistry().size()); n++) {
+    for (const auto& [n, entry] : std::views::enumerate(sceneRegistry())) {
       const bool isSelected = (params.currentScene == n);
-      if (ImGui::Selectable(sceneRegistry()[n].name, isSelected)) {
-        params.currentScene = n;
+      if (ImGui::Selectable(entry.name, isSelected)) {
+        params.currentScene = static_cast<int>(n);
         raytracer.setupScene(glRes, params.currentScene, params.lookFrom, params.lookAt);
         maybeRenderOnParamChange(raytracer);
       }

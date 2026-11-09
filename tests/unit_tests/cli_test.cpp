@@ -92,7 +92,7 @@ static ut::suite<"cli"> cliSuite = [] {
       expect(parse({"--help"}).value().help);
       expect(parse({"-h"}).value().help);
       expect(parse({"--list-scenes"}).value().listScenes);
-      expect(usage().find("--spp") != std::string::npos);
+      expect(usage().contains("--spp"));
     };
 
     "rejects_bad_input"_test = [] {

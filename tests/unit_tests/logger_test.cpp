@@ -16,9 +16,9 @@ static ut::suite<"logger"> loggerSuite = [] {
   "logger"_test = [] {
     "log_file_for_names_a_per_run_file_in_logs"_test = [] {
       const std::string path = logFileFor("cli");
-      expect(path.rfind("logs/cli_", 0) == 0) << path;          // logs/cli_YYYYmmdd_HHMMSS.log
+      expect(path.starts_with("logs/cli_")) << path;  // logs/cli_YYYYmmdd_HHMMSS.log
       expect(path.size() == std::string("logs/cli_20261011_123456.log").size()) << path;
-      expect(path.substr(path.size() - 4) == ".log") << path;
+      expect(path.ends_with(".log")) << path;
     };
 
     "creates_missing_directories"_test = [] {
@@ -31,7 +31,7 @@ static ut::suite<"logger"> loggerSuite = [] {
       std::ifstream in(dir / "run.log");
       std::string line;
       std::getline(in, line);
-      expect(line.find("hello 42") != std::string::npos) << line;
+      expect(line.contains("hello 42")) << line;
     };
   };
 };

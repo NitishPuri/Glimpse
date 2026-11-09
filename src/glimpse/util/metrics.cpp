@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <ranges>
 
 #include "glimpse/util/float_image.h"
 #include "glimpse/util/image.h"
@@ -43,8 +44,8 @@ std::optional<ErrorStats> compareImages(const FloatImage& test, const FloatImage
 
   ErrorStats stats;
   double sumSE = 0, sumRSE = 0;
-  for (size_t i = 0; i < ref.rgb.size(); ++i) {
-    const double v = test.rgb[i], r = ref.rgb[i];
+  for (const auto [testValue, refValue] : std::views::zip(test.rgb, ref.rgb)) {
+    const double v = testValue, r = refValue;  // accumulate in double: a float sum over a whole image loses digits
     if (!std::isfinite(v) || !std::isfinite(r)) {
       ++stats.nonFinite;
       continue;

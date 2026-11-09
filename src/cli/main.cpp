@@ -4,6 +4,7 @@
 #include <chrono>
 #include <filesystem>
 #include <print>
+#include <ranges>
 
 #include "glimpse/convergence.h"
 #include "glimpse/glimpse.h"
@@ -117,7 +118,7 @@ int main(int argc, char **argv) {
     return 0;
   }
   if (options.listScenes) {
-    for (size_t i = 0; i < sceneRegistry().size(); ++i) std::println("{}  {}", i, sceneRegistry()[i].name);
+    for (const auto &[i, entry] : std::views::enumerate(sceneRegistry())) std::println("{}  {}", i, entry.name);
     return 0;
   }
 
