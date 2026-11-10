@@ -5,19 +5,20 @@
 
 #define MULTITHREADED
 #ifdef MULTITHREADED
+#include <algorithm>
 #include <future>
-#include <print>
 #include <thread>
 #endif
 
-#include "glimpse/camera.h"
-#include "glimpse/util/rng.h"
 #include "glimpse/aggregates.h"
-#include "glimpse/shapes.h"
-#include "glimpse/materials.h"
+#include "glimpse/camera.h"
 #include "glimpse/integrators.h"
+#include "glimpse/materials.h"
 #include "glimpse/render.h"
+#include "glimpse/shapes.h"
 #include "glimpse/util/color.h"
+#include "glimpse/util/log.h"
+#include "glimpse/util/rng.h"
 #include "glimpse/util/vecmath.h"
 
 namespace glimpse {
@@ -83,7 +84,7 @@ void renderSection(RenderSectionArgs &args) {
       }
     }
   }
-  std::println("Section done ... rows[{}, {}] thread {}", startRow, endRow, std::this_thread::get_id());
+  log::debug("Section done ... rows[{}, {}] thread {}", startRow, endRow, std::this_thread::get_id());
 }
 
 void renderSectionUncap(RenderSectionArgs &args) {
@@ -126,7 +127,7 @@ void renderSectionUncap(RenderSectionArgs &args) {
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
-  std::println("Stopping section ... rows[{}, {}] thread {}", startRow, endRow, std::this_thread::get_id());
+  log::debug("Stopping section ... rows[{}, {}] thread {}", startRow, endRow, std::this_thread::get_id());
 }
 
 void Renderer::renderScene(Scene scene, Image &image, std::atomic<int64_t> *progress) {
@@ -139,7 +140,9 @@ void Renderer::renderScene(Scene scene, Image &image, std::atomic<int64_t> *prog
   film.initialize(scene.cam.imageWidth, scene.cam.imageHeight);
 
 #ifdef MULTITHREADED
-  const int numThreads = std::thread::hardware_concurrency();
+  // hardware_concurrency() may return 0 ("not computable"); more threads than rows would get empty sections.
+  const int numThreads =
+      std::clamp(static_cast<int>(std::thread::hardware_concurrency()), 1, std::max(1, scene.cam.imageHeight));
   std::vector<std::future<void>> futures;
   int rowsPerThread = scene.cam.imageHeight / numThreads;
 
@@ -167,7 +170,7 @@ void Renderer::renderScene(Scene scene, Image &image, std::atomic<int64_t> *prog
     f.get();
   }
 
-  std::println("{} : All threads finished rendering...", __func__);
+  log::debug("{}: all threads finished", __func__);
   Renderer::stopRequested = false;
 #else  // SINGLETHREADED
 

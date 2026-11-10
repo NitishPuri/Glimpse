@@ -20,7 +20,6 @@ class AppWindow;
 class UIRenderer {
  public:
   ImGuiParams params;
-  UIRenderer(Logger& logger) : logger(logger) {}
 
   void renderUI(RayTracer& RayTracer, GLResources& GLResources);
   void renderOutput(GLResources& GLResources, RayTracer& raytracer);
@@ -46,8 +45,6 @@ class UIRenderer {
   std::optional<RenderStats> lastStats;  // the running render's, or the last finished one's
   double lastErrorSample = -1;           // render time of the last ErrorTracker sample
   bool errorVsTime = false;              // plot x axis: seconds instead of spp
-
-  Logger& logger;
 };
 
 }  // namespace glimpse::gui

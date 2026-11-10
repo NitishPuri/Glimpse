@@ -96,9 +96,9 @@ void UIRenderer::renderControl(RayTracer& raytracer, GLResources& glRes) {
                                          sceneRegistry()[params.currentScene].name, spp);
 
     if (raytracer.image.write(outfilePath)) {
-      logger.log("Image written to {}", outfilePath);
+      log::info("Image written to {}", outfilePath);
     } else {
-      logger.log("Failed to write image to {}", outfilePath);
+      log::error("Failed to write image to {}", outfilePath);
     }
   }
 

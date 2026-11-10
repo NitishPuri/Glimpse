@@ -12,13 +12,10 @@
 namespace glimpse::gui {
 
 struct GLResources {
-  GLResources(Logger& logger) : logger(logger) {}
   GLuint framebufferTexture{};
   int renderWidth{};
   int renderHeight{};
   GLFWwindow* window = nullptr;
-
-  Logger& logger;
 
   int initGL();
 

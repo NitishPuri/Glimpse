@@ -15,6 +15,7 @@
 #include "glimpse/scenes/registry.h"
 #include "glimpse/shapes.h"
 #include "glimpse/util/image.h"
+#include "glimpse/util/log.h"
 
 namespace glimpse::gui {
 
@@ -35,9 +36,6 @@ struct RayTracer {
   bool measuring = false;  // the current render is the reference's image, so its error is sampled
   std::chrono::steady_clock::time_point startTime;
 
-  Logger& logger;
-  RayTracer(Logger& logger) : logger(logger) {}
-
   void renderSceneAsync() {
     // check if we are already rendering, if yes, then lets do nothing for now.
     if (renderer.get() != nullptr) {
@@ -54,8 +52,8 @@ struct RayTracer {
     traceFuture = std::async(std::launch::async, [&]() {
       image.clear();
       scene.cam.initialize();
-      logger.log("Rendering... {}x{} with {} samples per pixel", scene.cam.imageWidth, scene.cam.imageHeight,
-                 scene.cam.samplesPerPixel);
+      log::info("Rendering... {}x{} with {} samples per pixel", scene.cam.imageWidth, scene.cam.imageHeight,
+                scene.cam.samplesPerPixel);
       auto startTime = std::chrono::high_resolution_clock::now();
 
       status = RENDERING;
@@ -67,7 +65,7 @@ struct RayTracer {
       auto endTime = std::chrono::high_resolution_clock::now();
       auto duration = std::chrono::duration<float, std::chrono::seconds::period>(endTime - startTime).count();
 
-      logger.log("Image generated in {:.3f} seconds", duration);
+      log::info("Image generated in {:.3f} seconds", duration);
     });
   }
 
@@ -80,12 +78,12 @@ struct RayTracer {
   void setupScene(GLResources& GLResources, int currentScene, float lookFrom[3], float lookAt[3]) {
     // Ensure currentScene is within valid range
     if (currentScene < 0 || std::cmp_greater_equal(currentScene, sceneRegistry().size())) {
-      logger.log("Invalid scene index: {}", currentScene);
+      log::warn("Invalid scene index: {}", currentScene);
       return;
     }
 
     const SceneEntry& entry = sceneRegistry()[currentScene];
-    logger.log("Setting up scene ... {} {}", currentScene, entry.name);
+    log::info("Setting up scene ... {} {}", currentScene, entry.name);
     scene = entry.make();
     errors.loadReference(entry.name, scene);
 

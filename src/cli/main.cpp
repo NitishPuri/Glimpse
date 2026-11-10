@@ -58,7 +58,7 @@ int runCompare(int argc, const char *const *argv) {
 }
 
 // `--convergence out.csv`: error vs spp and time against refs/<scene>.pfm (technique 02).
-int runConvergence(const glimpse::CmdOptions &options, const std::string &sceneName, glimpse::Logger &logger) {
+int runConvergence(const glimpse::CmdOptions &options, const std::string &sceneName) {
   using namespace glimpse;
   const std::string refPath = referenceOutputPath(sceneName);
   const auto ref = readPFM(refPath);
@@ -79,23 +79,23 @@ int runConvergence(const glimpse::CmdOptions &options, const std::string &sceneN
   }
 
   const auto schedule = convergenceSchedule(options.spp.value_or(kConvergenceMaxSpp));
-  logger.log("Convergence of {} at {}x{}, depth {}, {} renders up to {} spp, against {}", sceneName, ref->width,
-             ref->height, scene.cam.maxDepth, schedule.size(), schedule.back(), refPath);
+  log::info("Convergence of {} at {}x{}, depth {}, {} renders up to {} spp, against {}", sceneName, ref->width,
+            ref->height, scene.cam.maxDepth, schedule.size(), schedule.back(), refPath);
   const auto points = measureConvergence(scene, *ref, schedule, [&](const ConvergencePoint &p) {
-    logger.log("{} spp  {:.3f} s  RMSE {:.6g}  relMSE {:.6g}", p.spp, p.seconds, p.error.rmse, p.error.relMSE);
+    log::info("{} spp  {:.3f} s  RMSE {:.6g}  relMSE {:.6g}", p.spp, p.seconds, p.error.rmse, p.error.relMSE);
   });
   if (points.size() != schedule.size()) {
-    logger.log("Convergence stopped after {} of {} renders", points.size(), schedule.size());
+    log::error("Convergence stopped after {} of {} renders", points.size(), schedule.size());
     return 1;
   }
 
   const auto parent = std::filesystem::path(options.convergence).parent_path();
   if (!parent.empty()) std::filesystem::create_directories(parent);
   if (!writeConvergenceCSV(options.convergence, points)) {
-    logger.log("Failed to write {}", options.convergence);
+    log::error("Failed to write {}", options.convergence);
     return 1;
   }
-  logger.log("Wrote {}", options.convergence);
+  log::info("Wrote {}", options.convergence);
   return 0;
 }
 
@@ -129,12 +129,12 @@ int main(int argc, char **argv) {
     return 2;
   }
 
-  Logger logger(logFileFor("cli"));
+  log::setFile(logFileFor("cli"));
   // Seeds every worker thread's generator. Rows are split per thread, so this is reproducible on one machine;
   // seeding that is independent of the thread count is technique 03.
   if (options.seed) Random::setSeed(*options.seed);
 
-  if (!options.convergence.empty()) return runConvergence(options, *sceneName, logger);
+  if (!options.convergence.empty()) return runConvergence(options, *sceneName);
 
   // Scenes declare their own lights (scene.lights); nothing is added here.
   Scene scene = findScene(*sceneName)->make();
@@ -143,15 +143,15 @@ int main(int argc, char **argv) {
   Image image(cam.imageWidth, cam.imageHeight);
 
   // Stratified sampling uses a sqrtSpp x sqrtSpp grid: the real sample count is sqrtSpp^2.
-  logger.log("Rendering {} at {}x{}, {} spp, depth {}", *sceneName, cam.imageWidth, cam.imageHeight,
-             cam.sqrtSpp * cam.sqrtSpp, cam.maxDepth);
+  log::info("Rendering {} at {}x{}, {} spp, depth {}", *sceneName, cam.imageWidth, cam.imageHeight,
+            cam.sqrtSpp * cam.sqrtSpp, cam.maxDepth);
   const auto start = std::chrono::high_resolution_clock::now();
 
   Renderer renderer;
   renderer.renderScene(scene, image, nullptr);
 
   const auto seconds = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - start).count();
-  logger.log("Rendered in {:.3f} s", seconds);
+  log::info("Rendered in {:.3f} s", seconds);
 
   const std::string out = !options.out.empty() ? options.out
                           : options.reference ? referenceOutputPath(*sceneName)
@@ -163,9 +163,9 @@ int main(int argc, char **argv) {
   const FloatImage linear = renderer.film.linearRGB();
   const bool ok = isFloatOutput(out) ? writePFM(out, linear) : encodeSRGB(linear, options.exposure).write(out);
   if (!ok) {
-    logger.log("Failed to write {}", out);
+    log::error("Failed to write {}", out);
     return 1;
   }
-  logger.log("Wrote {}", out);
+  log::info("Wrote {}", out);
   return 0;
 }

@@ -7,7 +7,8 @@
 #endif
 
 #include <algorithm>
-#include <print>
+
+#include "glimpse/util/log.h"
 
 // Define STB image implementation in this file
 #define STB_IMAGE_IMPLEMENTATION
@@ -106,7 +107,7 @@ std::unique_ptr<StbImageData> Image::loadStbImage(const std::string& filename) {
   result->data = stbi_load(filename.c_str(), &result->width, &result->height, &result->channels, bytesPerPixel);
 
   if (!result->data) {
-    std::println(stderr, "Failed to load image: {}", stbi_failure_reason());
+    log::error("Failed to load image: {}", stbi_failure_reason());
     return result;
   }
 
@@ -117,7 +118,7 @@ bool Image::read(const std::string& filename) {
   auto stbData = loadStbImage(filename);
 
   if (!stbData->data) {
-    std::println(stderr, "Failed to load image: {}", filename);
+    log::error("Failed to load image: {}", filename);
     return false;
   }
 
@@ -147,7 +148,7 @@ bool Image::read(const std::string& filename) {
 // Write image using STB library
 bool Image::write(const std::string& filename) const {
   if (!isValid()) {
-    std::println(stderr, "Cannot write invalid image to: {}", filename);
+    log::error("Cannot write invalid image to: {}", filename);
     return false;
   }
 
@@ -172,7 +173,7 @@ bool Image::write(const std::string& filename) const {
   }
 
   if (!result) {
-    std::println(stderr, "Failed to write image: {}", filename);
+    log::error("Failed to write image: {}", filename);
     return false;
   }
 

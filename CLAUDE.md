@@ -48,7 +48,13 @@ Rules that come with it:
   plus Ray Tracing Gems I/II articles. For BDPT and SPPM, read pbrt-v3 ch16 and the local `pbrt-v3` source. Each
   technique note has a **Read** section with links.
   - Local pbrt-v4 scenes for testing are in `.../pbrt/pbrt_scenes/pbrt-v4-scenes`.
-  - pbrt-v4's `imgtool diff` can cross-check error metrics.
+  - pbrt-v4's `imgtool diff` can cross-check error metrics (02 found exact agreement). It is already built on
+    Linux at `.../pbrt/pbrt-v4/build/linux/imgtool`; use it, don't rebuild elsewhere:
+    `imgtool diff --metric MRSE --reference refs/<scene>.pfm x.pfm` (also `MSE`; it reads EXR too). `build/` is
+    gitignored in pbrt. To rebuild (about 270 steps): `cmake -S pbrt-v4 -B pbrt-v4/build/linux -G Ninja
+    -DCMAKE_BUILD_TYPE=Release -DGLFW_BUILD_WAYLAND=OFF && ninja -C pbrt-v4/build/linux imgtool` (Wayland is off
+    because `libxkbcommon-dev` isn't installed). The `pbrt` renderer target lives in the same tree if a technique
+    ever needs pbrt's own render as a reference.
 - **Code is for reading.** The owner learns from it, so comment the *why* (the estimator, the pdf, the measure
   conversion), not the *what*.
 - **Diagrams** (as in Glint), wherever a picture beats words: mermaid inline in the docs for flow and structure,
@@ -123,7 +129,7 @@ the old spellings (see [Tooling](#tooling)).
 
 | Use | Instead of | Where it already is |
 |---|---|---|
-| `std::format`, `std::print`/`println`; `logger.log("{} spp", n)` (compile-time checked) | `iostream` chains, `ostringstream`, `to_string` | `log.h`, `cli/main.cpp`, `render.cpp`, `image.cpp` |
+| `std::format`, `std::print`/`println`; `log::info("{} spp", n)` (compile-time checked) | `iostream` chains, `ostringstream`, `to_string` | `log.h`, `cli/main.cpp`, `render.cpp`, `image.cpp` |
 | chrono formatting of `localNow<Precision>()` (`"{:%Y%m%d_%H%M%S}"`) | `localtime` + `put_time` | `log.h`, the viewer's Save Image |
 | `std::expected<T, std::string>` for failures that are a normal outcome | result struct with an `error` string; `optional` that loses the reason | `parseCommandLine`, `parseCompareCommand`, `readPFM` |
 | exceptions for failures that end the run | `expected` that every caller just passes up | escape `main` on purpose (`NOLINT` there) |
@@ -208,7 +214,8 @@ read, so new scenes go at the end. `findScene(name)` looks one up by name.
 
 **Utilities** (`src/glimpse/util/`): `math.h` (constants, `degreesToRadians`), `rng.h` (`Random`, `randomDouble`),
 `vecmath.h` (`Vec3`/`Point3`/`Color`, `ONB`), `sampling.h` (warps: `randomUnitVector`, `randomCosineDirection`,
-...), `interval.h`, `AABB`, `image`, `log.h` (`Logger`, `logFileFor`), `cli_options`. The viewer code is in
+...), `interval.h`, `AABB`, `image`, `log.h` (thread-safe `log::debug/info/warn/error` free functions like
+Glint's; `log::setFile(logFileFor(app))`; debug lines only in debug builds), `cli_options`. The viewer code is in
 `namespace glimpse::gui`. Nothing in `src/` has a global `using namespace`.
 
 **Geometry** (pbrt-like split): `interaction.h` (`HitRecord` + the `Hittable` interface), `shapes.h`

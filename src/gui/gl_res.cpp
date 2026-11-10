@@ -10,7 +10,7 @@ namespace glimpse::gui {
 int GLResources::initGL() {
   // Initialize GLFW and OpenGL
   if (!glfwInit()) {
-    logger.log("Failed to initialize GLFW");
+    log::error("Failed to initialize GLFW");
     return -1;
   }
 
@@ -23,7 +23,7 @@ int GLResources::initGL() {
   if (!window) {
     const char* description;
     int code = glfwGetError(&description);
-    logger.log("Failed to create GLFW window: {} (0x{:X})", description ? description : "no description", code);
+    log::error("Failed to create GLFW window: {} (0x{:X})", description ? description : "no description", code);
     glfwTerminate();
     return -1;
   }
@@ -32,7 +32,7 @@ int GLResources::initGL() {
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);  // Enable vsync
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    logger.log("Failed to initialize GLAD");
+    log::error("Failed to initialize GLAD");
     return -1;
   }
 
@@ -61,7 +61,7 @@ void GLResources::setupFramebuffer() {
 bool GLResources::checkGLError(const std::string& functionName) {
   GLenum err;
   while ((err = glGetError()) != GL_NO_ERROR) {
-    logger.log("OpenGL error in {}: 0x{:04X}", functionName, err);
+    log::error("OpenGL error in {}: 0x{:04X}", functionName, err);
     return true;
   }
   return false;

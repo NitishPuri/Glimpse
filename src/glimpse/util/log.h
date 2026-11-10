@@ -1,19 +1,53 @@
 #pragma once
 
-// Logger: timestamped lines to the console and a file, on top of std::format:
-//   logger.log("Rendered {} at {}x{}", name, width, height);
-// logFileFor(app) names a per-run file logs/<app>_<time>.log.
+// Logging on top of std::format, as free functions like Glint's (core/log.h):
+//   glimpse::log::info("Rendered {} at {}x{}", name, width, height);
+// Every line goes to the console (warn/error to stderr) and, once log::setFile has opened one, to that file too.
+// Thread-safe: the render threads and the viewer's UI thread log at the same time. Console lines carry seconds
+// since start; file lines also carry the wall-clock time. logFileFor(app) names a per-run file.
 
 #include <chrono>
-#include <filesystem>
 #include <format>
-#include <fstream>
-#include <print>
 #include <string>
-
-#define CONSOLE_LOG 1
+#include <string_view>
 
 namespace glimpse {
+
+namespace log {
+
+enum class Level { Debug, Info, Warn, Error };
+
+void write(Level level, std::string_view message);
+
+// Also write every message to this file (truncated on open; missing directories are created). Empty path closes
+// it. Returns false if the file can't be opened.
+bool setFile(const std::string& path);
+
+// Console output on/off (default on); the file, if open, still gets every line. Tests use it to stay quiet.
+void setConsole(bool enabled);
+
+// Messages below this level are dropped. Default: Debug in debug builds, Info otherwise.
+void setMinLevel(Level level);
+
+// The format string is checked at compile time against the argument types.
+template <typename... Args>
+void debug(std::format_string<Args...> f, Args&&... args) {
+  write(Level::Debug, std::format(f, std::forward<Args>(args)...));
+}
+template <typename... Args>
+void info(std::format_string<Args...> f, Args&&... args) {
+  write(Level::Info, std::format(f, std::forward<Args>(args)...));
+}
+template <typename... Args>
+void warn(std::format_string<Args...> f, Args&&... args) {
+  write(Level::Warn, std::format(f, std::forward<Args>(args)...));
+}
+template <typename... Args>
+void error(std::format_string<Args...> f, Args&&... args) {
+  write(Level::Error, std::format(f, std::forward<Args>(args)...));
+}
+
+}  // namespace log
 
 // The local wall-clock time now, truncated to Precision, for std::format's chrono specs ("{:%Y%m%d_%H%M%S}").
 // The truncation matters: %S prints fractional seconds down to the time point's precision.
@@ -23,36 +57,8 @@ auto localNow() {
   return std::chrono::zoned_time{std::chrono::current_zone(), now};
 }
 
-class Logger {
- public:
-  Logger(const std::string &logFilePath) : logFilePath(logFilePath) {
-    const auto dir = std::filesystem::path(logFilePath).parent_path();
-    if (!dir.empty()) std::filesystem::create_directories(dir);
-    logFile.open(logFilePath, std::ios_base::app);  // Open in append mode
-    if (!logFile.is_open()) std::println(stderr, "Unable to open log file: {}", logFilePath);
-  }
-
-  // The format string is checked at compile time against the argument types.
-  template <typename... Args>
-  void log(std::format_string<Args...> fmt, Args &&...args) {
-    const std::string line = std::format("{:%Y-%m-%d %H:%M:%S}: {}", localNow<std::chrono::milliseconds>(),
-                                         std::format(fmt, std::forward<Args>(args)...));
-#if CONSOLE_LOG
-    std::println(stderr, "{}", line);
-#endif
-    if (logFile.is_open()) {
-      std::println(logFile, "{}", line);
-      logFile.flush();  // keep the file useful even if the run crashes right after
-    }
-  }
-
- private:
-  std::string logFilePath;
-  std::ofstream logFile;
-};
-
 // One log file per run, like Glint: logs/<app>_<YYYYmmdd_HHMMSS>.log (relative to the repo root, where run.sh runs).
-inline std::string logFileFor(const std::string &app) {
+inline std::string logFileFor(const std::string& app) {
   return std::format("logs/{}_{:%Y%m%d_%H%M%S}.log", app, localNow());
 }
 

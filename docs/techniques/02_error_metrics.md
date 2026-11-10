@@ -170,6 +170,6 @@ Cornell box, 300×300, depth 50, seed 1, against `refs/cornell_box.pfm` (4096 sp
 ./run.sh cli compare results/c16.pfm refs/cornell_box.pfm --error-image results/c16_err.png
 ./run.sh cli --scene cornell_box --seed 1 --convergence docs/data/02_convergence_cornell_box.csv   # ~41 s
 tools/.venv/bin/python tools/diagrams.py 02_convergence
-# cross-check with pbrt-v4 (built on Linux with -DGLFW_BUILD_WAYLAND=OFF, target imgtool):
-imgtool diff --metric MRSE --reference refs/cornell_box.pfm results/c16.pfm
+# cross-check with pbrt-v4's imgtool (built once; CLAUDE.md has the rebuild command):
+/mnt/e/tree/graphics/ray_tracing/pbrt/pbrt-v4/build/linux/imgtool diff --metric MRSE --reference refs/cornell_box.pfm results/c16.pfm
 ```

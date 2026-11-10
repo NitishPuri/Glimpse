@@ -27,7 +27,7 @@ int AppWindow::initApp() {
     }
     raytracer.setupScene(glRes, ui.params.currentScene, ui.params.lookFrom, ui.params.lookAt);
   } else {
-    logger.log("Failed to initialize OpenGL context");
+    log::error("Failed to initialize OpenGL context");
     return -1;
   }
 
@@ -75,8 +75,8 @@ void AppWindow::run() {
 
 // NOLINTNEXTLINE(bugprone-exception-escape): exceptions are for fatal failures; ending the run is the point
 int main() {
-  glimpse::Logger logger(glimpse::logFileFor("gui"));
-  glimpse::gui::AppWindow app(logger);
+  glimpse::log::setFile(glimpse::logFileFor("gui"));
+  glimpse::gui::AppWindow app;
   if (app.initApp() != 0) {
     return -1;
   }
