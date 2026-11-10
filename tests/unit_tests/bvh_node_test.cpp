@@ -101,15 +101,15 @@ static ut::suite<"bvh"> bvhSuite = [] {
       struct testBvhNode : public BVHNode {
         testBvhNode() : BVHNode(HittableList()) {}
 
-        static bool testBoxXCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) {
+        static bool testBoxXCompare(const shared_ptr<Hittable>& a, const shared_ptr<Hittable>& b) {
           return boxXCompare(a, b);
         }
 
-        static bool testBoxYCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) {
+        static bool testBoxYCompare(const shared_ptr<Hittable>& a, const shared_ptr<Hittable>& b) {
           return boxYCompare(a, b);
         }
 
-        static bool testBoxZCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) {
+        static bool testBoxZCompare(const shared_ptr<Hittable>& a, const shared_ptr<Hittable>& b) {
           return boxZCompare(a, b);
         }
       };

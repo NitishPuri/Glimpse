@@ -15,10 +15,12 @@
 // along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //==============================================================================================
 
+#include <utility>
+
 #include "glimpse/aggregates.h"
 #include "glimpse/shapes.h"
-#include "glimpse/util/vecmath.h"
 #include "glimpse/util/sampling.h"
+#include "glimpse/util/vecmath.h"
 
 namespace glimpse {
 
@@ -70,8 +72,8 @@ class HittablePDF : public PDF {
 class MixturePDF : public PDF {
  public:
   MixturePDF(shared_ptr<PDF> p0, shared_ptr<PDF> p1) {
-    p[0] = p0;
-    p[1] = p1;
+    p[0] = std::move(p0);
+    p[1] = std::move(p1);
   }
 
   double value(const Vec3& direction) const override {

@@ -9,7 +9,7 @@ namespace glimpse {
 
 class Translate : public Hittable {
  public:
-  Translate(shared_ptr<Hittable> object, const Vec3& offset) : object(object), offset(offset) {
+  Translate(const shared_ptr<Hittable>& object, const Vec3& offset) : object(object), offset(offset) {
     bbox = object->boundingBox() + offset;
   }
 
@@ -36,7 +36,7 @@ class Translate : public Hittable {
 
 class RotateY : public Hittable {
  public:
-  RotateY(shared_ptr<Hittable> object, double angle) : object(object) {
+  RotateY(const shared_ptr<Hittable>& object, double angle) : object(object) {
     auto radians = math::degreesToRadians(angle);
     sinTheta = std::sin(radians);
     cosTheta = std::cos(radians);

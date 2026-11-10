@@ -5,6 +5,7 @@
 // Follows TNW "Volumes"; pbrt-v4 ch11 and technique 20 (media, delta/ratio tracking) replace it.
 
 #include <algorithm>
+#include <utility>
 
 #include "glimpse/interaction.h"
 #include "glimpse/materials.h"
@@ -15,10 +16,12 @@ namespace glimpse {
 class ConstantMedium : public Hittable {
  public:
   ConstantMedium(shared_ptr<Hittable> boundary, double density, shared_ptr<Texture> tex)
-      : boundary(boundary), negInvDensity(-1 / density), phaseFunction(make_shared<Isotropic>(tex)) {}
+      : boundary(std::move(boundary)),
+        negInvDensity(-1 / density),
+        phaseFunction(make_shared<Isotropic>(std::move(tex))) {}
 
   ConstantMedium(shared_ptr<Hittable> boundary, double density, const Color& albedo)
-      : boundary(boundary), negInvDensity(-1 / density), phaseFunction(make_shared<Isotropic>(albedo)) {}
+      : boundary(std::move(boundary)), negInvDensity(-1 / density), phaseFunction(make_shared<Isotropic>(albedo)) {}
 
   bool hit(const Ray& r, Interval rayT, HitRecord& rec) const override {
     HitRecord rec1, rec2;

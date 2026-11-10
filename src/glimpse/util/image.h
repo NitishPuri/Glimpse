@@ -4,7 +4,6 @@
 // setFloat() clamps and quantises [0,1] floats. Float (PFM) output arrives with technique 01.
 
 #include <algorithm>
-#include <cmath>
 #include <memory>
 #include <string>
 #include <vector>
@@ -86,23 +85,6 @@ class Image {
   const std::vector<uchar>& data() const { return pixelData; }
 
  private:
-  // Convert linear RGB [0,1] to sRGB [0,1]
-  static float linearToSrgb(float linear) {
-    if (linear <= 0.0031308f) {
-      return linear * 12.92f;
-    } else {
-      return 1.055f * std::pow(linear, 1.0f / 2.4f) - 0.055f;
-    }
-  }
-
-  // Convert sRGB [0,1] to linear RGB [0,1]
-  static float srgbToLinear(float srgb) {
-    if (srgb <= 0.04045f) {
-      return srgb / 12.92f;
-    } else {
-      return std::pow((srgb + 0.055f) / 1.055f, 2.4f);
-    }
-  }
   std::vector<uchar> pixelData;
   const int bytesPerPixel = 3;  // RGB format
 

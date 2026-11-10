@@ -5,6 +5,8 @@
 // Follows RTIOW "Adding a Sphere", TNW "Motion Blur" and "Quadrilaterals", TROYL "Sampling Lights Directly";
 // pbrt-v4 §6.2, §6.5–6.6 (triangles arrive in technique 14).
 
+#include <utility>
+
 #include "glimpse/aggregates.h"
 #include "glimpse/interaction.h"
 #include "glimpse/util/vecmath.h"
@@ -15,14 +17,14 @@ class Sphere : public Hittable {
  public:
   // Stationary Sphere
   Sphere(const Point3& staticCenter, double radius_, shared_ptr<Material> mat)
-      : center(staticCenter, Vec3(0, 0, 0)), radius(std::fmax(0, radius_)), mat(mat) {
+      : center(staticCenter, Vec3(0, 0, 0)), radius(std::fmax(0, radius_)), mat(std::move(mat)) {
     auto rvec = Vec3(radius, radius, radius);
     bbox = AABB(staticCenter - rvec, staticCenter + rvec);
   }
 
   // Moving Sphere
   Sphere(const Point3& center1, const Point3& center2, double radius_, shared_ptr<Material> mat)
-      : center(center1, center2 - center1), radius(std::fmax(0, radius_)), mat(mat) {
+      : center(center1, center2 - center1), radius(std::fmax(0, radius_)), mat(std::move(mat)) {
     auto rvec = Vec3(radius, radius, radius);
     AABB box1(center.at(0) - rvec, center.at(0) + rvec);
     AABB box2(center.at(1) - rvec, center.at(1) + rvec);
@@ -116,7 +118,8 @@ class Sphere : public Hittable {
 
 class Quad : public Hittable {
  public:
-  Quad(const Point3& Q, const Vec3& u, const Vec3& v, shared_ptr<Material> mat) : Q(Q), u(u), v(v), mat(mat) {
+  Quad(const Point3& Q, const Vec3& u, const Vec3& v, shared_ptr<Material> mat)
+      : Q(Q), u(u), v(v), mat(std::move(mat)) {
     auto n = cross(u, v);
     normal = unitVector(n);
     D = dot(normal, Q);
@@ -201,7 +204,7 @@ class Quad : public Hittable {
   double area;
 };
 
-inline shared_ptr<HittableList> box(const Point3& a, const Point3& b, shared_ptr<Material> mat) {
+inline shared_ptr<HittableList> box(const Point3& a, const Point3& b, const shared_ptr<Material>& mat) {
   // Returns the 3D box (six sides) that contains the two opposite vertices a & b.
 
   auto sides = make_shared<HittableList>();

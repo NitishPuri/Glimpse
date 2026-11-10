@@ -5,6 +5,8 @@
 // Follows RTIOW "Diffuse Materials", "Metal", "Dielectrics", TNW "Lights", TROYL "Cleaning Up PDF Management";
 // pbrt-v4 ch9 replaces it with BSDFs in technique 11.
 
+#include <utility>
+
 #include "glimpse/interaction.h"
 #include "glimpse/pdf.h"
 #include "glimpse/textures.h"
@@ -36,7 +38,7 @@ class Material {
 class Lambertian : public Material {
  public:
   Lambertian(const Color& albedo) : tex(make_shared<SolidColor>(albedo)) {}
-  Lambertian(shared_ptr<Texture> tex) : tex(tex) {}
+  Lambertian(shared_ptr<Texture> tex) : tex(std::move(tex)) {}
 
   bool scatter(const Ray& rIn, const HitRecord& rec, ScatterRecord& srec) const override {
     srec.attenuation = tex->value(rec.u, rec.v, rec.p);
@@ -116,7 +118,7 @@ class Dielectric : public Material {
 
 class DiffuseLight : public Material {
  public:
-  DiffuseLight(shared_ptr<Texture> tex) : tex(tex) {}
+  DiffuseLight(shared_ptr<Texture> tex) : tex(std::move(tex)) {}
   DiffuseLight(const Color& emit) : tex(make_shared<SolidColor>(emit)) {}
 
   Color emitted(const Ray& rIn, const HitRecord& rec, double u, double v, const Point3& p) const override {
@@ -131,7 +133,7 @@ class DiffuseLight : public Material {
 class Isotropic : public Material {
  public:
   Isotropic(const Color& albedo) : tex(make_shared<SolidColor>(albedo)) {}
-  Isotropic(shared_ptr<Texture> tex) : tex(tex) {}
+  Isotropic(shared_ptr<Texture> tex) : tex(std::move(tex)) {}
 
   bool scatter(const Ray& rIn, const HitRecord& rec, ScatterRecord& srec) const override {
     srec.attenuation = tex->value(rec.u, rec.v, rec.p);

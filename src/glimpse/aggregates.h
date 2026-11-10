@@ -5,6 +5,7 @@
 // Follows TNW "Bounding Volume Hierarchies"; pbrt-v4 §7.2–7.3 (the SAH build replaces it in technique 15).
 
 #include <algorithm>
+#include <utility>
 #include <vector>
 
 #include "glimpse/interaction.h"
@@ -17,13 +18,13 @@ class HittableList : public Hittable {
   std::vector<shared_ptr<Hittable>> objects;
 
   HittableList() = default;
-  HittableList(shared_ptr<Hittable> object) { add(object); }
+  HittableList(shared_ptr<Hittable> object) { add(std::move(object)); }
 
   void clear() { objects.clear(); }
 
   void add(shared_ptr<Hittable> object) {
-    objects.push_back(object);
     bbox = AABB(bbox, object->boundingBox());
+    objects.push_back(std::move(object));
   }
 
   bool hit(const Ray& r, Interval rayT, HitRecord& rec) const override {
@@ -85,17 +86,17 @@ class BVHNode : public Hittable {
   AABB bbox;
 
  protected:
-  static bool boxCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b, int axisIndex) {
+  static bool boxCompare(const shared_ptr<Hittable>& a, const shared_ptr<Hittable>& b, int axisIndex) {
     auto aAxisInterval = a->boundingBox().axisInterval(axisIndex);
     auto bAxisInterval = b->boundingBox().axisInterval(axisIndex);
     return aAxisInterval.min < bAxisInterval.min;
   }
 
-  static bool boxXCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return boxCompare(a, b, 0); }
+  static bool boxXCompare(const shared_ptr<Hittable>& a, const shared_ptr<Hittable>& b) { return boxCompare(a, b, 0); }
 
-  static bool boxYCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return boxCompare(a, b, 1); }
+  static bool boxYCompare(const shared_ptr<Hittable>& a, const shared_ptr<Hittable>& b) { return boxCompare(a, b, 1); }
 
-  static bool boxZCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return boxCompare(a, b, 2); }
+  static bool boxZCompare(const shared_ptr<Hittable>& a, const shared_ptr<Hittable>& b) { return boxCompare(a, b, 2); }
 };
 
 }  // namespace glimpse

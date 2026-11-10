@@ -3,6 +3,8 @@
 // Textures: SolidColor, CheckerTexture, ImageTexture, NoiseTexture (Perlin). value(u, v, p) returns a color.
 // Follows TNW "Texture Mapping", "Perlin Noise"; pbrt-v4 §10.3–10.4.
 
+#include <utility>
+
 #include "glimpse/perlin.h"
 #include "glimpse/util/vecmath.h"
 
@@ -32,7 +34,7 @@ class SolidColor : public Texture {
 class CheckerTexture : public Texture {
  public:
   CheckerTexture(double scale, shared_ptr<Texture> even, shared_ptr<Texture> odd)
-      : invScale(1.0 / scale), even(even), odd(odd) {}
+      : invScale(1.0 / scale), even(std::move(even)), odd(std::move(odd)) {}
 
   CheckerTexture(double scale, const Color &c1, const Color &c2)
       : CheckerTexture(scale, make_shared<SolidColor>(c1), make_shared<SolidColor>(c2)) {}
