@@ -42,23 +42,24 @@ static ut::suite<"perlin"> perlinSuite = [] {
       }
     };
 
-    skip / "noise_different_points"_test = [] {
+    "noise_different_points"_test = [] {
       Perlin noise;
 
-      // Test that different points typically give different noise values
-      double prev = noise.noise(Point3(0, 0, 0));
+      // Different points give different noise values. Half-integer points, not integers: at a lattice point the
+      // noise is exactly 0 (noise_zero_at_integers), so integer points would all compare equal.
+      double prev = noise.noise(Point3(0.5, 0.5, 0.5));
       int differentCount = 0;
 
       for (int i = 1; i < 10; i++) {
-        double current = noise.noise(Point3(i, i, i));
+        double current = noise.noise(Point3(i + 0.5, i + 0.5, i + 0.5));
         if (std::abs(current - prev) > 0.001) {
           differentCount++;
         }
         prev = current;
       }
 
-      // At least some values should be different
-      expect(differentCount > 0_i);
+      // Most should differ. Not all: the gradients are random, so two neighbours can land within 0.001 by chance.
+      expect(differentCount >= 5_i) << differentCount << "of 9 consecutive values differ";
     };
 
     "turbulence"_test = [] {

@@ -126,28 +126,29 @@ static ut::suite<"sphere"> sphereSuite = [] {
       }
     };
 
-    skip / "uv_mapping"_test = [] {
+    "uv_mapping"_test = [] {
       Point3 center(0, 0, 0);
       double radius = 1.0;
       auto mat = make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
       Sphere s(center, radius, mat);
 
       // Hit sphere at different positions to test UV mapping
-      Ray r1(Point3(0, 0, -2), Vec3(1, 0, 0));  // Hit at (0,0,-1) - back of sphere
+      Ray r1(Point3(0, 0, -2), Vec3(0, 0, 1));  // Hit at (0,0,-1) - back of sphere
       HitRecord rec1;
-      s.hit(r1, Interval(0.001, glimpse::math::infinity), rec1);
+      expect(s.hit(r1, Interval(0.001, glimpse::math::infinity), rec1) >> fatal);
       expect(rec1.u == 0.75_d) << "UV mapping for back of sphere";
       expect(rec1.v == 0.5_d);
 
       Ray r2(Point3(-2, 0, 0), Vec3(1, 0, 0));  // Hit at (-1,0,0) - left side
       HitRecord rec2;
-      s.hit(r2, Interval(0.001, glimpse::math::infinity), rec2);
+      expect(s.hit(r2, Interval(0.001, glimpse::math::infinity), rec2) >> fatal);
+      // -x is the u seam: atan2(-0.0, -1) = -pi gives u = 0 (with +0.0 it would be 1).
       expect(rec2.u == 0.0_d) << "UV mapping for left side";
       expect(rec2.v == 0.5_d);
 
       Ray r3(Point3(0, -2, 0), Vec3(0, 1, 0));  // Hit at (0,-1,0) - bottom
       HitRecord rec3;
-      s.hit(r3, Interval(0.001, glimpse::math::infinity), rec3);
+      expect(s.hit(r3, Interval(0.001, glimpse::math::infinity), rec3) >> fatal);
       expect(rec3.u == 0.5_d) << "UV mapping for bottom";
       expect(rec3.v == 0.0_d);
     };

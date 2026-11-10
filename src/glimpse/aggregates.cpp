@@ -34,6 +34,9 @@ BVHNode::BVHNode(std::vector<shared_ptr<Hittable>>& objects, size_t start, size_
 }
 
 bool BVHNode::hit(const Ray& r, Interval rayT, HitRecord& rec) const {
+  // Built from no objects: no children. The box test can't catch it, because AABB::empty's swapped (+inf, -inf)
+  // slabs pass the slab test. pbrt-v4's BVHAggregate::Intersect has the same guard (`if (!nodes) return {};`).
+  if (!left) return false;
   if (!bbox.hit(r, rayT)) return false;
 
   bool hitLeft = left->hit(r, rayT, rec);

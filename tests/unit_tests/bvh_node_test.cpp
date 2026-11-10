@@ -63,7 +63,7 @@ static ut::suite<"bvh"> bvhSuite = [] {
       expect(bvh.hit(r3, Interval(0.001, glimpse::math::infinity), rec3) == false);
     };
 
-    skip / "empty_list"_test = [] {
+    "empty_list"_test = [] {
       // Test with empty list
       HittableList emptyList;
       BVHNode emptyBvh(emptyList);
