@@ -68,12 +68,16 @@ Obsidian vault (`/mnt/d/ObsidianVault`, use the obsidian-kb skill):
 
 ## Environment
 
-- Now on **Pop!_OS 22.04, GCC 11.4** (so no `std::format`), with cmake and ninja available. The repo is on an
-  NTFS mount, so expect slow builds and every file showing mode 755.
+- Now on **Pop!_OS 22.04** with cmake 3.22 and ninja. The system `c++` is GCC 11.4, which has almost no C++23
+  library, so builds use **GCC 14** (`g++-14`, ubuntu-toolchain-r PPA) and **Clang 20** (apt.llvm.org), picked by
+  `CMakePresets.json` (see [C++ standard](#c-standard) and [Tooling](#tooling)). The repo is on an NTFS mount, so
+  expect slow builds and every file showing mode 755.
 - Line endings are LF (`.gitattributes`; `.bat` files stay CRLF). `.git-blame-ignore-revs` lists the
   line-ending-only commits.
-- Build trees live under `build/` (gitignored): `build/release` and `build/debug` (Linux, `build.sh`) and
-  `build/windows` (preset `win`, the `.bat` scripts, untested since the move to Linux).
+- Build temporaries live only in `build/<preset>/` (gitignored): `build/release`, `build/debug`,
+  `build/clang-debug` (Linux presets, `build.sh`) and `build/windows` (preset `win`, the `.bat` scripts, untested
+  since the move to Linux; leave them alone until a Windows build is tried again). Tests write to
+  `build/<preset>/test_output`.
 - `ext/`: boost.ut, stb, ImGui + ImPlot and glad are vendored. GLFW 3.4 is fetched by CMake (FetchContent,
   pinned like Glint). The old prebuilt Windows GLFW is no longer used.
 
@@ -81,14 +85,15 @@ Obsidian vault (`/mnt/d/ObsidianVault`, use the obsidian-kb skill):
 
 Linux (same pattern as Glint):
 ```bash
-./build.sh                            # Release into build/release (./build.sh debug -> build/debug)
+./build.sh                            # preset `release` (GCC 14) into build/release; also: debug, clang-debug
 ./run.sh cli --scene cornell_box      # runs from the repo root; CFG=debug selects the debug build
 ./run.sh gui
 ./run.sh tests "camera*"              # argv[1] is a boost.ut name filter; or: ctest --test-dir build/release
 ```
 Windows (old setup): `configure.bat` → `build.bat`; `cli.bat`, `gui.bat`, `test.bat <filter>`.
 
-State (Stage 0 done; **Stage 1: 01 `float_output` and 02 `error_metrics` done**, next 03 `deterministic_rng`; technique notes in `docs/techniques/`): the library, CLI, viewer and tests build with GCC 11, and the tests pass under ctest.
+State (Stage 0 done; **Stage 1: 01 `float_output` and 02 `error_metrics` done**, next 03 `deterministic_rng`; technique notes in `docs/techniques/`): the library, CLI, viewer and tests build as C++23 with GCC 14 and Clang 20 with zero warnings (the viewer's own
+sources included), clang-tidy is clean, and the tests pass under ctest.
 - CLI flags: `--scene <name|index> --spp --width --depth --seed --out --list-scenes --help`.
   - `--spp` is rounded down to a square (the stratified grid is `sqrtSpp × sqrtSpp`).
   - `--seed` is reproducible on one machine, but not across thread counts (technique 03).
@@ -107,6 +112,69 @@ State (Stage 0 done; **Stage 1: 01 `float_output` and 02 `error_metrics` done**,
 - No CI: it was skipped on purpose, and `ctest` runs locally.
 
 Style: `.clang-format` (Google base, 2-space indent, 120 columns). Everything is in `namespace glimpse`.
+
+## C++ standard
+
+The project builds as **C++23** (`CMAKE_CXX_STANDARD 23`, extensions off) and requires GCC ≥ 14, Clang ≥ 19 or
+MSVC ≥ 19.37 (`CMakeLists.txt` enforces it). **New and touched code uses the C++23 (and C++20) idiom where one
+exists**, as long as it reads at least as clearly as the old form (code is for reading). Don't sweep untouched
+files just to modernise them; convert the code you are editing. `clang-tidy`'s `modernize-*` checks flag most of
+the old spellings (see [Tooling](#tooling)).
+
+| Use | Instead of | Where it already is |
+|---|---|---|
+| `std::format`, `std::print`/`println`; `logger.log("{} spp", n)` (compile-time checked) | `iostream` chains, `ostringstream`, `to_string` | `log.h`, `cli/main.cpp`, `render.cpp`, `image.cpp` |
+| chrono formatting of `localNow<Precision>()` (`"{:%Y%m%d_%H%M%S}"`) | `localtime` + `put_time` | `log.h`, the viewer's Save Image |
+| `std::expected<T, std::string>` for failures that are a normal outcome | result struct with an `error` string; `optional` that loses the reason | `parseCommandLine`, `parseCompareCommand`, `readPFM` |
+| exceptions for failures that end the run | `expected` that every caller just passes up | escape `main` on purpose (`NOLINT` there) |
+| `std::views::zip(a, b)` | index loops over parallel arrays | `compareImages` (`metrics.cpp`) |
+| `std::views::enumerate(v)` | `for (size_t i...)` when `i` is only a label/second index | `--list-scenes`, the viewer's scene combo |
+| `std::ranges::contains`, `find` (with projections: `&SceneEntry::name`), `fill`, `transform` | `\|\|` chains, hand-written search loops, iterator pairs | `cli_options.cpp` (`kValueFlags`, `kWritable`), `findScene`, `Image::clear` |
+| `str.contains`, `starts_with`/`ends_with` | `find(...) != npos`, `rfind(x, 0) == 0`, `substr(size() - n)` | `cli_options.cpp`, tests |
+| monadic `optional` (`transform`, `and_then`, `value_or`) | `if (opt) return f(*opt); return nullopt;` | `resolveSceneName` |
+| `std::numbers::pi`, `sqrt2`, ... | literal constants | `util/math.h`, `convergence.cpp` |
+| `std::min`/`std::max` for clamps | `if (t0 > t.min) t.min = t0;` (same NaN behaviour) | the slab test (`aabb.cpp`), `ConstantMedium` |
+| `std::cmp_less`, `cmp_greater_equal`, ... | `static_cast<int>(v.size())` to silence sign compares | `RayTracer::setupScene` |
+| `shared_ptr` parameters: by value + `std::move` when stored, `const&` when only read | by-value copies (an atomic inc/dec each) | shapes, materials, textures, `HittableList`, BVH comparators |
+| `0uz`, `3uz` | `size_t{0}`, widening after an `int` multiply | image tests |
+
+Available and expected when the code calls for them (nothing uses them yet): `std::to_underlying(e)` instead of
+`static_cast<int>(e)` (ImGui radio buttons), `std::unreachable()` after a `switch` that covers every enumerator
+(keeps `-Wswitch` working), `range | std::ranges::to<std::vector>()` instead of `push_back` loops that only build a
+vector, deducing `this` instead of const/non-const overload pairs.
+
+Leave the explicit form where the index *is* the lesson: the row split across threads in `render.cpp`, the
+stratified `sqrtSpp × sqrtSpp` grid, pixel loops, Perlin's permutation tables, BVH construction. Filtered
+`push_back` loops (the convergence schedule, the viewer's plot series) also stay: as pipelines they read worse.
+`Vec3`'s `operator[]` stays a plain const/non-const pair, and its `operator<<` stays because boost.ut prints values
+with it.
+
+Not available yet on this toolchain (libstdc++ 14): `std::mdspan`, `std::flat_map`, formatting of ranges
+(`std::format("{}", vec)`; `image_test.cpp`'s `rgbText()` spells the channels out). When the compiler changes,
+re-probe with `<version>` feature-test macros (`__cpp_lib_*`) and update this section; don't assume from release
+notes.
+
+## Tooling
+
+- **Presets** (`CMakePresets.json`): `release`, `debug` (GCC 14) and `clang-debug` (Clang 20 + lld), each into
+  `build/<preset>`; `win` (VS 2022, `build/windows`) only shows on Windows. `./build.sh <preset>` configures and
+  builds, and first drops a `CMakeCache.txt` made by another compiler (an old GCC 11 tree fails the first
+  reconfigure otherwise). Build `clang-debug` before committing larger changes: a second compiler finds different
+  warnings (Clang found the Perlin tests that asserted nothing).
+- **Warnings**: `-Wall -Wextra -pedantic` on the library, CLI, tests and the viewer's own sources (not vendored
+  ImGui/ImPlot/glad). Keep all three presets at zero.
+- **clangd** (`.clangd`): reads `build/debug/compile_commands.json` (so build `debug` once); runs cheap clang-tidy
+  checks as you type and flags unused/missing includes. Needs clangd ≥ 19 (`clangd-20`): clangd 18 can't parse
+  libstdc++ 14's `<expected>` and reports false errors.
+- **clang-tidy** (`.clang-tidy`): `modernize-*`, `bugprone-*`, `performance-*` + a few readability checks; the file
+  explains each disabled check. The tree is clean, so keep it clean: fix new findings, or `// NOLINT(check)` with
+  the reason. Whole tree (about 3 minutes on the NTFS mount):
+  `run-clang-tidy-20 -p build/debug -quiet '/(src/(glimpse|gui|cli)|tests/unit_tests)/'`; changed files:
+  `clang-tidy-20 -p build/debug <files>`.
+- **clang-format** only the lines you changed (files aren't all formatted, and whole-file formatting buries the
+  diff): `git diff -U0 --no-color | clang-format-diff-20 -p1 -i -binary clang-format-20`.
+- **Build-time profiling**: `cmake --preset clang-debug -DCMAKE_CXX_FLAGS=-ftime-trace`, then open the per-TU
+  `.json` next to each `.o` in `chrome://tracing` / Perfetto (which headers make the NTFS build slow).
 
 ## Architecture
 

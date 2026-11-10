@@ -321,3 +321,16 @@ From `ROADMAP.md`, parked:
 - KD-trees and grids
 - SIMD packets
 - MLT (pbrt-v3 §16.4) is a candidate stage after 25.
+
+## Decisions log
+
+Tooling and code-wide decisions; per-technique decisions live in the technique notes.
+
+| Date | Decision | Why |
+|---|---|---|
+| 2026-11-09 | C++23 on GCC 14 (primary) + Clang 20 (second compiler, clangd, clang-tidy), picked by `CMakePresets.json`; `build.sh` drives the presets | GCC 11 had almost no C++23 library; Clang 18 can't compile libstdc++ 14's `<expected>`. Same toolchain as Glint. Idiom table in CLAUDE.md "C++ standard" |
+| 2026-11-09 | Build temporaries only in `build/<preset>/`; the `win` preset keeps `build/windows`, `.bat` scripts untouched | One place to delete; stray trees (`buildLinux/`, a 2025 VS tree loose in `build/`, root `test_output/`) removed. Windows gets fixed when it's built again |
+| 2026-11-09 | `std::format`/`std::print` everywhere; `Logger::log` takes a format string | No `{fmt}` to drop: this replaces iostream chains, and the format string is checked at compile time |
+| 2026-11-09 | `std::expected` for failures that are a normal outcome (CLI parsing, `readPFM`), exceptions for fatal ones | A flag typo or a reference not rendered yet isn't exceptional, and the error now says why (`truncated: 0 of 300 rows`) |
+| 2026-11-09 | `.clang-tidy` (modernize/bugprone/performance), tree kept at zero findings | Enforces the idiom table on edited code; `NOLINT` only with a reason |
+| 2026-11-09 | `shared_ptr` parameters: by value + move when stored, `const&` when only read | clang-tidy findings; signature hygiene only. Ownership is still RTIOW `shared_ptr`: technique 14 (`Shape`/`Primitive`) replaces it |

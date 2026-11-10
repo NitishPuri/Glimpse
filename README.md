@@ -31,17 +31,20 @@ A physically-based path tracer that simulates light to reveal scenes with realis
 
 ## Build & run (Linux)
 
-Needs CMake ≥ 3.22, Ninja, a C++20 compiler (GCC 11 works) and the X11/GL dev headers for the viewer.
+Needs CMake ≥ 3.22, Ninja, a C++23 compiler (GCC ≥ 14 or Clang ≥ 19; on Ubuntu 22.04 `g++-14` from
+`ppa:ubuntu-toolchain-r/test`, Clang 20 from apt.llvm.org) and the X11/GL dev headers for the viewer. GLFW is
+fetched by CMake; everything else is vendored in `ext/`.
 
 ```bash
-./build.sh                      # cmake -S . -B build/release -G Ninja; cmake --build build/release
+./build.sh                      # cmake --preset release && cmake --build --preset release (GCC 14)
 ./run.sh cli --list-scenes      # build/release/Glimpse_cli
 ./run.sh cli --scene cornell_box --spp 64 --width 300 --out results/cornell.png
 ./run.sh gui                    # build/release/Glimpse_gui — the interactive viewer
 ```
 
-`./build.sh debug` / `CFG=debug ./run.sh ...` for a debug build. Release is the default because a path tracer
-in Debug is painfully slow. `run.sh` always runs from the repo root, because scenes load `./res/...`.
+`./build.sh debug` / `CFG=debug ./run.sh ...` for a debug build, `./build.sh clang-debug` for the Clang 20 build
+(`CMakePresets.json`; build trees go to `build/<preset>`). Release is the default because a path tracer in Debug
+is painfully slow. `run.sh` always runs from the repo root, because scenes load `./res/...`.
 
 CLI flags:
 
